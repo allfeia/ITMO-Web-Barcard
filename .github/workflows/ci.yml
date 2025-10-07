@@ -46,7 +46,7 @@ jobs:
             exit 1
           fi
 
-      - name: Check coverage threshold (80%)
+      - name: Run e2e Tests
         run: |
           npx playwright install --with-deps
           npm run build

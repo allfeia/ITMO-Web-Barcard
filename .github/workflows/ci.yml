@@ -14,6 +14,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ">=20 <21"
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
 
       - name: Install dependencies
         run: npm ci
@@ -39,6 +46,10 @@ jobs:
             exit 1
           fi
 
-
-      - name: Run E2E tests
-        run: npx start-server-and-test "npm run build && vite preview" http://localhost:4173 "npm run test:e2e"
+      - name: Check coverage threshold (80%)
+        run: |
+          npx playwright install --with-deps
+          npm run build
+          npx vite preview &
+          npx wait-on http://localhost:4173
+          npm run test:e2e

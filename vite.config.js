@@ -10,7 +10,7 @@ export default defineConfig({
     globals: true,
     exclude: ["tests/**/*.spec.js", "node_modules/**"],
     coverage: {
-      reporter: ['text', 'lcov'],
+      reporter: ['text', 'json-summary'],
       reportsDirectory: './coverage',
       all: true,
       include: ["src/**/*.{js,jsx}"],

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1759858139793" clover="3.2.0">
-  <project timestamp="1759858139793" name="All files">
+<coverage generated="1759864912913" clover="3.2.0">
+  <project timestamp="1759864912913" name="All files">
     <metrics statements="30" coveredstatements="30" conditionals="3" coveredconditionals="3" methods="2" coveredmethods="2" elements="35" coveredelements="35" complexity="0" loc="30" ncloc="30" packages="1" files="1" classes="1"/>
     <file name="App.jsx" path="/Users/alyssanabokova/Documents/3year/5sem/web/ITMO-Web_Barcard/src/App.jsx">
       <metrics statements="30" coveredstatements="30" conditionals="3" coveredconditionals="3" methods="2" coveredmethods="2"/>

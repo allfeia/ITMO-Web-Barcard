@@ -21,9 +21,6 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-      - name: Clean coverage folder
-        run: rm -rf coverage
-
       - name: Run Prettier check
         run: npm run format
 

@@ -1,36 +1,16 @@
-# ITMO-Web-Barcard
-## Репозиторий курсовой работы по предмету "Разработка веб-приложений"
+# React + Vite
 
-Концепт: Игра для запоминания рецептов коктейлей “Barcard”. 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Мы рассматриваем два варианта целевой аудитории:
+Currently, two official plugins are available:
 
-1) Бары и рестораны. Новые сотрудники заведений (официанты, бармены) могут учить барную карту в игровом формате.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-2) Посетители или обычные пользователи. На физическом меню может быть qr-код со ссылкой на барную игру, в которой посетители заведения могут скоротать время в ожидании своего заказа или просто развлечься в свободное время.
+## React Compiler
 
-Механика игры:
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-Пользователю будет предложено барное меню с изображениями и рецептами коктейлей, которые он может изучить. Нажав на карточку понравившегося коктейля пользователь попадает на страницу с подробным описанием его состава и пошаговым рецептом. Затем в игровом формате начинается проверка его знаний. Ему необходимо по памяти выбрать все ингредиенты для напитка из множества других. Если все ингредиенты выбраны корректно, пользователь попадает на страницу с бокалом, который надо заполнить ингредиентами в порядке по рецепту, учитывая мл, а также украсить фруктами, ягодами и пр.
+## Expanding the ESLint configuration
 
-За каждый воссозданный рецепт начисляются очки 
-
-В игре можно выбирать режимы:
-
-- Easy - с подсказками без штрафов во время воссоздания рецепта 
-
-- Medium - с подсказками и штрафами в виде уменьшения рейтинга за воссоздание рецепта
-
-- Hard - без подсказок, но штрафов в виде уменьшения рейтинга за ошибки
-
-Пользователю будет предложено выбрать режим:
-
-- Light (пользовательский режим)
-- Bar (барный режим)
-
-Отличия:
-В пользовательском режиме будет создана стандартная барная карта, придуманная разработчиками
-
-В барном режиме предлагается выбрать заведение, в барную карту которого будет осуществляться игра (для сотрудников и посетителей)
-
-Также будет кнопка с контактами разработчиков для сотрудничества с владельцами заведений. Так выбор заведений и их барные карты в игре будут пополняться
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

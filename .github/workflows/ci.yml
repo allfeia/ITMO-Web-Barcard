@@ -45,4 +45,5 @@ jobs:
           npm run build
           npx vite preview &
           npx wait-on http://localhost:4173
+          npx playwright install --with-deps
           npm run test:e2e

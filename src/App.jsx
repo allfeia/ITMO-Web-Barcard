@@ -6,6 +6,18 @@ import "./App.css";
 function App() {
   const [count, setCount] = useState(0);
 
+  const [showMessage, setShowMessage] = useState(false);
+
+  const handleReset = () => {
+    setCount(0);
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 1000);
+  };
+
+  const calculateDouble = () => {
+    return count * 2;
+  };
+
   return (
     <>
       <div>
@@ -21,6 +33,11 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <button onClick={handleReset} style={{ marginLeft: '10px' }}>
+          Reset
+        </button>
+        {showMessage && <p>Counter was reset!</p>}
+        <p>Double: {calculateDouble()}</p>
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>

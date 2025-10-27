@@ -1,10 +1,27 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 
 function App() {
   const [count, setCount] = useState(0);
+  const [title, setTitle] = useState(["", ""]);
+
+    useEffect(() => {
+        fetch("/api/title")
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                return res.json();
+            })
+            .then((data) => {
+                console.log("data from server:", data);
+                setTitle(data)
+            })
+            .catch((err) => {
+                console.error("Ошибка при загрузке данных:", err);
+                setTitle({ vite: "Ошибка", react: "Ошибка" });
+            });
+    }, []);
 
   return (
     <>
@@ -16,7 +33,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>{title[0]} + {title[1]}</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}

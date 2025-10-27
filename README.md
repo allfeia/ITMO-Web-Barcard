@@ -1,16 +1,29 @@
-# React + Vite
+## Веб-игра для запоминания рецептов коктейлей “Barcard”
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ЦА:
+Бары и рестораны.
+- Новые сотрудники заведений (официанты, бармены) могут учить барную карту в игровом формате
+- Посетители. На физическом меню может быть qr-код со ссылкой на барную игру, в которой можно скоротать время в ожидании своего заказа, поближе ознакомиться с меню и сразу заказать собранный коктейль
 
-Currently, two official plugins are available:
+Механика игры:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Пользователю будет предложено барное меню с изображениями и рецептами коктейлей, которые он может изучить. Нажав на карточку понравившегося коктейля пользователь попадает на страницу с подробным описанием его состава и пошаговым рецептом. Затем в игровом формате начинается проверка его знаний. Ему необходимо по памяти выбрать все ингредиенты для напитка из множества других. Если все ингредиенты выбраны корректно, пользователь попадает на страницу с бокалом, который надо заполнить ингредиентами в порядке по рецепту, учитывая мл, а также украсить фруктами, ягодами и пр.
 
-## React Compiler
+За каждый воссозданный рецепт начисляются очки
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+В игре можно выбирать режимы:
+- Легкий - с подсказками без штрафов во время воссоздания рецепта
 
-## Expanding the ESLint configuration
+- Средний - с подсказками и штрафами в виде уменьшения рейтинга за воссоздание рецепта
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Сложный - без подсказок, но штрафов в виде уменьшения рейтинга за ошибки
+
+Пользователю будет предложено выбрать режим:
+
+- Посетитель (пользовательский режим)
+- Бармен (барный режим)
+
+Отличия:
+Посетителю доступна барная карта ресторана, qr-код которой был отсканирован, и заказ собранного коктейля
+
+Бармену доступно изучение коктейлей ресторана, qr-код которой был отсканирован, а также в личном кабинете он может ознакомиться с рейтингом очков среди работников заведения

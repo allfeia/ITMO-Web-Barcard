@@ -6,16 +6,14 @@ const app = express();
 const PORT = 3000;
 const {Pool} = pg;
 
-// Настройки подключения к PostgreSQL
 const pool = new Pool({
-    user: "postgres",        // замени на своего пользователя
+    user: "postgres",
     host: "localhost",
-    database: "postgres",        // замени на свою базу
-    password: "",  // замени на свой пароль
-    port: 5433,              // твой порт
+    database: "postgres",
+    password: "",
+    port: 5433,
 });
 
-// Разрешаем CORS для всех источников
 app.use(cors({
     origin: "*",
 }));

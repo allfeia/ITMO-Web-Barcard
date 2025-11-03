@@ -10,11 +10,11 @@ function App() {
     useEffect(() => {
         fetch("/api/title")
             .then((res) => {
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                if (!res.ok) throw new Error(`статус: ${res.status}`);
                 return res.json();
             })
             .then((data) => {
-                console.log("data from server:", data);
+                console.log(data);
                 setTitle(data)
             })
             .catch((err) => {

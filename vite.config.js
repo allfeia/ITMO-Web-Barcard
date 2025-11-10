@@ -1,29 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-      proxy: {
-          "/api": {
-              target: "http://localhost:3000",
-              changeOrigin: true,
-              secure: false,
-          },
-      },
-  },
-  test: {
-    environment: "jsdom", // имитация браузера
-    setupFiles: "./src/setupTests.js", // подключаем setupTests
-    globals: true,
-    exclude: ["tests/**/*.spec.js", "node_modules/**"],
-    coverage: {
-      reporter: ['text', 'json-summary'],
-      reportsDirectory: './coverage',
-      all: true,
-      include: ["src/**/*.{js,jsx}"],
-      exclude: ["src/main.jsx"],
-    },
-  },
-});
+})

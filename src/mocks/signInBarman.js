@@ -16,7 +16,7 @@ const barsDatabase = {
 export const signInBarman = [
 
     http.post("/api/barman/auth", async ({ request }) => {
-        const { barId, username, barPassword } = await request.json();
+        const { barId, username, barPassword, barKey} = await request.json();
 
         const bar = barsDatabase[barId];
         if (!bar) {
@@ -29,6 +29,13 @@ export const signInBarman = [
         if (bar.barPassword !== barPassword) {
             return HttpResponse.json(
                 { error: "Неверный пароль бара" },
+                { status: 403 }
+            );
+        }
+
+        if (bar.barKey !== barKey) {
+            return HttpResponse.json(
+                { error: "Неверный ключ бара" },
                 { status: 403 }
             );
         }

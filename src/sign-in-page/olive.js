@@ -1,4 +1,4 @@
-import {canvaStyles} from "../mode-page/bottoms-utils/canvaStyles.js";
+import {canvaStyles} from "../bottoms-utils/canvaStyles.js";
 
 export default function drawOlive(canvas) {
     if (!canvas) return;

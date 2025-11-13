@@ -14,7 +14,7 @@ function StartPage() {
         <>
             <h1>Start</h1>
             <nav>
-                <Link to="/modePage">ModePage</Link>
+                <Link to="/signInPage">SignInPage</Link>
             </nav>
         </>
     )

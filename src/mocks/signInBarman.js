@@ -2,13 +2,13 @@ import { http, HttpResponse } from "msw";
 
 const barsDatabase = {
     BAR123: {
-        barPassword: "OLIVE-2024",
+        barKey: "OLIVE-2024",
         barmen: [
-            { username: "ivan" },
+            { username: "ivan", barPassword: "ivan" },
         ]
     },
     BAR777: {
-        barPassword: "NEGRONI-777",
+        barKey: "NEGRONI-777",
         barmen: []
     }
 };
@@ -26,13 +26,6 @@ export const signInBarman = [
             );
         }
 
-        if (bar.barPassword !== barPassword) {
-            return HttpResponse.json(
-                { error: "Неверный пароль бара" },
-                { status: 403 }
-            );
-        }
-
         if (bar.barKey !== barKey) {
             return HttpResponse.json(
                 { error: "Неверный ключ бара" },
@@ -40,25 +33,31 @@ export const signInBarman = [
             );
         }
 
-        const existing = bar.barmen.find((b) => b.username === username);
+        const existingUser = bar.barmen.find((bar) => bar.username === username);
 
-        if (existing) {
+        if (existingUser) {
+            if (existingUser.barPassword !== barPassword) {
+                return HttpResponse.json(
+                    { error: "Неверный пароль бара" },
+                    { status: 403 }
+                );
+            }
 
             return HttpResponse.json({
                 ok: true,
                 mode: "login",
                 message: "Успешный вход",
-                user: { username, barId }
+                user: { username, barPassword, barId }
             });
         }
 
-        bar.barmen.push({ username });
+        bar.barmen.push({ username, barPassword });
 
         return HttpResponse.json({
             ok: true,
             mode: "register",
             message: "Новый бармен создан",
-            user: { username, barId }
+            user: { username, barPassword, barId }
         });
     }),
 ];

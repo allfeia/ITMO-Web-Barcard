@@ -5,12 +5,13 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: "jsdom", // имитация браузера
-    setupFiles: "./src/setupTests.js", // подключаем setupTests
+    environment: "happy-dom", // имитация браузера
+    setupFiles: "./tests/setup.js", // подключаем setupTests
     globals: true,
     exclude: ["tests/**/*.spec.js", "node_modules/**"],
     coverage: {
-      reporter: ['text', 'json-summary'],
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
       all: true,
       include: ["src/**/*.{js,jsx}"],

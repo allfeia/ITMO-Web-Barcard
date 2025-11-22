@@ -1,4 +1,3 @@
-// src/start-page/StartPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import './StartPage.css';
@@ -17,10 +16,8 @@ function StartPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    // ЭТО СТРОКА БЫЛА ПОТЕРЯНА — ВОТ И ВСЯ ПРИЧИНА ОШИБКИ!
     const [isBarman, setIsBarman] = useState(null);
 
-    // Читаем параметры из URL и сохраняем в sessionStorage
     useEffect(() => {
         const barId = searchParams.get("barId");
         const isBarmanParam = searchParams.get("isBarman");
@@ -38,7 +35,6 @@ function StartPage() {
         } else if (isBarman === false) {
             navigate("/menu");
         }
-        // если isBarman === null — ничего не делаем (пользователь ещё не определён)
     };
 
     const tracks = [

@@ -1,5 +1,3 @@
-// tests/setup.js
-
 Object.defineProperty(globalThis.HTMLCanvasElement.prototype, "getContext", {
     value: () => ({
         clearRect: () => {},

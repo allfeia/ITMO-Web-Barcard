@@ -3,9 +3,6 @@ import { MemoryRouter } from "react-router-dom";
 import StartPage from "./StartPage.jsx";
 import { vi } from "vitest";
 
-// ──────────────────────────────────────────────────────────────
-// 1. Мокаем react-router-dom (useNavigate + useSearchParams)
-// ──────────────────────────────────────────────────────────────
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -13,13 +10,9 @@ vi.mock("react-router-dom", async (importOriginal) => {
     return {
         ...actual,
         useNavigate: () => mockNavigate,
-        // useSearchParams не обязателен, т.к. MemoryRouter сам передаёт параметры
     };
 });
 
-// ──────────────────────────────────────────────────────────────
-// 2. Мокаем все функции рисования — самый надёжный и быстрый способ
-// ──────────────────────────────────────────────────────────────
 vi.mock("../glasses/BlueGlass.js", () => ({
     drawBlueGlass: vi.fn(),
 }));
@@ -33,10 +26,6 @@ vi.mock("../glasses/YellowGlass.js", () => ({
     drawYellowGlass: vi.fn(),
 }));
 
-// ──────────────────────────────────────────────────────────────
-// 3. Если всё-таки хочешь замокать canvas (необязательно при vi.mock выше)
-//    но на всякий случай — полный и безопасный мок
-// ──────────────────────────────────────────────────────────────
 beforeAll(() => {
     const ctxMock = {
         fillStyle: "",
@@ -49,7 +38,7 @@ beforeAll(() => {
         ellipse: vi.fn(),
         quadraticCurveTo: vi.fn(),
         bezierCurveTo: vi.fn(),
-        roundRect: vi.fn(),        // ← важно! drawRedGlass использует roundRect
+        roundRect: vi.fn(),
         fill: vi.fn(),
         stroke: vi.fn(),
         closePath: vi.fn(),
@@ -62,25 +51,17 @@ beforeAll(() => {
         scale: vi.fn(),
     };
 
-    // Один раз задаём мок, который будет возвращаться всегда
     HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(ctxMock);
 
-    // Некоторые функции могут менять размер canvas
     Object.defineProperty(HTMLCanvasElement.prototype, "width", { writable: true, value: 75 });
     Object.defineProperty(HTMLCanvasElement.prototype, "height", { writable: true, value: 75 });
 });
 
-// ──────────────────────────────────────────────────────────────
-// 4. Очистка перед каждым тестом
-// ───────────────────────────────────────────────────────────────
 beforeEach(() => {
     sessionStorage.clear();
     mockNavigate.mockReset();
 });
 
-// ──────────────────────────────────────────────────────────────
-// 5. Тесты — всё зелёное!
-// ──────────────────────────────────────────────────────────────
 describe("StartPage", () => {
     test("чтение URL параметров и запись в sessionStorage", () => {
         render(
@@ -125,7 +106,6 @@ describe("StartPage", () => {
         );
 
         fireEvent.click(screen.getByText("Начать"));
-        // Ничего не должно упасть, и navigate не должен вызваться
         expect(mockNavigate).not.toHaveBeenCalled();
     });
 });

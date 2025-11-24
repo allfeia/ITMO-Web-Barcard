@@ -4,8 +4,8 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {useGoTo} from "../useGoTo.js";
 import {IconButton, InputAdornment} from "@mui/material";
+import {useNavigate} from "react-router-dom";
 
 export default function BarmanAuthForm() {
     const [username, setUsername] = useState("");
@@ -17,7 +17,7 @@ export default function BarmanAuthForm() {
     const [showPass, setShowPass] = useState(true);
     const [showKey, setShowKey] = useState(true);
 
-    const goTo = useGoTo();
+    const goTo = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

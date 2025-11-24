@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
           <Route path="/" element={<StartPage />} />
           <Route path="/signInPage" element={<SignInPage />} />
-          <Route path="/Menu" element={<Menu />} />
+          <Route path="/menu" element={<Menu />} />
       </Routes>
   </BrowserRouter>
 )

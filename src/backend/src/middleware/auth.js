@@ -35,7 +35,7 @@ export function authRequired(req, res, next) {
       : (decoded.barId ?? null);
     req.user = decoded;
     next();
-  } catch (e) {
+  } catch{
     return res.status(401).json({ error: 'Invalid token' });
   }
 }

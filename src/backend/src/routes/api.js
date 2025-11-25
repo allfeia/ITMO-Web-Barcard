@@ -35,7 +35,7 @@ router.get('/me', authRequired, async (req, res) => {
       bar_id: user.bar_id,
       points: totalPoints
     });
-  } catch (e) {
+  } catch {
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -83,7 +83,7 @@ router.post('/admin/bars', authRequired, requireRole('super_admin'), async (req,
       id: bar.id,
       name: bar.name
     });
-  } catch (e) {
+  } catch {
     res.status(400).json({ error: 'Invalid payload' });
   }
 });

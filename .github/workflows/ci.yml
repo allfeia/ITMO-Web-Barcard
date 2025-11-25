@@ -19,7 +19,7 @@ jobs:
           path: |
             ~/.npm
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'src/backend/package-lock.json') }}
 
 
       - name: Install dependencies

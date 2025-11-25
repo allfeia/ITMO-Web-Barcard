@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -13,13 +14,12 @@ export default defineConfig({
       },
   },
   test: {
-    environment: "happy-dom",
-    setupFiles: "./tests/setup.js",
+    environment: "jsdom", // имитация браузера
+    setupFiles: "./src/setupTests.js", // подключаем setupTests
     globals: true,
     exclude: ["tests/**/*.spec.js", "node_modules/**"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json-summary'],
       reportsDirectory: './coverage',
       all: true,
       include: ["src/**/*.{js,jsx}"],

@@ -1,7 +1,7 @@
 import { sequelize } from "../db.js";
 import "../models.js";
 
-(async () => {
+export async function run() {
   try {
     await sequelize.sync({ alter: true });
     console.log("DB synced");
@@ -10,4 +10,10 @@ import "../models.js";
     console.error(e);
     process.exit(1);
   }
-})();
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  run();
+}
+
+export default run;

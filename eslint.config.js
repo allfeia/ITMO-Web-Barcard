@@ -18,7 +18,7 @@ export default defineConfig([
       globals: {
         ...globals.browser,
         ...globals.node,
-      }
+      },
     },
     rules: {
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],

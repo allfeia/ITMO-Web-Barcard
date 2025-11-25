@@ -5,13 +5,13 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-      proxy: {
-          "/api": {
-              target: "http://localhost:3000",
-              changeOrigin: true,
-              secure: false,
-          },
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
       },
+    },
   },
   test: {
     environment: "jsdom", // имитация браузера
@@ -19,8 +19,8 @@ export default defineConfig({
     globals: true,
     exclude: ["tests/**/*.spec.js", "node_modules/**"],
     coverage: {
-      reporter: ['text', 'json-summary'],
-      reportsDirectory: './coverage',
+      reporter: ["text", "json-summary"],
+      reportsDirectory: "./coverage",
       all: true,
       include: ["src/**/*.{js,jsx}"],
       exclude: ["src/main.jsx"],

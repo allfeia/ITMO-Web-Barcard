@@ -17,7 +17,7 @@ export default defineConfig({
     environment: "jsdom", // имитация браузера
     setupFiles: "./src/setupTests.js", // подключаем setupTests
     globals: true,
-    exclude: ["tests/**/*.spec.js", "node_modules/**"],
+    exclude: ["tests/**/*.spec.js", "node_modules/**", "src/backend/node_modules/**"],
     coverage: {
       reporter: ["text", "json-summary"],
       reportsDirectory: "./coverage",

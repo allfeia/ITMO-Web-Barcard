@@ -25,6 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install backend dependencies
+        working-directory: src/backend
+        run: npm ci
+
       - name: Run ESLint
         run: npm run lint
 

@@ -19,11 +19,6 @@ export default defineConfig([
         ...globals.browser,
         ...globals.node,
       }
-      parserOptions: {
-        ecmaVersion: "latest",
-        ecmaFeatures: { jsx: true },
-        sourceType: "module",
-      },
     },
     rules: {
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],

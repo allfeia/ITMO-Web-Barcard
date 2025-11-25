@@ -43,7 +43,9 @@ describe("server.js bootstrap", () => {
 
   it("настраивает middlewares, роуты и стартует сервер", async () => {
     process.env.PORT = "0";
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     await import("../src/server.js");
 

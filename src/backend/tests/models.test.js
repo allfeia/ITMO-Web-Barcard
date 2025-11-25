@@ -29,10 +29,10 @@ describe("models.js", () => {
 
     vi.doMock("../db.js", () => ({ sequelize }));
     vi.doMock("sequelize", () => ({
-        DataTypes,
-        Model: MockModel,
-        Sequelize: vi.fn(), 
-}));
+      DataTypes,
+      Model: MockModel,
+      Sequelize: vi.fn(),
+    }));
   });
 
   it("инициализирует модели и связи без ошибок", async () => {
@@ -77,9 +77,9 @@ describe("models.js", () => {
     });
 
     // staff без пароля и bar_id — ошибка
-    expect(() =>
-      validate.roleConstraints.call(make(["staff"])),
-    ).toThrow(/парол/i);
+    expect(() => validate.roleConstraints.call(make(["staff"]))).toThrow(
+      /парол/i,
+    );
 
     // bar_admin с паролем, но без bar_id — ошибка
     expect(() =>
@@ -88,7 +88,9 @@ describe("models.js", () => {
 
     // staff с обоими — ок
     expect(() =>
-      validate.roleConstraints.call(make(["staff"], { password: "x", bar_id: 1 })),
+      validate.roleConstraints.call(
+        make(["staff"], { password: "x", bar_id: 1 }),
+      ),
     ).not.toThrow();
   });
 
@@ -98,7 +100,11 @@ describe("models.js", () => {
 
     // user без пароля — ошибка
     expect(() =>
-      validate.roleConstraints.call({ roles: ["user"], password: null, bar_id: null }),
+      validate.roleConstraints.call({
+        roles: ["user"],
+        password: null,
+        bar_id: null,
+      }),
     ).toThrow(/парол/i);
 
     // user с bar_id — ошибка

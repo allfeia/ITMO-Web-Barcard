@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "format": "prettier 'src/**/*.{js, jsx}' --check",
-    "lint:style": "stylelint 'src/**/*.css' --fix",
+    "lint:style": "stylelint 'src/**/*.css' --fix --allow-empty-input",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",

@@ -1,24 +1,30 @@
 import { http, HttpResponse } from "msw";
 
 const barsDatabase = {
-    BAR123: {
+    123: {
+        name: "Olive Bar",
         barKey: "OLIVE-2024",
         barmen: [
             { username: "ivan", barPassword: "ivan" },
         ]
     },
-    BAR777: {
+    777: {
+        name: "Negroni Club",
         barKey: "NEGRONI-777",
         barmen: []
     }
 };
+
+function generateToken(username, barId) {
+    return btoa(`${username}-${barId}-${Date.now()}`);
+}
 
 export const signInBarman = [
 
     http.post("/api/barman/auth", async ({ request }) => {
         const { barId, username, barPassword, barKey} = await request.json();
 
-        const bar = barsDatabase[barId];
+        const bar = barsDatabase[Number(barId)];
         if (!bar) {
             return HttpResponse.json(
                 { error: "Бар не найден" },
@@ -47,7 +53,10 @@ export const signInBarman = [
                 ok: true,
                 mode: "login",
                 message: "Успешный вход",
-                user: { username, barPassword, barId }
+                token: generateToken(username, barId),
+                roles: ["BARMAN"],
+                barId,
+                barName: bar.name
             });
         }
 
@@ -57,7 +66,10 @@ export const signInBarman = [
             ok: true,
             mode: "register",
             message: "Новый бармен создан",
-            user: { username, barPassword, barId }
+            token: generateToken(username, barId),
+            roles: ["BARMAN"],
+            barId,
+            barName: bar.name
         });
     }),
 ];

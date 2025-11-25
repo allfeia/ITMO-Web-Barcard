@@ -6,8 +6,10 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {IconButton, InputAdornment} from "@mui/material";
 import {useNavigate} from "react-router-dom";
+import { useAuth} from "../AuthContext.jsx";
 
 export default function BarmanAuthForm() {
+    const { setToken, setRoles} = useAuth();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [barKey, setBarKey] = useState("");
@@ -52,7 +54,7 @@ export default function BarmanAuthForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    barId,
+                    barId: Number(barId),
                     username,
                     barPassword: password,
                     barKey: barKey
@@ -69,6 +71,11 @@ export default function BarmanAuthForm() {
             if (!response.ok) {
                 console.log("API ERROR:", data.error);
                 return;
+            }
+
+            if (data?.token) {
+                setToken(data.token);
+                setRoles(Array.isArray(data?.user?.roles) ? data.user.roles : []);
             }
 
             console.log("SUCCESS", data);

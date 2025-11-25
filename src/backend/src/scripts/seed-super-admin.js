@@ -9,7 +9,7 @@ export async function run() {
 
     const password = await bcrypt.hash(
       process.env.SUPER_ADMIN_PASSWORD || "root",
-      12
+      12,
     );
 
     const [user, created] = await User.findOrCreate({

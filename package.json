@@ -11,9 +11,6 @@
     "lint:style": "stylelint 'src/**/*.css' --fix",
     "preview": "vite preview",
     "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test:ui": "vitest --ui",
-    "test:unit": "vitest --type unit",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test"
   },

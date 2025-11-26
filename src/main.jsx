@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import StartPage from './StartPage.jsx'
 import SignInPage from "./sign-in-page/SignInPage.jsx";
 import Menu from "./Menu.jsx";
-import { AuthProvider } from '../authContext/AuthContext.jsx'
+import { AuthProvider } from './authContext/AuthContext.jsx'
 
 if (import.meta.env.MODE === 'development') {
     const { worker } = await import('./mocks/browser');

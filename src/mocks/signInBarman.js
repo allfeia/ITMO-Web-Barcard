@@ -34,7 +34,7 @@ export const signInBarman = [
 
         if (bar.barKey !== barKey) {
             return HttpResponse.json(
-                { error: "Неверный ключ бара" },
+                { error: "wrong_bar_key" },
                 { status: 403 }
             );
         }
@@ -44,7 +44,7 @@ export const signInBarman = [
         if (existingUser) {
             if (existingUser.barPassword !== barPassword) {
                 return HttpResponse.json(
-                    { error: "Неверный пароль бара" },
+                    { error: "wrong_password" },
                     { status: 403 }
                 );
             }

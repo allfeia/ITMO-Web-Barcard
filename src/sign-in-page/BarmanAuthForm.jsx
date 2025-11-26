@@ -64,7 +64,13 @@ export default function BarmanAuthForm() {
             const data = await response.json();
 
             if (response.status === 403) {
-                setPasswordError("Неверный пароль");
+                if (data.error === "wrong_password") {
+                    setPasswordError("Неверный пароль");
+                } else if (data.error === "wrong_bar_key") {
+                    setBarKeyError("Неверный барный ключ");
+                } else {
+                    setPasswordError("Ошибка авторизации");
+                }
                 return;
             }
 
@@ -93,6 +99,7 @@ export default function BarmanAuthForm() {
             className="sign-in-form"
         >
             <TextField
+                id="auth-username"
                 className="sign-in-form-input"
                 label="Почта / Логин / Имя"
                 variant="outlined"
@@ -103,6 +110,7 @@ export default function BarmanAuthForm() {
             />
 
             <TextField
+                id="auth-password"
                 className="sign-in-form-input"
                 label="Пароль"
                 variant="outlined"
@@ -125,6 +133,7 @@ export default function BarmanAuthForm() {
             />
 
             <TextField
+                id="auth-barkey"
                 className="sign-in-form-input"
                 label="Барный ключ"
                 variant="outlined"

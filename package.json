@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "format": "prettier 'src/**/*.{js, jsx}' --check",
+    "format": "prettier 'src/**/*.{js, jsx}' --write",
     "lint:style": "stylelint 'src/**/*.css' --fix",
     "preview": "vite preview",
     "test": "vitest",

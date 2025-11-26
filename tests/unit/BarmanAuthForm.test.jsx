@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BarmanAuthForm from "../../src/sign-in-page/BarmanAuthForm.jsx";
 import { AuthProvider } from "../../authContext/AuthContext.jsx";
@@ -14,7 +14,7 @@ vi.mock("react-router-dom", async (importOriginal) => {
     return { ...actual, useNavigate: () => mockNavigate };
 });
 
-vi.mock("../../authContext/AuthContext.jsx", async (importOriginal) => {
+vi.mock("../../authContext/useAuth.js", async (importOriginal) => {
     const actual = await importOriginal();
     return { ...actual, useAuth: () => ({ setToken: mockSetToken, setRoles: mockSetRoles }) };
 });
@@ -165,9 +165,11 @@ describe('BarmanAuthForm', () => {
             method: "POST",
         }));
 
-        expect(mockSetToken).toHaveBeenCalledWith('123');
-        expect(mockSetRoles).toHaveBeenCalledWith(['BARMAN']);
-        expect(mockNavigate).toHaveBeenCalledWith("/menu");
+        await waitFor(() => {
+            expect(mockSetToken).toHaveBeenCalledWith('123');
+            expect(mockSetRoles).toHaveBeenCalledWith(['BARMAN']);
+            expect(mockNavigate).toHaveBeenCalledWith("/menu");
+        });
     });
 
     it('переключает видимость пароля и барного ключа', async () => {

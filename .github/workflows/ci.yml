@@ -47,9 +47,4 @@ jobs:
           fi
 
       - name: Run e2e Tests
-        run: |
-          npx playwright install --with-deps
-          npm run build
-          npx vite preview &
-          npx wait-on http://localhost:5173
-          npm run test:e2e
+        run: npx playwright test

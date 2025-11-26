@@ -23,6 +23,7 @@ export default defineConfig([
           beforeEach: 'readonly',
           afterEach: 'readonly',
           vi: 'readonly',
+          global: 'readonly',
       },
       parserOptions: {
         ecmaVersion: 'latest',

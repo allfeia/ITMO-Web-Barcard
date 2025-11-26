@@ -6,7 +6,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {IconButton, InputAdornment} from "@mui/material";
 import {useNavigate} from "react-router-dom";
-import { useAuth} from "../AuthContext.jsx";
+import { useAuth } from "../../authContext/useAuth.js";
 
 export default function BarmanAuthForm() {
     const { setToken, setRoles} = useAuth();

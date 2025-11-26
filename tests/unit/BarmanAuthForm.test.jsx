@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BarmanAuthForm from "../../src/sign-in-page/BarmanAuthForm.jsx";
-import { AuthProvider } from "../../src/AuthContext.jsx";
+import { AuthProvider } from "../../authContext/AuthContext.jsx";
 import { MemoryRouter } from "react-router-dom";
 
 const mockNavigate = vi.fn();
@@ -14,7 +14,7 @@ vi.mock("react-router-dom", async (importOriginal) => {
     return { ...actual, useNavigate: () => mockNavigate };
 });
 
-vi.mock("../../src/AuthContext.jsx", async (importOriginal) => {
+vi.mock("../../authContext/AuthContext.jsx", async (importOriginal) => {
     const actual = await importOriginal();
     return { ...actual, useAuth: () => ({ setToken: mockSetToken, setRoles: mockSetRoles }) };
 });

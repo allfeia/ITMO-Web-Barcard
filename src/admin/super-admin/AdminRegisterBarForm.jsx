@@ -3,12 +3,12 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { useGoTo } from '../../useGoTo.js';
-import { useAuth } from '../../AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../authContext/useAuth.js';
 import "../admin.css"
 
 export default function AdminRegisterBarForm() {
-  const goTo = useGoTo();
+  const goTo = useNavigate();
   const { token } = useAuth();
 
   const [form, setForm] = useState({

@@ -1,4 +1,4 @@
-import '../commonStyles.css'
+import '../../commonStyles.css'
 import AdminRegisterBarForm from "./AdminRegisterBarForm.jsx";
 import "../admin.css"
 

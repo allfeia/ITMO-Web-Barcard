@@ -3,13 +3,13 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { useAuth } from '../../AuthContext.jsx';
-import { useGoTo } from '../../useGoTo.js';
+import { useAuth } from '../../authContext/useAuth.js';
+import { useNavigate } from 'react-router-dom';
 import "../admin.css";
 
 export default function SuperLoginPage() {
   const { setToken, setRoles, setBarId } = useAuth();
-  const goTo = useGoTo();
+  const goTo = useNavigate();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

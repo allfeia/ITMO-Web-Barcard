@@ -1,12 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SuperLoginPage from '../src/admin/super-admin/SuperLoginPage.jsx';
+import SuperLoginPage from '../../src/admin/super-admin/SuperLoginPage.jsx';
 
 const setToken = vi.fn();
 const setRoles = vi.fn();
 const setBarId = vi.fn();
 
-vi.mock('../../AuthContext.js', () => ({
+const goToMock = vi.fn();
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useNavigate: () => goToMock,
+  };
+});
+
+vi.mock('../../src/authContext/useAuth.js', () => ({
   useAuth: () => ({ setToken, setRoles, setBarId }),
 }));
 

@@ -1,5 +1,5 @@
 import { Link as RouterLink } from "react-router-dom";
-import { useAuth } from "../AuthContext.jsx";
+import { useAuth } from "../authContext/useAuth.js";
 import {
   Box,
   Stack,

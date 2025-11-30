@@ -7,13 +7,13 @@ import MenuItem from '@mui/material/MenuItem';
 import FormGroup from '@mui/material/FormGroup'; 
 import FormControlLabel from '@mui/material/FormControlLabel'; 
 import Checkbox from '@mui/material/Checkbox';
-import { useAuth } from '../../AuthContext.jsx';
-import { useGoTo } from '../../useGoTo.js';
+import { useAuth } from '../../authContext/useAuth.js';
+import { useNavigate } from 'react-router-dom';
 import "../admin.css"
 
 export default function SuperAssignUserPage() {
   const { token } = useAuth();
-  const goTo = useGoTo();
+  const goTo = useNavigate();
 
   const [bars, setBars] = useState([]);
   const [form, setForm] = useState({

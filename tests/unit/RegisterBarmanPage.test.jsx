@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import RegisterBarmenPage from '../src/admin/bar-admin/RegisterBarmanPage.jsx';
+import RegisterBarmenPage from '../../src/admin/bar-admin/RegisterBarmanPage.jsx';
 
-vi.mock('../src/admin/bar-admin/AdminRegisterBarmanForm.jsx', () => ({
+vi.mock('../../src/admin/bar-admin/AdminRegisterBarmanForm.jsx', () => ({
   default: () => <div data-testid="admin-register-barman-form">FORM</div>,
 }));
 

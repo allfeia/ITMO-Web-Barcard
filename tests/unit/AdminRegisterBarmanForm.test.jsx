@@ -1,8 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import AdminRegisterBarmanForm from '../src/admin/bar-admin/AdminRegisterBarmanForm.jsx';
+import AdminRegisterBarmanForm from '../../src/admin/bar-admin/AdminRegisterBarmanForm.jsx';
+import { useAuth } from '../../src/authContext/useAuth.js';
 
-vi.mock('../../AuthContext.js', () => ({
+const goToMock = vi.fn();
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useNavigate: () => goToMock,
+  };
+});
+
+vi.mock('../../src/authContext/useAuth.js', () => ({
   useAuth: vi.fn(),
 }));
 
@@ -61,19 +72,25 @@ describe('AdminRegisterBarmanForm', () => {
   });
 
   it('когда нет контекста бара — показывает ошибку и не шлёт запрос', async () => {
-    useAuth.mockReturnValueOnce({
-      token: 'jwt',
-      roles: ['staff'], // нет bar_admin
-      barId: null,
-    });
-    render(<AdminRegisterBarmanForm />);
+  vi.clearAllMocks();
+  const fetchMock = vi.fn();
+  global.fetch = fetchMock;
 
-    fillValidForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
-
-    expect(await screen.findByText('Нет контекста бара')).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+  useAuth.mockReturnValue({
+    token: 'jwt',
+    roles: ['staff'], // нет bar_admin
+    barId: null,
   });
+
+  render(<AdminRegisterBarmanForm />);
+
+  fillValidForm();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+
+  expect(await screen.findByText('Нет контекста бара')).toBeInTheDocument();
+  expect(fetchMock).not.toHaveBeenCalled();
+});
 
   it('отправляет запрос и показывает success', async () => {
     fetchMock.mockResolvedValueOnce({

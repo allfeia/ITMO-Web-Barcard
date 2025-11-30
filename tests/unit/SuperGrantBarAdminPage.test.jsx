@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SuperGrantBarAdminPage from '../src/admin/super-admin/SuperGrantBarAdminPage.jsx';
+import SuperGrantBarAdminPage from '../../src/admin/super-admin/SuperGrantBarAdminPage.jsx';
 
-vi.mock('../../AuthContext.js', () => ({
+const goToMock = vi.fn();
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useNavigate: () => goToMock,
+  };
+});
+
+vi.mock('../../src/authContext/useAuth.js', () => ({
   useAuth: () => ({ token: 'jwt' }),
 }));
 

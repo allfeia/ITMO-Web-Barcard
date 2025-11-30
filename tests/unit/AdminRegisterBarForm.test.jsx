@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import AdminRegisterBarForm from '../src/admin/super-admin/AdminRegisterBarForm.jsx';
+import AdminRegisterBarForm from '../../src/admin/super-admin/AdminRegisterBarForm.jsx';
 
-vi.mock('../../AuthContext.js', () => ({
+const goToMock = vi.fn();
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useNavigate: () => goToMock,
+  };
+});
+
+vi.mock('../../src/authContext/useAuth.js', () => ({
   useAuth: () => ({ token: 'jwt-super' }),
 }));
 
@@ -15,8 +25,17 @@ describe('AdminRegisterBarForm', () => {
   });
 
   function fillBase(valid = true) {
-    fireEvent.change(screen.getByLabelText('Название бара'), { target: { value: 'Бар 1' } });
-    fireEvent.change(screen.getByLabelText('Ключ бара'), { target: { value: valid ? 'key123' : '' } });
+  const [nameInput] = screen.getAllByLabelText('Название бара');
+  fireEvent.change(nameInput, { target: { value: 'Бар 1' } });
+
+  const keyInput = screen.getAllByLabelText('Ключ бара')
+  .find(el => el.tagName === 'INPUT');
+
+fireEvent.change(
+  keyInput,
+  { target: { value: valid ? 'key123' : '' } }
+);
+  
   }
 
   it('валидация: пустое имя/ключ, некорректный URL', async () => {
@@ -61,10 +80,15 @@ describe('AdminRegisterBarForm', () => {
     expect(await screen.findByText(/Бар создан/)).toBeInTheDocument();
   });
 
-  it('обрабатывает 401, 403 и 400 (ключ)', async () => {
+    it('обрабатывает 401, 403 и 400 (ключ)', async () => {
     const renderAndFill = () => {
       render(<AdminRegisterBarForm />);
       fillBase(true);
+    };
+
+    const clickSubmit = () => {
+      const [submitBtn] = screen.getAllByRole('button', { name: 'Создать бар' });
+      fireEvent.click(submitBtn);
     };
 
     // 401
@@ -74,7 +98,7 @@ describe('AdminRegisterBarForm', () => {
       json: async () => ({}),
     });
     renderAndFill();
-    fireEvent.click(screen.getByRole('button', { name: 'Создать бар' }));
+    clickSubmit();
     expect(await screen.findByText('Не авторизовано')).toBeInTheDocument();
 
     // 403
@@ -84,7 +108,7 @@ describe('AdminRegisterBarForm', () => {
       json: async () => ({ error: 'Доступ запрещён' }),
     });
     renderAndFill();
-    fireEvent.click(screen.getByRole('button', { name: 'Создать бар' }));
+    clickSubmit();
     expect(await screen.findByText('Доступ запрещён')).toBeInTheDocument();
 
     // 400 с ключом
@@ -94,7 +118,7 @@ describe('AdminRegisterBarForm', () => {
       json: async () => ({ error: 'Некорректный ключ бара' }),
     });
     renderAndFill();
-    fireEvent.click(screen.getByRole('button', { name: 'Создать бар' }));
+    clickSubmit();
     expect(await screen.findByText('Некорректный ключ бара')).toBeInTheDocument();
   });
 });

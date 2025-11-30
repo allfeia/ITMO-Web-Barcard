@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../../AuthContext.jsx';
+import { useAuth } from '../../authContext/useAuth.js';
 import { TextField, Button, Typography, Box, MenuItem } from '@mui/material';
-import { useGoTo } from '../../useGoTo.js';
+import { useNavigate } from 'react-router-dom';
 import "../admin.css"
 
 export default function SuperGrantBarAdminPage() {
   const { token } = useAuth();
-  const goTo = useGoTo();
+  const goTo = useNavigate();
 
   const [bars, setBars] = useState([]);
   const [barId, setBarId] = useState('');

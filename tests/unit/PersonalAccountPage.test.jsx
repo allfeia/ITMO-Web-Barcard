@@ -3,7 +3,7 @@ import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import PersonalAccountPage from '../../src/personal-acount-page/PersonalAccountPage.jsx' 
-import { AuthProvider } from '../src/AuthContext.jsx'
+import { AuthProvider } from '../../src/authContext/AuthContext.jsx'
 
 
 vi.mock('../icons/heartIcon.js', () => ({

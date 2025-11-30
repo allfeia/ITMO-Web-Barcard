@@ -37,7 +37,10 @@ export default function SuperAssignUserPage() {
         });
         const data = await resp.json().catch(()=>[]);
         if (resp.ok) setBars(data);
-      } catch {}
+      }  catch (e) {
+        console.error(e);
+        setErr('Не удалось загрузить бары');
+      }
     })();
   }, [token]);
 

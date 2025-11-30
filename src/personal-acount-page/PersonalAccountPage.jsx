@@ -1,6 +1,6 @@
 import { Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { useAuth } from '../AuthContext.jsx'; 
+import { useAuth } from '../authContext/useAuth.js'; 
 import drawHeartIcon from '../icons/heartIcon.js';
 import drawStarIcon from '../icons/starIcon.js';
 import drawUserIcon from '../icons/userIcon.js';

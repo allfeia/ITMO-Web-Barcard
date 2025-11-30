@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { createRoot } from 'react-dom/client'
 import StartPage from './StartPage.jsx'
 import SignInPage from "./sign-in-page/SignInPage.jsx";
-import Menu from "./menu-template-page/Menu.jsx";
 import Account from "./Account.jsx";
 import LevelPage from "./LevelPage.jsx";
 import Menu from "./Menu.jsx";

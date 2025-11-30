@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, expect} from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { AuthProvider, useAuth } from '../../src/AuthContext.jsx'
+import { AuthProvider} from '../../src/authContext/AuthContext.jsx'
+import { useAuth } from '../../src/authContext/useAuth.js'
 
 function wrapper({ children }) {
   return <AuthProvider>{children}</AuthProvider>

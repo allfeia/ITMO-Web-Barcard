@@ -17,6 +17,7 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: {
           ...globals.browser,
+          ...globals.node,
           test: 'readonly',
           expect: 'readonly',
           describe: 'readonly',

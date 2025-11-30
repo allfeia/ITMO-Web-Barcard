@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import {ProtectedRoute} from "../src/ProtectedRoute.jsx"
+import ProtectedRoute from "../src/ProtectedRoute.jsx"
 import { createRoot } from 'react-dom/client'
 import StartPage from './StartPage.jsx'
 import SignInPage from './sign-in-page/SignInPage.jsx'
@@ -15,13 +15,14 @@ if (import.meta.env.MODE === 'development') {
 }
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
+ <BrowserRouter>
     <AuthProvider>
       <Routes>
-          <Route path="/" element={<StartPage />} />
-          <Route path="/signInPage" element={<SignInPage />} />
-          <Route path="/menu" element={<Menu />} />
-          {/* Супер-админ*/}
+        <Route path="/" element={<StartPage />} />
+        <Route path="/signInPage" element={<SignInPage />} />
+        <Route path="/menu" element={<Menu />} />
+        
+        {/* Супер-админ*/}
           <Route path="/super/login" element={<SuperLoginPage />} />
           <Route
             path="/super/bars/new"
@@ -67,7 +68,7 @@ createRoot(document.getElementById('root')).render(
               </ProtectedRoute>
             }
           />
-        </Routes>
+      </Routes>
     </AuthProvider>
   </BrowserRouter>
 )

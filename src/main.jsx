@@ -4,8 +4,8 @@ import StartPage from './StartPage.jsx'
 import SignInPage from './sign-in-page/SignInPage.jsx'
 import Menu from "./Menu.jsx"
 
-import { AuthProvider } from './AuthContext.jsx'
-import PersonalAccount from './personal_account/PersonalAccountPage.jsx'
+import { AuthProvider } from '../src/authContext/AuthContext.jsx'
+import PersonalAccount from '../src/personal-acount-page/PersonalAccountPage.jsx'
 
 if (import.meta.env.MODE === 'development') {
     const { worker } = await import('./mocks/browser');

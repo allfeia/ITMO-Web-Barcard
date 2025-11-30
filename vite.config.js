@@ -1,7 +1,20 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-})
+    plugins: [react()],
+    test: {
+        environment: "jsdom",
+        setupFiles: "./src/setupTests.js",
+        globals: true,
+        exclude: ['node_modules/**', 'tests/e2e/**', "src/backend/node_modules/**"],
+        coverage: {
+            provider: "v8",
+            reporter: ['text', 'json-summary', "html", "lcov"],
+            reporterDirectory: './coverage',
+            all: true,
+            include: ['src/**/*.{js,jsx}'],
+            exclude: ['node_modules/', 'tests/e2e/**', 'src/mocks/**', 'src/bottoms-utils', 'src/main.jsx', 'src/Menu.jsx', 'src/StartPage.jsx', 'src/sign-in-page/olive.js'],
+        },
+    },
+});

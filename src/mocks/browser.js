@@ -1,5 +1,4 @@
-import { setupWorker } from 'msw/browser';
-import {signInBarman} from "./signInBarman.js";
-import {getCocktails} from "./getCocktails.js";
+import { setupWorker } from "msw/browser";
+import { signInBarman } from "./signInBarman.js";
 
-export const worker = setupWorker(...signInBarman, ...getCocktails);
+export const worker = setupWorker(...signInBarman);

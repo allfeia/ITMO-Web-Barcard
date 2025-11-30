@@ -9,9 +9,13 @@ function SignInPage() {
     const canvasRefOlive = useRef(null);
 
     useEffect(() => {
-        drawOlive(canvasRefOlive.current);
+        const canvas = canvasRefOlive.current;
+        if (!canvas) return;
 
-    });
+        requestAnimationFrame(() => {
+            drawOlive(canvas);
+        });
+    }, []);
 
     //style={{border: "1px solid #999"}}
     return (

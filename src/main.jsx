@@ -4,8 +4,15 @@ import { createRoot } from 'react-dom/client'
 import StartPage from './StartPage.jsx'
 import SignInPage from './sign-in-page/SignInPage.jsx'
 import Menu from "./Menu.jsx"
+import AdminPage from "../src/admin/AdminPage.jsx"
+import AdminRegisterBarmanForm from "../src/admin/bar-admin/AdminRegisterBarmanForm.jsx"
+import AdminRegisterBarForm from '../src/admin/super-admin/AdminRegisterBarForm.jsx'
+import SuperGrantBarAdminPage from "../src/admin/super-admin/SuperGrantBarAdminPage.jsx"
+import SuperAssignUserPage from "../src/admin/super-admin/SuperAssignUserPage.jsx"
+import SuperLoginPage from "../src/admin/super-admin/SuperLoginPage.jsx"
 
 import { AuthProvider } from '../src/authContext/AuthContext.jsx'
+
 
 if (import.meta.env.MODE === 'development') {
     const { worker } = await import('./mocks/browser');

@@ -43,7 +43,7 @@ export default function SuperLoginPage() {
       setBarId(null);
 
       goTo('/administration');
-    } catch (e2) {
+    } catch{
       setErr('Сетевая ошибка');
     } finally {
       setLoading(false);

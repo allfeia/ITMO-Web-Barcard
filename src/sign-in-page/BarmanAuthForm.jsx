@@ -6,10 +6,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {IconButton, InputAdornment} from "@mui/material";
 import {useNavigate} from "react-router-dom";
-import { useAuth } from "../authContext/useAuth.js";
 
 export default function BarmanAuthForm() {
-    const { setToken, setRoles} = useAuth();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [barKey, setBarKey] = useState("");
@@ -54,7 +52,7 @@ export default function BarmanAuthForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    barId: Number(barId),
+                    barId,
                     username,
                     barPassword: password,
                     barKey: barKey
@@ -73,11 +71,6 @@ export default function BarmanAuthForm() {
                 return;
             }
 
-            if (data?.token) {
-                setToken(data.token);
-                setRoles(Array.isArray(data?.user?.roles) ? data.user.roles : []);
-            }
-
             console.log("SUCCESS", data);
             goTo("/menu");
 
@@ -93,7 +86,6 @@ export default function BarmanAuthForm() {
             className="sign-in-form"
         >
             <TextField
-                id="auth-username"
                 className="sign-in-form-input"
                 label="Почта / Логин / Имя"
                 variant="outlined"
@@ -104,7 +96,6 @@ export default function BarmanAuthForm() {
             />
 
             <TextField
-                id="auth-password"
                 className="sign-in-form-input"
                 label="Пароль"
                 variant="outlined"
@@ -127,7 +118,6 @@ export default function BarmanAuthForm() {
             />
 
             <TextField
-                id="auth-barkey"
                 className="sign-in-form-input"
                 label="Барный ключ"
                 variant="outlined"

@@ -64,13 +64,7 @@ export default function BarmanAuthForm() {
             const data = await response.json();
 
             if (response.status === 403) {
-                if (data.error === "wrong_password") {
-                    setPasswordError("Неверный пароль");
-                } else if (data.error === "wrong_bar_key") {
-                    setBarKeyError("Неверный барный ключ");
-                } else {
-                    setPasswordError("Ошибка авторизации");
-                }
+                setPasswordError("Неверный пароль");
                 return;
             }
 

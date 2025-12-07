@@ -9,7 +9,7 @@ import {useNavigate} from "react-router-dom";
 import { useAuth } from "../authContext/useAuth.js";
 
 export default function BarmanAuthForm() {
-    const { setToken, setRoles} = useAuth();
+    const { setToken, setRoles, setBarName, setBarSite} = useAuth();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [barKey, setBarKey] = useState("");
@@ -54,14 +54,15 @@ export default function BarmanAuthForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    barId: Number(barId),
+                    barId,
                     username,
                     barPassword: password,
-                    barKey: barKey
+                    barKey: barKey,
                 })
             });
 
             const data = await response.json();
+            console.log(data);
 
             if (response.status === 403) {
                 if (data.error === "wrong_password") {
@@ -82,6 +83,8 @@ export default function BarmanAuthForm() {
             if (data?.token) {
                 setToken(data.token);
                 setRoles(Array.isArray(data?.user?.roles) ? data.user.roles : []);
+                setBarName(data.barName);
+                setBarSite(data.barSite);
             }
 
             console.log("SUCCESS", data);

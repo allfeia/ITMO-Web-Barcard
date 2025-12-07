@@ -12,6 +12,28 @@ export function AuthProvider({ children }) {
     return fromSession ? Number(fromSession) : null;
   });
 
+  const [barName, setBarName] = useState(() => {
+      return sessionStorage.getItem('barName') || null;
+  });
+  useEffect(() => {
+      if (barName) {
+          sessionStorage.setItem('barName', barName);
+      } else {
+          sessionStorage.removeItem('barName');
+      }
+  }, [barName]);
+
+    const [barSite, setBarSite] = useState(() => {
+        return sessionStorage.getItem('barSite') || null;
+    });
+    useEffect(() => {
+        if (barSite) {
+            sessionStorage.setItem('barSite', barSite);
+        } else {
+            sessionStorage.removeItem('barSite');
+        }
+    }, [barSite]);
+
   useEffect(() => {
     if (token) sessionStorage.setItem('token', token);
     else sessionStorage.removeItem('token');
@@ -35,7 +57,7 @@ export function AuthProvider({ children }) {
     setBarId(null);
   };
 
-  const value = useMemo(() => ({ token, roles, barId, setToken, setRoles, setBarId, logout }), [token, roles, barId]);
+  const value = useMemo(() => ({ token, roles, barId, barName, barSite, setToken, setRoles, setBarId, setBarSite, setBarName, logout }), [token, roles, barId, barName, barSite]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

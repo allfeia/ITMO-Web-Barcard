@@ -9,6 +9,8 @@ import {MemoryRouter} from "react-router-dom";
 const mockNavigate = vi.fn();
 const mockSetToken = vi.fn();
 const mockSetRoles = vi.fn();
+const mockSetBarName = vi.fn();
+const mockSetBarSite = vi.fn();
 
 vi.mock("react-router-dom", async (importOriginal) => {
     const actual = await importOriginal();
@@ -17,7 +19,7 @@ vi.mock("react-router-dom", async (importOriginal) => {
 
 vi.mock("../../src/authContext/useAuth.js", async (importOriginal) => {
     const actual = await importOriginal();
-    return { ...actual, useAuth: () => ({ setToken: mockSetToken, setRoles: mockSetRoles }) };
+    return { ...actual, useAuth: () => ({ setToken: mockSetToken, setRoles: mockSetRoles, setBarName: mockSetBarName, setBarSite: mockSetBarSite }) };
 });
 
 vi.mock('../../src/sign-in-page/olive.js', () => ({

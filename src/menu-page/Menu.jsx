@@ -1,0 +1,86 @@
+import '../commonStyles.css'
+import './menu-page.css'
+import {useNavigate} from "react-router-dom";
+import CardsGrid from "./CardsGrid.jsx";
+import {useEffect, useRef, useState} from "react";
+import TextField from "@mui/material/TextField";
+import {InputAdornment} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListAltIcon from "@mui/icons-material/FilterListAlt";
+import drawUserIcon from "../icons/userIcon.js";
+import {useAuth} from "../authContext/useAuth.js";
+
+function Menu() {
+    const goTo = useNavigate();
+    const [searchValue, setSearchValue] = useState("");
+    const [cocktails, setCocktails] = useState([]);
+    const barId = sessionStorage.getItem("barId");
+    const isBarman = sessionStorage.getItem("isBarman");
+    const canvasRefUser = useRef(null);
+
+    const { barName, barSite } = useAuth();
+
+    useEffect(() => {
+        drawUserIcon(canvasRefUser.current, { color: '#333', filled: true });
+
+        if (!barId) return;
+
+        fetch(`/api/cocktail?barId=${barId}`)
+            .then((res) => res.json())
+            .then(data => {
+                setCocktails(data);
+                console.log("Полученные коктейли:", data);
+            })
+            .catch(err => console.error(err));
+    }, []);
+
+
+    const filteredCocktails = cocktails.filter(c => c.name.toLowerCase().includes(searchValue.toLowerCase()));
+
+    return (
+        <div className="menu-template-container">
+            {isBarman ? (
+                <canvas
+                    className="account-icon"
+                    data-testid="account-canvas"
+                    ref={canvasRefUser}
+                    onClick={() => goTo("/account")}
+                />
+            ) : null}
+            <h1 className="menu-template-title">
+                Выберете<br/>коктейль
+            </h1>
+            {/*поменять на ссылку, которая вытаскивается из бд*/}
+            <a className="bar-name" href={barSite}>{barName}</a>
+            <div className="cocktail-search-container">
+                <TextField
+                    className="cocktail-search"
+                    placeholder="Поиск"
+                    color="#333"
+                    focused
+                    value={searchValue}
+                    onChange={e => setSearchValue(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <FilterListAltIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
+            </div>
+            {filteredCocktails.length > 0 ? (
+                <CardsGrid cocktails={filteredCocktails} />
+            ) : (
+                <h2 className="no-cocktail-text">Такого коктейля нет :(</h2>
+            )}
+
+        </div>
+    )
+}
+export default Menu;

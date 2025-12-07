@@ -1,12 +1,12 @@
 import { http, HttpResponse } from "msw";
 
 const cocktailsDatabase = {
-    BAR123: [
+    123: [
         { id: 1, name: "Мохито", draw_file: "mojito" },
         { id: 2, name: "Разбитый базилик", draw_file: "smash-basil" },
         { id: 3, name: "Негрони", draw_file: "negroni" },
     ],
-    BAR777: [
+    777: [
         { id: 1, name: "Клеверный клуб", draw_file: "clover-club" },
         { id: 2, name: "Горячий пунш", draw_file: "hot-toddy" },
     ],

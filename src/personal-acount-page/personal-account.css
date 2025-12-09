@@ -9,6 +9,10 @@
   max-width: 100%;
 }
 
+.back-arrow {
+    margin-bottom: 10px;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -23,6 +27,8 @@
 .username {
   font-size: 22px;
   font-weight: 400;
+  position: absolute;
+  margin-left: 35px;
 }
 
 .icon {
@@ -32,9 +38,9 @@
 }
 
 .icon-inline {
-  width: 16px;
-  height: 16px;
-  margin-left: 10px;
+  width: 25px;
+  height: 25px;
+  margin-left: 5px;
 }
 
 .icon-user {

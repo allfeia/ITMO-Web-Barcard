@@ -31,12 +31,19 @@ export default function drawHeartIcon(canvas, { color = '#fff', filled = true } 
   const strokeW = Math.max(1, s * 0.09); 
   ctx.lineWidth = strokeW;
 
-  const cxL = offsetX + 0.25 * w;
-  const cxR = offsetX + 0.75 * w;
-  const cy = offsetY + 0.28 * h;      
-  const r = 0.25 * w;
-  const tipX = offsetX + 0.5 * w;
-  const tipY = offsetY + 0.98 * h;
+    const padding = 2;
+    const sAdjusted = s - padding * 2;
+    const wAdjusted = sAdjusted;
+    const hAdjusted = sAdjusted;
+    const offsetXAdjusted = offsetX + padding;
+    const offsetYAdjusted = offsetY + padding;
+
+    const cxL = offsetXAdjusted + 0.25 * wAdjusted;
+    const cxR = offsetXAdjusted + 0.75 * wAdjusted;
+    const cy = offsetYAdjusted + 0.28 * hAdjusted;
+    const r = 0.25 * wAdjusted;
+    const tipX = offsetXAdjusted + 0.5 * wAdjusted;
+    const tipY = offsetYAdjusted + 0.98 * hAdjusted;
 
   ctx.beginPath();
   ctx.arc(cxL, cy, r, Math.PI - 0.6, -0.15, false);
@@ -46,5 +53,7 @@ export default function drawHeartIcon(canvas, { color = '#fff', filled = true } 
 
   if (filled) {
     ctx.fill();
+  } else {
+      ctx.stroke();
   }
 }

@@ -14,7 +14,7 @@ export default defineConfig({
             reporterDirectory: './coverage',
             all: true,
             include: ['src/**/*.{js,jsx}'],
-            exclude: ['node_modules/', 'tests/e2e/**', 'src/mocks/**', 'src/bottoms-utils', 'src/main.jsx', 'src/Menu.jsx', 'src/StartPage.jsx', 'src/sign-in-page/olive.js'],
+            exclude: ['node_modules/', 'tests/e2e/**', 'src/mocks/**', 'src/bottoms-utils', 'src/main.jsx', 'src/MenuPage.jsx', 'src/StartPage.jsx', 'src/sign-in-page/olive.js'],
         },
     },
 });

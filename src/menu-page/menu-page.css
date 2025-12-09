@@ -53,6 +53,8 @@
     border: 1px solid #333 !important;
     border-radius: 4px;
     background-color: #F7F6F3 !important;
+    position: relative !important;
+    z-index: 3 !important;
 }
 
 .cocktail-drawing {
@@ -62,6 +64,12 @@
     display: block;
 
     /* outline: 2px solid red; */
+}
+
+.favourites {
+    position: absolute;
+    right: 15px;
+    top: 10px;
 }
 
 .card-title {
@@ -100,6 +108,46 @@
     padding-top: 5px;
     font-size: 32px;
     padding-left: 20px;
+    padding-bottom: 30px;
+}
+
+.recipe-sections {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.8rem 1rem;
+    align-items: flex-start;
+}
+
+.recipe-section {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+
+.ing-list {
+    padding: 0;
+    margin: 0;
+}
+
+.recipe-lists {
+    padding-bottom: 5px;
+}
+
+.ing-list .MuiListItem-root {
+    padding: 0;
+    line-height: 1.6;
+}
+
+.recipe-steps {
+    padding: 0;
+    margin: 0;
+    list-style-position: inside;
+}
+
+.recipe-steps li {
+    margin-bottom: 0.5rem;
 }
 
 .learn {

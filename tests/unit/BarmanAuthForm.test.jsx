@@ -10,6 +10,7 @@ const mockSetToken = vi.fn();
 const mockSetRoles = vi.fn();
 const mockSetBarName = vi.fn();
 const mockSetBarSite = vi.fn();
+const mockSetSavedCocktailsId = vi.fn();
 
 vi.mock("react-router-dom", async (importOriginal) => {
     const actual = await importOriginal();
@@ -18,7 +19,16 @@ vi.mock("react-router-dom", async (importOriginal) => {
 
 vi.mock("../../src/authContext/useAuth.js", async (importOriginal) => {
     const actual = await importOriginal();
-    return { ...actual, useAuth: () => ({ setToken: mockSetToken, setRoles: mockSetRoles, setBarName: mockSetBarName, setBarSite: mockSetBarSite }), };
+    return {
+        ...actual,
+        useAuth: () => ({
+            setToken: mockSetToken,
+            setRoles: mockSetRoles,
+            setBarName: mockSetBarName,
+            setBarSite: mockSetBarSite,
+            setSavedCocktailsId: mockSetSavedCocktailsId
+        }),
+    };
 });
 
 describe('BarmanAuthForm', () => {

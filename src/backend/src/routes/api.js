@@ -159,7 +159,7 @@ router.get("/cocktail", async (req, res) => {
       order: [["name", "ASC"]],
     });
     return res.json(cocktails);
-  } catch (e) {
+  } catch{
     return res.status(500).json({ error: "Server error" });
   }
 });
@@ -311,7 +311,7 @@ router.patch("/favourites/add/:cocktailId", authRequired, async (req, res) => {
       return res.status(404).json({ error: "Cocktail not found" });
     }
 
-    const [fav, created] = await UserFavourite.findOrCreate({
+    const [created] = await UserFavourite.findOrCreate({
       where: { user_id: userId, cocktail_id: cocktailId },
       defaults: { user_id: userId, cocktail_id: cocktailId },
     });

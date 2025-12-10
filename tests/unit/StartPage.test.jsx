@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import StartPage from "../../src/start-page/StartPage.jsx";
 import { vi } from "vitest";
@@ -63,35 +63,45 @@ beforeEach(() => {
 });
 
 describe("StartPage", () => {
-    test("чтение URL параметров и запись в sessionStorage", () => {
+    test("чтение URL параметров и запись в sessionStorage", async () => {
         render(
             <MemoryRouter initialEntries={["/?barId=BAR123&isBarman=true"]}>
                 <StartPage />
             </MemoryRouter>
         );
 
-        expect(sessionStorage.getItem("barId")).toBe("BAR123");
-        expect(sessionStorage.getItem("isBarman")).toBe("true");
+        await waitFor(() => {
+            expect(sessionStorage.getItem("barId")).toBe("BAR123");
+            expect(sessionStorage.getItem("isBarman")).toBe("true");
+        });
     });
 
-    test("клик по кнопке → переход на /signInPage, если isBarman=true", () => {
+    test("клик по кнопке → переход на /signInPage, если isBarman=true", async () => {
         render(
             <MemoryRouter initialEntries={["/?barId=BAR1&isBarman=true"]}>
                 <StartPage />
             </MemoryRouter>
         );
 
+        await waitFor(() => {
+            expect(sessionStorage.getItem("isBarman")).toBe("true");
+        });
+
         fireEvent.click(screen.getByText("Начать"));
 
         expect(mockNavigate).toHaveBeenCalledWith("/signInPage");
     });
 
-    test("клик по кнопке → переход на /menu, если isBarman=false", () => {
+    test("клик по кнопке → переход на /menu, если isBarman=false", async () => {
         render(
             <MemoryRouter initialEntries={["/?barId=BAR1&isBarman=false"]}>
                 <StartPage />
             </MemoryRouter>
         );
+
+        await waitFor(() => {
+            expect(sessionStorage.getItem("isBarman")).toBe("false");
+        });
 
         fireEvent.click(screen.getByText("Начать"));
 

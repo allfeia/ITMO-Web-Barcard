@@ -46,6 +46,7 @@ describe("models.js", () => {
       CocktailIngredient,
       CocktailRecipeStep,
       Point,
+      UserFavourite,
     } = mod;
 
     // сущности объявлены
@@ -56,14 +57,66 @@ describe("models.js", () => {
     expect(CocktailIngredient).toBeDefined();
     expect(CocktailRecipeStep).toBeDefined();
     expect(Point).toBeDefined();
+    expect(UserFavourite).toBeDefined();
 
-    // связи вызывались
+    // связи вызывались (базовые)
     expect(Bar.hasMany).toHaveBeenCalled();
     expect(User.belongsTo).toHaveBeenCalled();
     expect(Cocktail.belongsToMany).toHaveBeenCalled();
     expect(Ingredient.belongsToMany).toHaveBeenCalled();
     expect(CocktailRecipeStep.belongsTo).toHaveBeenCalled();
     expect(Point.belongsTo).toHaveBeenCalled();
+
+    // доп. проверки для новых связей
+
+    // User.belongsTo(Cocktail, { as: "savedCocktail" })
+    expect(User.belongsTo).toHaveBeenCalledWith(
+      Cocktail,
+      expect.objectContaining({
+        foreignKey: "saved_cocktail_id",
+        as: "savedCocktail",
+      }),
+    );
+
+    // User.hasMany(Point, { as: "userPoints" })
+    expect(User.hasMany).toHaveBeenCalledWith(
+      Point,
+      expect.objectContaining({
+        foreignKey: "user_id",
+        as: "userPoints",
+      }),
+    );
+
+    // Cocktail.hasMany(Point, { as: "cocktailPoints" })
+    expect(Cocktail.hasMany).toHaveBeenCalledWith(
+      Point,
+      expect.objectContaining({
+        foreignKey: "cocktail_id",
+        as: "cocktailPoints",
+      }),
+    );
+
+    // User.belongsToMany(Cocktail, { through: UserFavourite, as: "favouriteCocktails" })
+    expect(User.belongsToMany).toHaveBeenCalledWith(
+      Cocktail,
+      expect.objectContaining({
+        through: UserFavourite,
+        foreignKey: "user_id",
+        otherKey: "cocktail_id",
+        as: "favouriteCocktails",
+      }),
+    );
+
+    // Cocktail.belongsToMany(User, { through: UserFavourite, as: "usersWhoFavourited" })
+    expect(Cocktail.belongsToMany).toHaveBeenCalledWith(
+      User,
+      expect.objectContaining({
+        through: UserFavourite,
+        foreignKey: "cocktail_id",
+        otherKey: "user_id",
+        as: "usersWhoFavourited",
+      }),
+    );
   });
 
   it("валидатор User.roleConstraints — staff/bar_admin требуют пароль и bar_id", async () => {

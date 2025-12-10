@@ -57,9 +57,9 @@ export default function BarmanAuthForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    barId,
+                    barId:Number(barId),
                     username,
-                    barPassword: password,
+                    password: password,
                     barKey: barKey,
                 })
             });

@@ -29,7 +29,7 @@ vi.mock("bcryptjs", () => ({
 }));
 
 import router from "./api.js";
-import { Bar, User, Point,  Cocktail, UserFavourite} from "../models.js";
+import { Bar, User, Point, Cocktail, UserFavourite } from "../models.js";
 import jwt from "jsonwebtoken";
 
 function appWithRouter() {
@@ -377,8 +377,11 @@ describe("PATCH /favourites/add/:cocktailId", () => {
     const res = await request(app)
       .patch("/api/favourites/add/5")
       .set("Authorization", auth);
+
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ ok: true, cocktailId: 5, created: true });
+    expect(res.body.ok).toBe(true);
+    expect(res.body.cocktailId).toBe(5);
+    expect(res.body.created).toEqual({ id: 1 });
   });
 });
 

@@ -159,7 +159,7 @@ router.get("/cocktail", async (req, res) => {
       order: [["name", "ASC"]],
     });
     return res.json(cocktails);
-  } catch{
+  } catch {
     return res.status(500).json({ error: "Server error" });
   }
 });

@@ -1,4 +1,4 @@
-import { Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../authContext/useAuth.js'; 
 import drawHeartIcon from '../icons/heartIcon.js';
@@ -6,17 +6,20 @@ import drawStarIcon from '../icons/starIcon.js';
 import drawUserIcon from '../icons/userIcon.js';
 import './personal-account.css';
 import '../commonStyles.css';
+import WestIcon from '@mui/icons-material/West';
 
 function PersonalAccountPage() {
   const canvasRefHeart = useRef(null);
   const canvasRefStar = useRef(null);
   const canvasRefUser = useRef(null);
 
-  const { token, roles} = useAuth(); 
+  const { token, roles } = useAuth();
   const isBarAdmin = Array.isArray(roles) && roles.includes("bar_admin");
 
   const [username, setUsername] = useState('');
   const [points, setPoints] = useState(0);
+
+  const goTo = useNavigate();
 
   useEffect(() => {
     drawUserIcon(canvasRefUser.current, { color: '#fff', filled: true });
@@ -51,6 +54,11 @@ function PersonalAccountPage() {
 
   return (
     <div className="screen">
+        <WestIcon
+            className="back-arrow"
+            sx={{ fontSize: "30px" }}
+            onClick={() => goTo('/menu')}
+        />
       <div className="row row-compact">
         <canvas
           className="icon icon-user"
@@ -70,7 +78,7 @@ function PersonalAccountPage() {
 
       <Link to="" className="linkRow">Рейтинг бара</Link>
 
-      <Link to="" className="linkRow">
+      <Link to="/favourities" className="linkRow">
         <span className="linkFull">
           <span>Избранное</span>
           <canvas

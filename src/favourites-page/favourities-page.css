@@ -1,0 +1,21 @@
+.favourites-container {
+    width: 100%;
+}
+
+.menu-template-title {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.back-arrow-fav {
+    margin-top: 25px;
+    margin-left: 20px;
+}
+
+.empty-favourites {
+    display: flex;
+    justify-content: center;
+    margin-top: 80%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #333;
+}

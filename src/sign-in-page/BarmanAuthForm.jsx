@@ -9,13 +9,16 @@ import {useNavigate} from "react-router-dom";
 import { useAuth } from "../authContext/useAuth.js";
 
 export default function BarmanAuthForm() {
-    const { setToken, setRoles, setBarName, setBarSite} = useAuth();
+    const { setToken, setRoles, setSavedCocktailsId, setBarName, setBarSite } = useAuth();
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [barKey, setBarKey] = useState("");
+
     const [usernameError, setUsernameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [barKeyError, setBarKeyError] = useState("");
+
     const [showPass, setShowPass] = useState(true);
     const [showKey, setShowKey] = useState(true);
 
@@ -85,6 +88,7 @@ export default function BarmanAuthForm() {
                 setRoles(Array.isArray(data?.user?.roles) ? data.user.roles : []);
                 setBarName(data.barName);
                 setBarSite(data.barSite);
+                setSavedCocktailsId(data.saved_cocktails_id);
             }
 
             console.log("SUCCESS", data);

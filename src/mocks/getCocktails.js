@@ -7,8 +7,8 @@ const cocktailsDatabase = {
         { id: 3, name: "Негрони", draw_file: "negroni" },
     ],
     777: [
-        { id: 1, name: "Клеверный клуб", draw_file: "clover-club" },
-        { id: 2, name: "Горячий пунш", draw_file: "hot-toddy" },
+        { id: 4, name: "Клеверный клуб", draw_file: "clover-club" },
+        { id: 5, name: "Горячий пунш", draw_file: "hot-toddy" },
     ],
 };
 

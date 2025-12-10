@@ -1,11 +1,13 @@
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import './commonStyles.css';
+import {useAuth} from "./authContext/useAuth.js";
 
 function StartPage() {
 
     const goTo = useNavigate();
-    const [isBarman, setIsBarman] = useState(null);
+    const { setBarId, setIsBarman } = useAuth();
+    const [isBarmanChecker, setIsBarmanChecker] = useState(null);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -13,21 +15,20 @@ function StartPage() {
         const isBarmanParam = params.get("isBarman");
 
         if (barId && isBarmanParam) {
+            setBarId(barId);
+            setIsBarman(isBarmanParam === "true");
+            setIsBarmanChecker(isBarmanParam === "true");
+
             sessionStorage.setItem("barId", barId);
             sessionStorage.setItem("isBarman", isBarmanParam);
-
-            setIsBarman(isBarmanParam === "true");
-
-            console.log(sessionStorage.getItem("barId"));
-            console.log(sessionStorage.getItem("isBarman"));
 
         }
     }, []);
 
     const whoIsEntered = () => {
-        if (isBarman) {
+        if (isBarmanChecker) {
             goTo("/signInPage");
-        } else if (!isBarman) {
+        } else if (!isBarmanChecker) {
             goTo("/menu");
         } else {
             console.log("неизвестный пользователь");

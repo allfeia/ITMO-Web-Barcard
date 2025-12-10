@@ -95,37 +95,39 @@ describe("CardsGrid", () => {
     });
 
     it("добавляет коктейль в избранное при клике на сердечко", async () => {
-        render(<CardsGrid cocktails={cocktails} />);
+    render(<CardsGrid cocktails={cocktails} />);
 
-        const heart = screen.getAllByTestId("favourites-canvas")[0];
+    const heart = screen.getAllByTestId("favourites-canvas")[0];
 
-        fireEvent.click(heart);
+    fireEvent.click(heart);
 
-        await waitFor(() => {
-            expect(global.fetch).toHaveBeenCalledWith("/api/favourites/add/1", {
-                method: "PATCH",
-            });
-        });
-
-        await waitFor(() => {
-            expect(mockSetSavedIds).toHaveBeenCalled();
+    await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith("/api/favourites/add/1", {
+            method: "PATCH",
+            headers: { Authorization: "Bearer undefined" }, 
         });
     });
 
-    it("удаляет из избранного, если уже в избранном", async () => {
-        mockSavedIds = [2];
+    await waitFor(() => {
+        expect(mockSetSavedIds).toHaveBeenCalled();
+    });
+});
 
-        render(<CardsGrid cocktails={cocktails} />);
+it("удаляет из избранного, если уже в избранном", async () => {
+    mockSavedIds = [2];
 
-        const heart = screen.getAllByTestId("favourites-canvas")[1];
+    render(<CardsGrid cocktails={cocktails} />);
 
-        fireEvent.click(heart);
+    const heart = screen.getAllByTestId("favourites-canvas")[1];
 
-        await waitFor(() => {
-            expect(global.fetch).toHaveBeenCalledWith("/api/favourites/remove/2", {
-                method: "DELETE",
-            });
+    fireEvent.click(heart);
+
+    await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith("/api/favourites/remove/2", {
+            method: "DELETE",
+            headers: { Authorization: "Bearer undefined" },
         });
     });
+});
 
 });

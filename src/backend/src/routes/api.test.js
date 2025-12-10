@@ -12,6 +12,15 @@ vi.mock("../models.js", () => {
     },
     User: { findByPk: vi.fn(), findAll: vi.fn() },
     Point: { findOne: vi.fn() },
+    Cocktail: { findAll: vi.fn(), findByPk: vi.fn() },
+    Ingredient: vi.fn(), // как модель, но напрямую в тестах не трогаем
+    CocktailIngredient: vi.fn(),
+    CocktailRecipeStep: vi.fn(),
+    UserFavourite: {
+      findOrCreate: vi.fn(),
+      findAll: vi.fn(),
+      destroy: vi.fn(),
+    },
   };
 });
 
@@ -262,5 +271,153 @@ describe("api router", () => {
         },
       ]);
     });
+  });
+});
+
+describe("GET /cocktail", () => {
+  it("400 if invalid barId", async () => {
+    const app = appWithRouter();
+    const res = await request(app).get("/api/cocktail?barId=abc");
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "Invalid barId" });
+  });
+
+  it("returns cocktails for bar", async () => {
+    Cocktail.findAll.mockResolvedValue([
+      { id: 1, name: "A", description: "d", image: "img" },
+    ]);
+    const app = appWithRouter();
+    const res = await request(app).get("/api/cocktail?barId=1");
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([
+      { id: 1, name: "A", description: "d", image: "img" },
+    ]);
+  });
+
+  it("500 on error", async () => {
+    Cocktail.findAll.mockRejectedValue(new Error("db down"));
+    const app = appWithRouter();
+    const res = await request(app).get("/api/cocktail?barId=1");
+    expect(res.status).toBe(500);
+    expect(res.body).toEqual({ error: "Server error" });
+  });
+});
+
+describe("POST /favourites", () => {
+  it("401 without auth", async () => {
+    const app = appWithRouter();
+    const res = await request(app)
+      .post("/api/favourites")
+      .send({ savedCocktailsId: [1, 2] });
+    expect(res.status).toBe(401);
+  });
+
+  it("400 invalid payload", async () => {
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .post("/api/favourites")
+      .set("Authorization", auth)
+      .send({ savedCocktailsId: "not-array" });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe("Invalid payload");
+  });
+
+  it("returns list of favourite cocktails", async () => {
+    Cocktail.findAll.mockResolvedValue([
+      { id: 1, name: "A", description: "d", image: "i", bar_id: 1 },
+    ]);
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .post("/api/favourites")
+      .set("Authorization", auth)
+      .send({ savedCocktailsId: [1] });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([
+      { id: 1, name: "A", description: "d", image: "i", bar_id: 1 },
+    ]);
+  });
+});
+
+describe("PATCH /favourites/add/:cocktailId", () => {
+  it("401 without auth", async () => {
+    const app = appWithRouter();
+    const res = await request(app).patch("/api/favourites/add/1");
+    expect(res.status).toBe(401);
+  });
+
+  it("400 invalid cocktail id", async () => {
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .patch("/api/favourites/add/abc")
+      .set("Authorization", auth);
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "Invalid cocktail id" });
+  });
+
+  it("404 cocktail not found", async () => {
+    Cocktail.findByPk.mockResolvedValue(null);
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .patch("/api/favourites/add/5")
+      .set("Authorization", auth);
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "Cocktail not found" });
+  });
+
+  it("ok when created", async () => {
+    Cocktail.findByPk.mockResolvedValue({ id: 5 });
+    UserFavourite.findOrCreate.mockResolvedValue([{ id: 1 }, true]);
+
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .patch("/api/favourites/add/5")
+      .set("Authorization", auth);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true, cocktailId: 5, created: true });
+  });
+});
+
+describe("DELETE /favourites/remove/:cocktailId", () => {
+  it("401 without auth", async () => {
+    const app = appWithRouter();
+    const res = await request(app).delete("/api/favourites/remove/1");
+    expect(res.status).toBe(401);
+  });
+
+  it("400 invalid cocktail id", async () => {
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .delete("/api/favourites/remove/abc")
+      .set("Authorization", auth);
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "Invalid cocktail id" });
+  });
+
+  it("ok and deleted=false when nothing deleted", async () => {
+    UserFavourite.destroy.mockResolvedValue(0);
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .delete("/api/favourites/remove/5")
+      .set("Authorization", auth);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true, cocktailId: 5, deleted: false });
+  });
+
+  it("ok and deleted=true when record deleted", async () => {
+    UserFavourite.destroy.mockResolvedValue(1);
+    const app = appWithRouter();
+    const auth = bearer({ id: 1, roles: ["user"] });
+    const res = await request(app)
+      .delete("/api/favourites/remove/5")
+      .set("Authorization", auth);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true, cocktailId: 5, deleted: true });
   });
 });

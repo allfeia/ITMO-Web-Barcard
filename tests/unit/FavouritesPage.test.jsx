@@ -74,7 +74,10 @@ describe("FavouritesPage", () => {
             "/api/favourites",
             expect.objectContaining({
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: expect.objectContaining({
+            "Content-Type": "application/json",
+            Authorization: expect.any(String),
+        }),
                 body: JSON.stringify({
                     barId: "123",
                     savedCocktailsId: [1,3],

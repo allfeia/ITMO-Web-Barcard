@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { User, Bar, UserFavourite} from "../models.js";
+import { User, Bar, UserFavourite } from "../models.js";
 import { signJwt, authRequired, requireRole } from "../middleware/auth.js";
 import { Op } from "sequelize";
 
@@ -101,10 +101,10 @@ router.post("/barman/auth", async (req, res) => {
 
     const favourites = await UserFavourite.findAll({
       where: { user_id: user.id },
-      attributes: ['cocktail_id']
+      attributes: ["cocktail_id"],
     });
 
-    const savedCocktailsId = favourites.map(f => f.cocktail_id);
+    const savedCocktailsId = favourites.map((f) => f.cocktail_id);
 
     const token = signJwt({
       id: user.id,
@@ -128,8 +128,8 @@ router.post("/barman/auth", async (req, res) => {
         bar_id: user.bar_id,
       },
       barName: bar.name,
-      barSite: bar['web-site'] ?? null,
-      saved_cocktails_id: savedCocktailsId 
+      barSite: bar["web-site"] ?? null,
+      saved_cocktails_id: savedCocktailsId,
     });
   } catch (e) {
     if (e.errors || e.issues)

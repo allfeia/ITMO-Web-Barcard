@@ -205,28 +205,28 @@ UserFavourite.init(
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'users', key: 'id' },
-      onDelete: 'CASCADE'
+      references: { model: "users", key: "id" },
+      onDelete: "CASCADE",
     },
     cocktail_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'cocktails', key: 'id' },
-      onDelete: 'CASCADE'
-    }
+      references: { model: "cocktails", key: "id" },
+      onDelete: "CASCADE",
+    },
   },
   {
     sequelize,
-    modelName: 'UserFavourite',
-    tableName: 'user_favourites',
+    modelName: "UserFavourite",
+    tableName: "user_favourites",
     underscored: true,
     timestamps: true,
     indexes: [
-      { fields: ['user_id'] },
-      { fields: ['cocktail_id'] },
-      { unique: true, fields: ['user_id', 'cocktail_id'] }
-    ]
-  }
+      { fields: ["user_id"] },
+      { fields: ["cocktail_id"] },
+      { unique: true, fields: ["user_id", "cocktail_id"] },
+    ],
+  },
 );
 
 // Связи
@@ -261,6 +261,16 @@ Point.belongsTo(User, { foreignKey: "user_id" });
 Cocktail.hasMany(Point, { foreignKey: "cocktail_id", as: "cocktailPoints" });
 Point.belongsTo(Cocktail, { foreignKey: "cocktail_id" });
 
-User.belongsToMany(Cocktail, {through: UserFavourite,foreignKey: 'user_id',otherKey: 'cocktail_id',as: 'favouriteCocktails'});
+User.belongsToMany(Cocktail, {
+  through: UserFavourite,
+  foreignKey: "user_id",
+  otherKey: "cocktail_id",
+  as: "favouriteCocktails",
+});
 
-Cocktail.belongsToMany(User, {through: UserFavourite,foreignKey: 'cocktail_id',otherKey: 'user_id',as: 'usersWhoFavourited'});
+Cocktail.belongsToMany(User, {
+  through: UserFavourite,
+  foreignKey: "cocktail_id",
+  otherKey: "user_id",
+  as: "usersWhoFavourited",
+});

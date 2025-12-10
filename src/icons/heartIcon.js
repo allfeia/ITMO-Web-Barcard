@@ -1,7 +1,10 @@
-export default function drawHeartIcon(canvas, { color = '#fff', filled = true } = {}) {
+export default function drawHeartIcon(
+  canvas,
+  { color = "#fff", filled = true } = {},
+) {
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const dpr = window.devicePixelRatio || 1;
@@ -22,25 +25,25 @@ export default function drawHeartIcon(canvas, { color = '#fff', filled = true } 
   const offsetX = (cssWidth - s) / 2;
   const offsetY = (cssHeight - s) / 2;
 
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
   ctx.lineWidth = Math.max(1, s * 0.09);
 
-    const padding = 2;
-    const sAdjusted = s - padding * 2;
-    const wAdjusted = sAdjusted;
-    const hAdjusted = sAdjusted;
-    const offsetXAdjusted = offsetX + padding;
-    const offsetYAdjusted = offsetY + padding;
+  const padding = 2;
+  const sAdjusted = s - padding * 2;
+  const wAdjusted = sAdjusted;
+  const hAdjusted = sAdjusted;
+  const offsetXAdjusted = offsetX + padding;
+  const offsetYAdjusted = offsetY + padding;
 
-    const cxL = offsetXAdjusted + 0.25 * wAdjusted;
-    const cxR = offsetXAdjusted + 0.75 * wAdjusted;
-    const cy = offsetYAdjusted + 0.28 * hAdjusted;
-    const r = 0.25 * wAdjusted;
-    const tipX = offsetXAdjusted + 0.5 * wAdjusted;
-    const tipY = offsetYAdjusted + 0.98 * hAdjusted;
+  const cxL = offsetXAdjusted + 0.25 * wAdjusted;
+  const cxR = offsetXAdjusted + 0.75 * wAdjusted;
+  const cy = offsetYAdjusted + 0.28 * hAdjusted;
+  const r = 0.25 * wAdjusted;
+  const tipX = offsetXAdjusted + 0.5 * wAdjusted;
+  const tipY = offsetYAdjusted + 0.98 * hAdjusted;
 
   ctx.beginPath();
   ctx.arc(cxL, cy, r, Math.PI - 0.6, -0.15, false);
@@ -51,6 +54,6 @@ export default function drawHeartIcon(canvas, { color = '#fff', filled = true } 
   if (filled) {
     ctx.fill();
   } else {
-      ctx.stroke();
+    ctx.stroke();
   }
 }

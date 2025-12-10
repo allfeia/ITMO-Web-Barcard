@@ -6,6 +6,7 @@ vi.mock("../models.js", () => {
   return {
     User: { findOne: vi.fn(), findByPk: vi.fn(), create: vi.fn() },
     Bar: { findByPk: vi.fn(), findOne: vi.fn() },
+    UserFavourite: { findAll: vi.fn() },
   };
 });
 
@@ -249,15 +250,21 @@ describe("auth endpoints", () => {
         bar_id: 2,
         password: "p",
       });
+      UserFavourite.findAll.mockResolvedValue([
+        { cocktail_id: 1 },
+        { cocktail_id: 3 },
+      ]);
 
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/barman/auth")
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
+
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.mode).toBe("login");
       expect(res.body.user).toMatchObject({ id: 10, bar_id: 2 });
+      expect(res.body.saved_cocktails_id).toEqual([1, 3]);
       expect(typeof res.body.token).toBe("string");
     });
   });

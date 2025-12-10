@@ -23,8 +23,8 @@ function StartPage() {
         const isBarmanParam = searchParams.get("isBarman");
 
         if (barId && isBarmanParam !== null) {
-            sessionStorage.setItem("barId", barId);
-            sessionStorage.setItem("isBarman", isBarmanParam);
+            sessionStorage.setItem("barId", String(barId));
+            sessionStorage.setItem("isBarman", String(isBarmanParam));
             setIsBarman(isBarmanParam === "true");
         }
     }, [searchParams]);

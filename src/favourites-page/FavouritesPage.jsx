@@ -11,7 +11,7 @@ function FavouritesPage() {
     const goTo = useNavigate();
     const [savedCocktails, setSavedCocktails] = useState([]);
 
-    const { barId, barName, barSite, savedCocktailsId } = useAuth();
+    const { barId, barName, barSite, savedCocktailsId, token} = useAuth();
 
     useEffect(() => {
         if (!barId || !savedCocktailsId) return;
@@ -19,10 +19,10 @@ function FavouritesPage() {
         fetch("/api/favourites", {
             method: "POST",
             headers: {
+                Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                barId: barId,
                 savedCocktailsId: savedCocktailsId,
             }),
         })

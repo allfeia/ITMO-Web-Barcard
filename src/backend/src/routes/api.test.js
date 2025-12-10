@@ -13,7 +13,7 @@ vi.mock("../models.js", () => {
     User: { findByPk: vi.fn(), findAll: vi.fn() },
     Point: { findOne: vi.fn() },
     Cocktail: { findAll: vi.fn(), findByPk: vi.fn() },
-    Ingredient: vi.fn(), // как модель, но напрямую в тестах не трогаем
+    Ingredient: vi.fn(),
     CocktailIngredient: vi.fn(),
     CocktailRecipeStep: vi.fn(),
     UserFavourite: {
@@ -29,7 +29,7 @@ vi.mock("bcryptjs", () => ({
 }));
 
 import router from "./api.js";
-import { Bar, User, Point } from "../models.js";
+import { Bar, User, Point,  Cocktail, UserFavourite} from "../models.js";
 import jwt from "jsonwebtoken";
 
 function appWithRouter() {

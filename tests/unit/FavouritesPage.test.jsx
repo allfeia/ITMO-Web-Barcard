@@ -79,7 +79,6 @@ describe("FavouritesPage", () => {
             Authorization: expect.any(String),
         }),
                 body: JSON.stringify({
-                    barId: "123",
                     savedCocktailsId: [1,3],
                 }),
             })

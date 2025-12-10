@@ -18,7 +18,7 @@ vi.mock("bcryptjs", () => ({
 }));
 
 import router from "./auth.js";
-import { User, Bar } from "../models.js";
+import { User, Bar, UserFavourite } from "../models.js";
 import jwt from "jsonwebtoken";
 
 function appWithRouter() {

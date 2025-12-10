@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import StartPage from "./StartPage.jsx";
+import StartPage from "../../src/start-page/StartPage.jsx";
 import { vi } from "vitest";
 
 const mockNavigate = vi.fn();

@@ -21,15 +21,12 @@ export default function drawHeartIcon(canvas, { color = '#fff', filled = true } 
   const s = Math.min(cssWidth, cssHeight);
   const offsetX = (cssWidth - s) / 2;
   const offsetY = (cssHeight - s) / 2;
-  const w = s;
-  const h = s;
 
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
-  const strokeW = Math.max(1, s * 0.09); 
-  ctx.lineWidth = strokeW;
+  ctx.lineWidth = Math.max(1, s * 0.09);
 
     const padding = 2;
     const sAdjusted = s - padding * 2;

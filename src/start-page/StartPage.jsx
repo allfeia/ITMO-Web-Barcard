@@ -15,16 +15,17 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 function StartPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-
     const [isBarman, setIsBarman] = useState(null);
 
     useEffect(() => {
         const barId = searchParams.get("barId");
         const isBarmanParam = searchParams.get("isBarman");
 
-        if (barId && isBarmanParam !== null) {
-            sessionStorage.setItem("barId", String(barId));
-            sessionStorage.setItem("isBarman", String(isBarmanParam));
+        if (barId !== null) {
+            sessionStorage.setItem("barId", barId);
+        }
+        if (isBarmanParam !== null) {
+            sessionStorage.setItem("isBarman", isBarmanParam);
             setIsBarman(isBarmanParam === "true");
         }
     }, [searchParams]);

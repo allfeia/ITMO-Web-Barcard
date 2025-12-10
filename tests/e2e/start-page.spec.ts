@@ -13,26 +13,20 @@ test.describe('StartPage — E2E тесты', () => {
     });
 
     test('анимация стаканов работает (хотя бы один трек движется)', async ({ page }) => {
-        const firstTrack = page.locator('.track-inner').first();
-        await expect(firstTrack).toHaveCSS('animation-name', /slide/);
+        await expect(page.locator('.track-inner').first()).toHaveCSS('animation-name', /slide/);
 
         const canvas = page.locator('canvas.glass-icon').first();
         await expect(canvas).toBeVisible();
 
-        const hasColor = await canvas.evaluate((canvas) => {
-            const ctx = (canvas as HTMLCanvasElement).getContext('2d');
-            if (!ctx || canvas.clientWidth === 0 || canvas.clientHeight === 0) return false;
-
-            const { width, height } = canvas as HTMLCanvasElement;
-            const imageData = ctx.getImageData(0, 0, width, height).data;
-
-            for (let i = 0; i < imageData.length; i += 4) {
-                const a = imageData[i + 3];
-                if (a === 0) continue;
-                const r = imageData[i];
-                const g = imageData[i + 1];
-                const b = imageData[i + 2];
-                if (!(r === 255 && g === 255 && b === 255)) return true;
+        const hasColor = await canvas.evaluate((el) => {
+            const canvas = el as HTMLCanvasElement;
+            const ctx = canvas.getContext('2d');
+            if (!ctx || canvas.width === 0 || canvas.height === 0) return false;
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i + 3] !== 0 && (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255)) {
+                    return true;
+                }
             }
             return false;
         });
@@ -60,14 +54,20 @@ test.describe('StartPage — E2E тесты', () => {
     test('сохраняет barId и isBarman в sessionStorage', async ({ page }) => {
         await page.goto('/?barId=789&isBarman=true');
 
-        expect(await page.evaluate(() => sessionStorage.getItem('barId'))).toBe('789');
-        expect(await page.evaluate(() => sessionStorage.getItem('isBarman'))).toBe('true');
+        await expect.poll(async () => {
+            const barId = await page.evaluate(() => window.sessionStorage.getItem('barId'));
+            const isBarman = await page.evaluate(() => window.sessionStorage.getItem('isBarman'));
+            return { barId, isBarman };
+        }, {
+            timeout: 15000,
+            intervals: [100, 200, 500, 1000]
+        }).toEqual({ barId: '789', isBarman: 'true' });
 
         await page.locator('.start-button').click();
         await expect(page).toHaveURL(/\/signInPage$/);
 
-        expect(await page.evaluate(() => sessionStorage.getItem('barId'))).toBe('789');
-        expect(await page.evaluate(() => sessionStorage.getItem('isBarman'))).toBe('true');
+        expect(await page.evaluate(() => window.sessionStorage.getItem('barId'))).toBe('789');
+        expect(await page.evaluate(() => window.sessionStorage.getItem('isBarman'))).toBe('true');
     });
 
     test('работает на разных размерах экрана', async ({ page }) => {

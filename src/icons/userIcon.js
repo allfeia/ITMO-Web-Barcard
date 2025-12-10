@@ -1,7 +1,10 @@
-export default function drawUserIcon(canvas, { color = '#fff', filled = true} = {}) {
+export default function drawUserIcon(
+  canvas,
+  { color = "#fff", filled = true } = {},
+) {
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const devicePixelRatio = window.devicePixelRatio || 1;
@@ -33,14 +36,14 @@ export default function drawUserIcon(canvas, { color = '#fff', filled = true} = 
   if (filled) {
     ctx.fillStyle = color;
     ctx.fill();
-  } 
+  }
 
   // Плечи
-  const bodyWidth = s * 0.70;    
-  const bodyHeight = s * 0.23;   
+  const bodyWidth = s * 0.7;
+  const bodyHeight = s * 0.23;
   const bodyX = offsetX + (s - bodyWidth) / 2;
-  const bodyY = offsetY + s * 0.63; 
-  const r = Math.min(s * 0.2, bodyWidth / 2, bodyHeight); 
+  const bodyY = offsetY + s * 0.63;
+  const r = Math.min(s * 0.2, bodyWidth / 2, bodyHeight);
 
   ctx.beginPath();
   ctx.moveTo(bodyX + r, bodyY);
@@ -55,5 +58,5 @@ export default function drawUserIcon(canvas, { color = '#fff', filled = true} = 
   if (filled) {
     ctx.fillStyle = color;
     ctx.fill();
-  } 
+  }
 }

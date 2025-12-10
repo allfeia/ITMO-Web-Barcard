@@ -1,15 +1,15 @@
 export default function drawStarIcon(
   canvas,
   {
-    color = '#fff',
+    color = "#fff",
     filled = true,
-    cornerRadiusOuter = 0.35, 
-    cornerRadiusInner = 0.05, 
-  } = {}
+    cornerRadiusOuter = 0.35,
+    cornerRadiusInner = 0.05,
+  } = {},
 ) {
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const devicePixelRatio = window.devicePixelRatio || 1;
@@ -49,7 +49,7 @@ export default function drawStarIcon(
   }
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-  const maxCornerFactorOuter = 0.45; 
+  const maxCornerFactorOuter = 0.45;
   const maxCornerFactorInner = 0.45;
 
   const crOuter = clamp(cornerRadiusOuter, 0, maxCornerFactorOuter) * rOuter;
@@ -87,12 +87,11 @@ export default function drawStarIcon(
     }
 
     ctx.quadraticCurveTo(curr.x, curr.y, segB.from.x, segB.from.y);
-
   }
   ctx.closePath();
 
   if (filled) {
     ctx.fillStyle = color;
     ctx.fill();
-  } 
+  }
 }

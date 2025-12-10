@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { User, Bar } from "../models.js";
+import { User, Bar, UserFavourite } from "../models.js";
 import { signJwt, authRequired, requireRole } from "../middleware/auth.js";
 import { Op } from "sequelize";
 
@@ -99,6 +99,13 @@ router.post("/barman/auth", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(403).json({ error: "Неверный пароль" });
 
+    const favourites = await UserFavourite.findAll({
+      where: { user_id: user.id },
+      attributes: ["cocktail_id"],
+    });
+
+    const savedCocktailsId = favourites.map((f) => f.cocktail_id);
+
     const token = signJwt({
       id: user.id,
       login: user.login,
@@ -120,6 +127,9 @@ router.post("/barman/auth", async (req, res) => {
         roles: Array.from(roles),
         bar_id: user.bar_id,
       },
+      barName: bar.name,
+      barSite: bar["web-site"] ?? null,
+      saved_cocktails_id: savedCocktailsId,
     });
   } catch (e) {
     if (e.errors || e.issues)

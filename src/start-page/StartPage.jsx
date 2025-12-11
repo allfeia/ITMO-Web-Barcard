@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import './StartPage.css';
 
 import { drawBlueGlass } from '../glasses/BlueGlass.js';
@@ -14,16 +14,13 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 
 function StartPage() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [isBarman, setIsBarman] = useState(null);
 
+    const params = new URLSearchParams(window.location.search);
+    const barId = params.get("barId");
+    const isBarmanParam = params.get("isBarman");
+
     useEffect(() => {
-        const search = window.location.search || location.search;
-        const params = new URLSearchParams(search);
-
-        const barId = params.get("barId");
-        const isBarmanParam = params.get("isBarman");
-
         if (barId !== null) {
             sessionStorage.setItem("barId", barId);
         }

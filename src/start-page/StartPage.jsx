@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import './StartPage.css';
 import { drawBlueGlass } from '../glasses/BlueGlass.js';
 import { drawPinkGlass } from '../glasses/PinkGlass.js';
@@ -12,29 +12,52 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 
 function StartPage() {
     const navigate = useNavigate();
-    const location = useLocation();
-    const [isBarman, setIsBarman] = useState(null);
+    const [isBarman, setIsBarman] = useState<boolean | null>(null);
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
+        sessionStorage.removeItem("barId");
+        sessionStorage.removeItem("isBarman");
+        setIsBarman(null);
+
+        const params = new URLSearchParams(window.location.search);
         const barId = params.get("barId");
         const isBarmanParam = params.get("isBarman");
 
         if (barId !== null) {
             sessionStorage.setItem("barId", barId);
-        } else {
-            sessionStorage.removeItem("barId");
         }
 
         if (isBarmanParam !== null) {
             const value = isBarmanParam === "true" ? "true" : "false";
             sessionStorage.setItem("isBarman", value);
             setIsBarman(isBarmanParam === "true");
-        } else {
+        }
+    }, []);
+
+    useEffect(() => {
+        const handleLocationChange = () => {
+            sessionStorage.removeItem("barId");
             sessionStorage.removeItem("isBarman");
             setIsBarman(null);
-        }
-    }, [location.search]);
+
+            const params = new URLSearchParams(window.location.search);
+            const barId = params.get("barId");
+            const isBarmanParam = params.get("isBarman");
+
+            if (barId !== null) {
+                sessionStorage.setItem("barId", barId);
+            }
+
+            if (isBarmanParam !== null) {
+                const value = isBarmanParam === "true" ? "true" : "false";
+                sessionStorage.setItem("isBarman", value);
+                setIsBarman(isBarmanParam === "true");
+            }
+        };
+
+        window.addEventListener("popstate", handleLocationChange);
+        return () => window.removeEventListener("popstate", handleLocationChange);
+    }, []);
 
     const whoIsEntered = () => {
         if (isBarman === true) {
@@ -60,8 +83,8 @@ function StartPage() {
                     {tracks.map((track, trackIndex) => (
                         <div
                             key={trackIndex}
-                            className={`track ${track.reverse ? 'reverse' : 'forward'}`}
-                            style={{ '--speed': `${track.speed}s` } as React.CSSProperties}
+                            className={`track ${track.reverse ? "reverse" : "forward"}`}
+                            style={{ "--speed": `${track.speed}s` }}
                         >
                             <div className="track-inner">
                                 {[...Array(32)].map((_, i) => {

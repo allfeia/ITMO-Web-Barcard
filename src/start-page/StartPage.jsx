@@ -12,7 +12,7 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 
 function StartPage() {
     const navigate = useNavigate();
-    const [isBarman, setIsBarman] = useState<null | boolean>(null);
+    const [isBarman, setIsBarman] = useState(null);
 
     useEffect(() => {
         sessionStorage.removeItem("barId");
@@ -28,8 +28,8 @@ function StartPage() {
         }
 
         if (isBarmanParam !== null) {
-            const normalized = isBarmanParam === "true" ? "true" : "false";
-            sessionStorage.setItem("isBarman", normalized);
+            const value = isBarmanParam === "true" ? "true" : "false";
+            sessionStorage.setItem("isBarman", value);
             setIsBarman(isBarmanParam === "true");
         }
     }, []);
@@ -49,8 +49,8 @@ function StartPage() {
             }
 
             if (isBarmanParam !== null) {
-                const normalized = isBarmanParam === "true" ? "true" : "false";
-                sessionStorage.setItem("isBarman", normalized);
+                const value = isBarmanParam === "true" ? "true" : "false";
+                sessionStorage.setItem("isBarman", value);
                 setIsBarman(isBarmanParam === "true");
             }
         };

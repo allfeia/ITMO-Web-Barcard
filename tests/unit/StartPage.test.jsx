@@ -51,29 +51,32 @@ beforeAll(() => {
 beforeEach(() => {
     sessionStorage.clear();
     mockNavigate.mockReset();
-    vi.resetModules();
+
+    delete window.location;
+    window.location = new URL("http://localhost/");
 });
 
 describe("StartPage", () => {
     test("чтение URL параметров и запись в sessionStorage", async () => {
+        window.location = new URL("http://localhost/?barId=BAR123&isBarman=true");
+
         render(
-            <MemoryRouter initialEntries={["/?barId=BAR123&isBarman=true"]}>
+            <MemoryRouter>
                 <StartPage />
             </MemoryRouter>
         );
 
-        await waitFor(
-            () => {
-                expect(sessionStorage.getItem("barId")).toBe("BAR123");
-                expect(sessionStorage.getItem("isBarman")).toBe("true");
-            },
-            { timeout: 3000 }
-        );
+        await waitFor(() => {
+            expect(sessionStorage.getItem("barId")).toBe("BAR123");
+            expect(sessionStorage.getItem("isBarman")).toBe("true");
+        });
     });
 
     test("клик по кнопке → переход на /signInPage, если isBarman=true", async () => {
+        window.location = new URL("http://localhost/?barId=123&isBarman=true");
+
         render(
-            <MemoryRouter initialEntries={["/?barId=123&isBarman=true"]}>
+            <MemoryRouter>
                 <StartPage />
             </MemoryRouter>
         );
@@ -85,8 +88,10 @@ describe("StartPage", () => {
     });
 
     test("клик по кнопке → переход на /menu, если isBarman=false", async () => {
+        window.location = new URL("http://localhost/?barId=123&isBarman=false");
+
         render(
-            <MemoryRouter initialEntries={["/?barId=123&isBarman=false"]}>
+            <MemoryRouter>
                 <StartPage />
             </MemoryRouter>
         );
@@ -98,8 +103,10 @@ describe("StartPage", () => {
     });
 
     test("если параметров нет → ничего не пишем в sessionStorage и не ломаемся", () => {
+        window.location = new URL("http://localhost/");
+
         render(
-            <MemoryRouter initialEntries={["/"]}>
+            <MemoryRouter>
                 <StartPage />
             </MemoryRouter>
         );

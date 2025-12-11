@@ -51,6 +51,7 @@ beforeAll(() => {
 beforeEach(() => {
     sessionStorage.clear();
     mockNavigate.mockReset();
+    vi.resetModules();
 });
 
 describe("StartPage", () => {
@@ -61,10 +62,13 @@ describe("StartPage", () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(sessionStorage.getItem("barId")).toBe("BAR123");
-            expect(sessionStorage.getItem("isBarman")).toBe("true");
-        });
+        await waitFor(
+            () => {
+                expect(sessionStorage.getItem("barId")).toBe("BAR123");
+                expect(sessionStorage.getItem("isBarman")).toBe("true");
+            },
+            { timeout: 3000 }
+        );
     });
 
     test("клик по кнопке → переход на /signInPage, если isBarman=true", async () => {

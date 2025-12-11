@@ -18,7 +18,9 @@ function StartPage() {
     const [isBarman, setIsBarman] = useState(null);
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
+        const search = window.location.search || location.search;
+        const params = new URLSearchParams(search);
+
         const barId = params.get("barId");
         const isBarmanParam = params.get("isBarman");
 
@@ -29,7 +31,7 @@ function StartPage() {
             sessionStorage.setItem("isBarman", isBarmanParam);
             setIsBarman(isBarmanParam === "true");
         }
-    }, [location.search]);
+    }, []);
 
     const whoIsEntered = () => {
         if (isBarman === true) {

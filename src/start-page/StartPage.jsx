@@ -12,7 +12,7 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 
 function StartPage() {
     const navigate = useNavigate();
-    const [isBarman, setIsBarman] = useState(true | false | null)(null);
+    const [isBarman, setIsBarman] = useState<boolean | null>(null);
 
     const syncParams = () => {
         sessionStorage.removeItem("barId");
@@ -72,7 +72,7 @@ function StartPage() {
                             style={{ "--speed": `${track.speed}s` }}
                         >
                             <div className="track-inner">
-                                {[...Array(32)].map((_, i) => {
+                                {Array.from({ length: 32 }, (_, i) => {
                                     const drawFn = glassDrawers[i % glassDrawers.length];
                                     return <GlassCanvas key={i} draw={drawFn} />;
                                 })}
@@ -81,7 +81,12 @@ function StartPage() {
                     ))}
                 </div>
             </div>
-            <Button variant="contained" disableElevation className="start-button" onClick={whoIsEntered}>
+            <Button
+                variant="contained"
+                disableElevation
+                className="start-button"
+                onClick={whoIsEntered}
+            >
                 Начать
             </Button>
         </div>

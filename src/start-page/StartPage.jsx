@@ -12,9 +12,9 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 
 function StartPage() {
     const navigate = useNavigate();
-    const [isBarman, setIsBarman] = useState<boolean | null>(null);
+    const [isBarman, setIsBarman] = useState(true | false | null)(null);
 
-    useEffect(() => {
+    const syncParams = () => {
         sessionStorage.removeItem("barId");
         sessionStorage.removeItem("isBarman");
         setIsBarman(null);
@@ -32,31 +32,16 @@ function StartPage() {
             sessionStorage.setItem("isBarman", value);
             setIsBarman(isBarmanParam === "true");
         }
+    };
+
+    useEffect(() => {
+        syncParams();
     }, []);
 
     useEffect(() => {
-        const handleLocationChange = () => {
-            sessionStorage.removeItem("barId");
-            sessionStorage.removeItem("isBarman");
-            setIsBarman(null);
-
-            const params = new URLSearchParams(window.location.search);
-            const barId = params.get("barId");
-            const isBarmanParam = params.get("isBarman");
-
-            if (barId !== null) {
-                sessionStorage.setItem("barId", barId);
-            }
-
-            if (isBarmanParam !== null) {
-                const value = isBarmanParam === "true" ? "true" : "false";
-                sessionStorage.setItem("isBarman", value);
-                setIsBarman(isBarmanParam === "true");
-            }
-        };
-
-        window.addEventListener("popstate", handleLocationChange);
-        return () => window.removeEventListener("popstate", handleLocationChange);
+        const handler = () => syncParams();
+        window.addEventListener("popstate", handler);
+        return () => window.removeEventListener("popstate", handler);
     }, []);
 
     const whoIsEntered = () => {

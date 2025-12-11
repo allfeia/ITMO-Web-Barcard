@@ -1,44 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import "./StartPage.css";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import './StartPage.css';
 
-import { drawBlueGlass } from "../glasses/BlueGlass.js";
-import { drawPinkGlass } from "../glasses/PinkGlass.js";
-import { drawRedGlass } from "../glasses/RedGlass.js";
-import { drawYellowGlass } from "../glasses/YellowGlass.js";
+import { drawBlueGlass } from '../glasses/BlueGlass.js';
+import { drawPinkGlass } from '../glasses/PinkGlass.js';
+import { drawRedGlass } from '../glasses/RedGlass.js';
+import { drawYellowGlass } from '../glasses/YellowGlass.js';
 
-import GlassCanvas from "./GlassCanvas";
-import { Button } from "@mui/material";
+import GlassCanvas from './GlassCanvas';
+import { Button } from '@mui/material';
 
 const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlass];
 
 function StartPage() {
     const navigate = useNavigate();
-    const location = useLocation();
-
-    const search =
-        location && location.search && location.search !== ""
-            ? location.search
-            : window.location.search;
-
-    const params = new URLSearchParams(search);
-
-    const barId = params.get("barId");
-    const isBarmanParam = params.get("isBarman");
-
     const [isBarman, setIsBarman] = useState(null);
 
     useEffect(() => {
-        if (barId !== null) sessionStorage.setItem("barId", barId);
+        const params = new URLSearchParams(window.location.search);
+        const barId = params.get("barId");
+        const isBarmanParam = params.get("isBarman");
+
+        console.log("URL params:", { barId, isBarmanParam });
+
+        if (barId !== null) {
+            sessionStorage.setItem("barId", barId);
+            console.log("Saved barId:", barId);
+        }
         if (isBarmanParam !== null) {
             sessionStorage.setItem("isBarman", isBarmanParam);
             setIsBarman(isBarmanParam === "true");
+            console.log("Saved isBarman:", isBarmanParam);
         }
-    }, [barId, isBarmanParam]);
+    }, []);
 
     const whoIsEntered = () => {
-        if (isBarman === true) navigate("/signInPage");
-        else if (isBarman === false) navigate("/menu");
+        if (isBarman === true) {
+            navigate("/signInPage");
+        } else if (isBarman === false) {
+            navigate("/menu");
+        }
     };
 
     const tracks = [
@@ -58,8 +59,8 @@ function StartPage() {
                     {tracks.map((track, trackIndex) => (
                         <div
                             key={trackIndex}
-                            className={`track ${track.reverse ? "reverse" : "forward"}`}
-                            style={{ "--speed": `${track.speed}s` }}
+                            className={`track ${track.reverse ? 'reverse' : 'forward'}`}
+                            style={{ '--speed': `${track.speed}s` }}
                         >
                             <div className="track-inner">
                                 {[...Array(32)].map((_, i) => {

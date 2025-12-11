@@ -12,9 +12,9 @@ const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlas
 
 function StartPage() {
     const navigate = useNavigate();
-    const [isBarman, setIsBarman] = useState<boolean | null>(null);
+    const [isBarman, setIsBarman] = useState<null | boolean>(null);
 
-    const syncParams = () => {
+    useEffect(() => {
         sessionStorage.removeItem("barId");
         sessionStorage.removeItem("isBarman");
         setIsBarman(null);
@@ -28,23 +28,38 @@ function StartPage() {
         }
 
         if (isBarmanParam !== null) {
-            const value = isBarmanParam === "true" ? "true" : "false";
-            sessionStorage.setItem("isBarman", value);
+            const normalized = isBarmanParam === "true" ? "true" : "false";
+            sessionStorage.setItem("isBarman", normalized);
             setIsBarman(isBarmanParam === "true");
         }
-    };
-
-    useEffect(() => {
-        syncParams();
     }, []);
 
     useEffect(() => {
-        const handler = () => syncParams();
-        window.addEventListener("popstate", handler);
-        return () => window.removeEventListener("popstate", handler);
+        const handlePopstate = () => {
+            sessionStorage.removeItem("barId");
+            sessionStorage.removeItem("isBarman");
+            setIsBarman(null);
+
+            const params = new URLSearchParams(window.location.search);
+            const barId = params.get("barId");
+            const isBarmanParam = params.get("isBarman");
+
+            if (barId !== null) {
+                sessionStorage.setItem("barId", barId);
+            }
+
+            if (isBarmanParam !== null) {
+                const normalized = isBarmanParam === "true" ? "true" : "false";
+                sessionStorage.setItem("isBarman", normalized);
+                setIsBarman(isBarmanParam === "true");
+            }
+        };
+
+        window.addEventListener("popstate", handlePopstate);
+        return () => window.removeEventListener("popstate", handlePopstate);
     }, []);
 
-    const whoIsEntered = () => {
+    const handleStartClick = () => {
         if (isBarman === true) {
             navigate("/signInPage");
         } else if (isBarman === false) {
@@ -85,7 +100,7 @@ function StartPage() {
                 variant="contained"
                 disableElevation
                 className="start-button"
-                onClick={whoIsEntered}
+                onClick={handleStartClick}
             >
                 Начать
             </Button>

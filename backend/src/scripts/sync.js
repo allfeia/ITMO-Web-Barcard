@@ -5,7 +5,7 @@ export async function run() {
   try {
     await sequelize.sync({ alter: true });
     console.log("DB synced");
-    process.exit(0);
+    // process.exit(0);
   } catch (e) {
     console.error(e);
     process.exit(1);
@@ -13,7 +13,7 @@ export async function run() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  run();
+  run().catch(() => process.exit(1));
 }
 
 export default run;

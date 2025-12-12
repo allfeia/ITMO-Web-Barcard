@@ -1,15 +1,16 @@
+import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import ProtectedRoute from "../src/ProtectedRoute.jsx"
+import ProtectedRoute from "./ProtectedRoute.jsx"
 import { createRoot } from 'react-dom/client'
 import StartPage from './StartPage.jsx'
 import SignInPage from './sign-in-page/SignInPage.jsx'
 import MenuPage from "./menu-page/MenuPage.jsx"
-import AdminPage from "../src/admin/AdminPage.jsx"
-import AdminRegisterBarmanForm from "../src/admin/bar-admin/AdminRegisterBarmanForm.jsx"
-import AdminRegisterBarForm from '../src/admin/super-admin/AdminRegisterBarForm.jsx'
-import SuperGrantBarAdminPage from "../src/admin/super-admin/SuperGrantBarAdminPage.jsx"
-import SuperAssignUserPage from "../src/admin/super-admin/SuperAssignUserPage.jsx"
-import SuperLoginPage from "../src/admin/super-admin/SuperLoginPage.jsx"
+import AdminPage from "./admin/AdminPage.jsx"
+import AdminRegisterBarmanForm from "./admin/bar-admin/AdminRegisterBarmanForm.jsx"
+import AdminRegisterBarForm from './admin/super-admin/AdminRegisterBarForm.jsx'
+import SuperGrantBarAdminPage from "./admin/super-admin/SuperGrantBarAdminPage.jsx"
+import SuperAssignUserPage from "./admin/super-admin/SuperAssignUserPage.jsx"
+import SuperLoginPage from "./admin/super-admin/SuperLoginPage.jsx"
 import "./commonStyles.css";
 
 import { AuthProvider } from './authContext/AuthContext.jsx'
@@ -19,7 +20,7 @@ import FavouritesPage from "./favourites-page/FavouritesPage.jsx";
 
 
 if (import.meta.env.MODE === 'development') {
-    const { worker } = await import('./mocks/browser');
+    const { worker } = await import('./mocks/browser.js');
     await worker.start({
         onUnhandledRequest: "warn",
     });

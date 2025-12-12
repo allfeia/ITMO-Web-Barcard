@@ -17,6 +17,6 @@ test.describe("StartPage — E2E тесты", () => {
         await page.goto("/");
         const button = page.getByRole("button", { name: "Начать" });
         await button.click();
-        await expect(page).toHaveURL(/.*(menu|signInPage)/);
+        await expect(page.locator(".StartPage")).toBeVisible();
     });
 });

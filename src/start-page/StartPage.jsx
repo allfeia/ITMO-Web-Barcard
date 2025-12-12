@@ -38,7 +38,7 @@ function StartPage() {
     const handleStartClick = () => {
         if (isBarman === true) {
             navigate("/signInPage");
-        } else if (isBarman === false) {
+        } else {
             navigate("/menu");
         }
     };

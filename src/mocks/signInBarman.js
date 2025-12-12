@@ -49,7 +49,7 @@ export const signInBarman = [
     }
 
     if (bar.barKey !== barKey) {
-      return HttpResponse.json({ error: "wrong_bar_key" }, { status: 403 });
+      return HttpResponse.json({ error: "Неверный барный ключ" }, { status: 403 });
     }
 
     const existingUser = barsDatabase.barmen.find(
@@ -58,7 +58,7 @@ export const signInBarman = [
 
     if (existingUser) {
       if (existingUser.barPassword !== barPassword) {
-        return HttpResponse.json({ error: "wrong_password" }, { status: 403 });
+        return HttpResponse.json({ error: "Неверный пароль" }, { status: 403 });
       }
 
       return HttpResponse.json({

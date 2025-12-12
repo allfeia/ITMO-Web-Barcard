@@ -15,54 +15,30 @@ function StartPage() {
     const [isBarman, setIsBarman] = useState(null);
 
     useEffect(() => {
-        sessionStorage.removeItem("barId");
-        sessionStorage.removeItem("isBarman");
-        setIsBarman(null);
-
         const params = new URLSearchParams(window.location.search);
         const barId = params.get("barId");
         const isBarmanParam = params.get("isBarman");
 
         if (barId !== null) {
             sessionStorage.setItem("barId", barId);
+        } else {
+            sessionStorage.removeItem("barId");
         }
 
         if (isBarmanParam !== null) {
-            const value = isBarmanParam === "true" ? "true" : "false";
-            sessionStorage.setItem("isBarman", value);
-            setIsBarman(isBarmanParam === "true");
-        }
-    }, []);
-
-    useEffect(() => {
-        const handlePopstate = () => {
-            sessionStorage.removeItem("barId");
+            const value = isBarmanParam === "true";
+            sessionStorage.setItem("isBarman", value ? "true" : "false");
+            setIsBarman(value);
+        } else {
             sessionStorage.removeItem("isBarman");
             setIsBarman(null);
-
-            const params = new URLSearchParams(window.location.search);
-            const barId = params.get("barId");
-            const isBarmanParam = params.get("isBarman");
-
-            if (barId !== null) {
-                sessionStorage.setItem("barId", barId);
-            }
-
-            if (isBarmanParam !== null) {
-                const value = isBarmanParam === "true" ? "true" : "false";
-                sessionStorage.setItem("isBarman", value);
-                setIsBarman(isBarmanParam === "true");
-            }
-        };
-
-        window.addEventListener("popstate", handlePopstate);
-        return () => window.removeEventListener("popstate", handlePopstate);
+        }
     }, []);
 
     const handleStartClick = () => {
         if (isBarman === true) {
             navigate("/signInPage");
-        } else if (isBarman === false) {
+        } else {
             navigate("/menu");
         }
     };

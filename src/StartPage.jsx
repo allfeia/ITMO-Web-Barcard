@@ -36,7 +36,7 @@ function StartPage() {
     }
     return (
         <>
-            <h1>Начать</h1>
+            <h1>Start</h1>
             <button onClick={whoIsEntered}>Начать</button>
         </>
     )

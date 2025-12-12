@@ -100,7 +100,7 @@ describe('BarmanAuthForm', () => {
             Promise.resolve({
                 ok: false,
                 status: 403,
-                json: () => Promise.resolve({ error: "wrong_password" }),
+                json: () => Promise.resolve({ error: "Неверный пароль" }),
             })
         );
 
@@ -128,7 +128,7 @@ describe('BarmanAuthForm', () => {
             Promise.resolve({
                 ok: false,
                 status: 403,
-                json: () => Promise.resolve({ error: "wrong_bar_key" }),
+                json: () => Promise.resolve({ error: "Неверный барный ключ" }),
             })
         );
 

@@ -7,41 +7,40 @@ import { drawRedGlass } from '../glasses/RedGlass.js';
 import { drawYellowGlass } from '../glasses/YellowGlass.js';
 import GlassCanvas from './GlassCanvas';
 import { Button } from '@mui/material';
+import {useAuth} from "../authContext/useAuth.js";
 
 const glassDrawers = [drawBlueGlass, drawPinkGlass, drawRedGlass, drawYellowGlass];
 
 function StartPage() {
-    const navigate = useNavigate();
-    const [isBarman, setIsBarman] = useState(null);
+    const goTo = useNavigate();
+    const { setBarId, setIsBarman } = useAuth();
+    const [isBarmanChecker, setIsBarmanChecker] = useState(null);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const barId = params.get("barId");
         const isBarmanParam = params.get("isBarman");
 
-        if (barId !== null) {
-            sessionStorage.setItem("barId", barId);
-        } else {
-            sessionStorage.removeItem("barId");
-        }
+        if (barId && isBarmanParam) {
+            setBarId(barId);
+            setIsBarman(isBarmanParam === "true");
+            setIsBarmanChecker(isBarmanParam === "true");
 
-        if (isBarmanParam !== null) {
-            const value = isBarmanParam === "true";
-            sessionStorage.setItem("isBarman", value ? "true" : "false");
-            setIsBarman(value);
-        } else {
-            sessionStorage.removeItem("isBarman");
-            setIsBarman(null);
+            sessionStorage.setItem("barId", barId);
+            sessionStorage.setItem("isBarman", isBarmanParam);
+
         }
     }, []);
 
-    const handleStartClick = () => {
-        if (isBarman === true) {
-            navigate("/signInPage");
-        } else if (isBarman === false) {
-            navigate("/menu");
+    const whoIsEntered = () => {
+        if (isBarmanChecker) {
+            goTo("/signInPage");
+        } else if (!isBarmanChecker) {
+            goTo("/menu");
+        } else {
+            console.log("неизвестный пользователь");
         }
-    };
+    }
 
     const tracks = [
         { speed: 18, reverse: false },
@@ -76,7 +75,7 @@ function StartPage() {
                 variant="contained"
                 disableElevation
                 className="start-button"
-                onClick={handleStartClick}
+                onClick={whoIsEntered}
             >
                 Начать
             </Button>

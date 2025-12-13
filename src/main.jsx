@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import ProtectedRoute from "../src/ProtectedRoute.jsx"
 import { createRoot } from 'react-dom/client'
-import StartPage from './StartPage.jsx'
+import StartPage from './start-page/StartPage.jsx'
 import SignInPage from './sign-in-page/SignInPage.jsx'
 import MenuPage from "./menu-page/MenuPage.jsx"
 import AdminPage from "../src/admin/AdminPage.jsx"

@@ -58,7 +58,8 @@ describe('SuperGrantBarAdminPage', () => {
     // Сотрудники
     const staffSelect = await screen.findByLabelText('Сотрудник бара');
     fireEvent.mouseDown(staffSelect);
-    fireEvent.click(await screen.findByText('Иван'));
+    const staffOption = await screen.findByRole('option', { name: 'Иван' });
+    fireEvent.click(staffOption);
 
     // Действие grant по умолчанию, отправляем
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));

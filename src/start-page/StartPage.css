@@ -1,6 +1,5 @@
 .StartPage {
     text-align: center;
-    padding: 5vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -14,7 +13,7 @@
 }
 
 .title {
-    color: #000;
+    color: #333;
     margin: 0;
     z-index: 10;
     position: absolute;
@@ -110,14 +109,14 @@
     transform: translateX(-50%) !important;
     width: 334px;
     height: 80px;
-    background: #000000 !important;
+    background: #333 !important;
     color: #ffffff;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     font-size: clamp(36px, 5vw, 40px) !important;
     font-weight: 400 !important;
     text-transform: none !important;
     border-radius: 4px;
-    border: 2px solid #000000;
+    border: 2px solid #333;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
     z-index: 20;
@@ -132,11 +131,4 @@
 .start-button:active {
     transform: translate(-50%, 0);
     background: #000;
-}
-
-html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background: #fff;
 }

@@ -33,14 +33,14 @@ function StartPage() {
     }, []);
 
     const whoIsEntered = () => {
-        if (isBarmanChecker) {
+        if (isBarmanChecker === true) {
             goTo("/signInPage");
-        } else if (!isBarmanChecker) {
+        } else if (isBarmanChecker === false) {
             goTo("/menu");
         } else {
-            console.log("неизвестный пользователь");
-        }
+        console.log("неизвестный пользователь");
     }
+    };
 
     const tracks = [
         { speed: 18, reverse: false },

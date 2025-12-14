@@ -155,7 +155,7 @@ router.get("/cocktail", async (req, res) => {
 
     const cocktails = await Cocktail.findAll({
       where: { bar_id: barId },
-      attributes: ["id", "name", "draw_file"],
+      attributes: ["id", "name", "draw_file", "bar_id"],
       order: [["name", "ASC"]],
     });
     return res.json(cocktails);
@@ -280,7 +280,7 @@ router.post("/favourites", authRequired, async (req, res) => {
       where: {
         id: { [Op.in]: savedCocktailsId },
       },
-      attributes: ["id", "name", "description", "image", "bar_id"],
+      attributes: ["id", "name", "draw_file", "bar_id"],
       order: [["name", "ASC"]],
     });
 

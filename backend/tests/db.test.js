@@ -42,6 +42,7 @@ describe("db.js", () => {
     const [_url, opts] = SequelizeMock.mock.calls[0];
     expect(opts.dialectOptions).toEqual({
       ssl: { require: true, rejectUnauthorized: false },
+      keepAlive: true,
     });
     expect(sequelize.opts.dialectOptions.ssl.require).toBe(true);
   });

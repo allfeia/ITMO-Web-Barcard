@@ -155,7 +155,7 @@ router.get("/cocktail", async (req, res) => {
 
     const cocktails = await Cocktail.findAll({
       where: { bar_id: barId },
-      attributes: ["id", "name", "description", "image"],
+      attributes: ["id", "name", "draw_file"],
       order: [["name", "ASC"]],
     });
     return res.json(cocktails);

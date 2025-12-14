@@ -25,7 +25,7 @@ export async function run() {
     });
 
     console.log("super admin:", user.id, created ? "created" : "exists");
-    // process.exit(0);
+    process.exit(0);
   } catch (err) {
     console.error(err);
     process.exit(1);

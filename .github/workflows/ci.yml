@@ -55,3 +55,23 @@ jobs:
 
       - name: Run e2e Tests
         run: npx playwright test
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no root@85.117.234.255 "
+          cd ITMO-Web-Barcard &&
+          git pull &&
+          make run
+          "

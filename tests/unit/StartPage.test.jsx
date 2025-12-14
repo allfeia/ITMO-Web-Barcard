@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import StartPage from "../../src/start-page/StartPage.jsx";
 import { vi } from "vitest";
+import { AuthContext } from "../../src/context/AuthContext";
 
 const mockNavigate = vi.fn();
 
@@ -51,20 +52,34 @@ beforeAll(() => {
 beforeEach(() => {
     sessionStorage.clear();
     mockNavigate.mockReset();
-
     delete window.location;
     window.location = new URL("http://localhost/");
 });
+
+const renderWithAuth = (component, initialUrl = "/") => {
+    return render(
+        <AuthContext.Provider
+            value={{
+                setBarId: vi.fn(),
+                setIsBarman: vi.fn(),
+                token: null,
+                roles: [],
+                barId: null,
+                isBarman: null,
+            }}
+        >
+            <MemoryRouter initialEntries={[initialUrl]}>
+                {component}
+            </MemoryRouter>
+        </AuthContext.Provider>
+    );
+};
 
 describe("StartPage", () => {
     test("чтение URL параметров и запись в sessionStorage", async () => {
         window.location = new URL("http://localhost/?barId=BAR123&isBarman=true");
 
-        render(
-            <MemoryRouter>
-                <StartPage />
-            </MemoryRouter>
-        );
+        renderWithAuth(<StartPage />);
 
         await waitFor(() => {
             expect(sessionStorage.getItem("barId")).toBe("BAR123");
@@ -75,11 +90,7 @@ describe("StartPage", () => {
     test("клик по кнопке → переход на /signInPage, если isBarman=true", async () => {
         window.location = new URL("http://localhost/?barId=123&isBarman=true");
 
-        render(
-            <MemoryRouter>
-                <StartPage />
-            </MemoryRouter>
-        );
+        renderWithAuth(<StartPage />);
 
         await waitFor(() => expect(sessionStorage.getItem("isBarman")).toBe("true"));
 
@@ -90,11 +101,7 @@ describe("StartPage", () => {
     test("клик по кнопке → переход на /menu, если isBarman=false", async () => {
         window.location = new URL("http://localhost/?barId=123&isBarman=false");
 
-        render(
-            <MemoryRouter>
-                <StartPage />
-            </MemoryRouter>
-        );
+        renderWithAuth(<StartPage />);
 
         await waitFor(() => expect(sessionStorage.getItem("isBarman")).toBe("false"));
 
@@ -105,11 +112,7 @@ describe("StartPage", () => {
     test("если параметров нет → ничего не пишем в sessionStorage и не ломаемся", () => {
         window.location = new URL("http://localhost/");
 
-        render(
-            <MemoryRouter>
-                <StartPage />
-            </MemoryRouter>
-        );
+        renderWithAuth(<StartPage />);
 
         expect(screen.getByText("Barcard")).toBeInTheDocument();
         expect(screen.getByText("Начать")).toBeInTheDocument();

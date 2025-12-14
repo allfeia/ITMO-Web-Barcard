@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: cocktails_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: Barcard_db
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/Barcard_db
+      JWT_SECRET: super_secret_change_me
+      SUPER_ADMIN_PASSWORD: root
+      JWT_EXPIRES: 7d
+      BCRYPT_ROUNDS: 12
+      CORS_ORIGIN: http://localhost:4173
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

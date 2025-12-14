@@ -12,12 +12,24 @@ import SuperGrantBarAdminPage from "./admin/super-admin/SuperGrantBarAdminPage.j
 import SuperAssignUserPage from "./admin/super-admin/SuperAssignUserPage.jsx"
 import SuperLoginPage from "./admin/super-admin/SuperLoginPage.jsx"
 import "./commonStyles.css";
-
 import { AuthProvider } from './authContext/AuthContext.jsx'
 import PersonalAccountPage from "./personal-acount-page/PersonalAccountPage.jsx";
 import LevelPage from "./LevelPage.jsx";
 import FavouritesPage from "./favourites-page/FavouritesPage.jsx";
 
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+    dsn: "https://ff863d9ec402606b1c0666c164a5ba2f@o4510535321255936.ingest.us.sentry.io/4510535479132160",
+    integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+    environment: import.meta.env.MODE || "development",
+});
 
 if (import.meta.env.MODE === 'development') {
     const { worker } = await import('./mocks/browser.js');

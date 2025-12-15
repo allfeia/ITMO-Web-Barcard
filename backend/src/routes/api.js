@@ -174,14 +174,6 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
     const cocktail = await Cocktail.findByPk(id, {
       include: [
         {
-          model: Ingredient,
-          through: {
-            model: CocktailIngredient,
-            attributes: ["amount", "unit", "step_order"],
-          },
-          attributes: ["id", "name", "type"],
-        },
-        {
           model: CocktailRecipeStep,
           as: "CocktailRecipeSteps", 
           attributes: [
@@ -189,8 +181,6 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
             "step_number",
             "action",
             "ingredient_id",
-            "amount",
-            "unit",
             "ingredient_case",
           ],
           include: [
@@ -278,8 +268,6 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
         step_number: s.step_number,
         action: s.action,
         ingredient_id: s.ingredient_id,
-        amount: s.amount,
-        unit: s.unit,
         ingredient_case: s.ingredient_case,
       }));
 
@@ -376,16 +364,15 @@ router.delete(
         where: { user_id: userId, cocktail_id: cocktailId },
       });
 
-      return res.json({
-        ok: true,
-        cocktailId,
-        deleted: deleted > 0,
-      });
-    } catch (e) {
-      console.error(e);
-      return res.status(500).json({ error: "Server error" });
-    }
-  },
-);
+    return res.json({
+      ok: true,
+      cocktailId,
+      deleted: deleted > 0
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
 
 export default router;

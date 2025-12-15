@@ -87,7 +87,8 @@ Cocktail.init(
       references: { model: "bars", key: "id" },
     },
     name: { type: DataTypes.STRING, allowNull: false },
-    draw_file: { type: DataTypes.STRING },
+    description: { type: DataTypes.TEXT },
+    image: { type: DataTypes.STRING },
   },
   {
     sequelize,
@@ -171,33 +172,6 @@ CocktailIngredient.init(
   },
 );
 
-export class CocktailRecipeStep extends Model {}
-CocktailRecipeStep.init(
-  {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    cocktail_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: { model: "cocktails", key: "id" },
-    },
-    step_number: { type: DataTypes.INTEGER, allowNull: false },
-    action: { type: DataTypes.TEXT, allowNull: false },
-    ingredient_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: { model: "ingredients", key: "id" },
-    },
-    amount: { type: DataTypes.FLOAT, allowNull: true },
-    unit: { type: DataTypes.STRING, allowNull: true },
-  },
-  {
-    sequelize,
-    modelName: "CocktailRecipeStep",
-    tableName: "cocktail_recipe_steps",
-    underscored: true,
-  },
-);
-
 export class Point extends Model {}
 Point.init(
   {
@@ -260,7 +234,7 @@ UserFavourite.init(
   },
 );
 
-// Связи
+//Связи 
 Bar.hasMany(Cocktail, { foreignKey: "bar_id" });
 Bar.hasMany(User, { foreignKey: "bar_id", as: "employees" });
 

@@ -17,6 +17,7 @@
     margin: 100px auto 50px;
     max-width: 377px;
     text-align: left;
+    pointer-events: none;
 }
 
 .level-block {

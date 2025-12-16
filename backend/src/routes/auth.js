@@ -205,50 +205,49 @@ const superRegisterInBarSchema = z
   });
 
 router.post(
-  "/super/users/register-in-bar",
+  '/super/users/register-in-bar',
   authRequired,
-  requireRole("super_admin", "bar_admin"),
+  requireRole('super_admin', 'bar_admin'),
   async (req, res) => {
     try {
       const { barId, barName, roles, name, login, email, password } =
         superRegisterInBarSchema.parse(req.body);
 
       let bar = null;
-      if (typeof barId === "number") {
+      if (typeof barId === 'number') {
         bar = await Bar.findByPk(barId);
-      } else if (typeof barName === "string" && barName.trim()) {
+      } else if (typeof barName === 'string' && barName.trim()) {
         bar = await Bar.findOne({ where: { name: barName.trim() } });
       }
-      if (!bar) return res.status(404).json({ error: "Бар не найден" });
+      if (!bar) return res.status(404).json({ error: 'Бар не найден' });
 
-      let user = await User.findOne({
-        where: { [Op.or]: [{ email }, { login }] },
+      const existingUser = await User.findOne({
+        where: {
+          [Op.or]: [{ email }, { login }]
+        }
       });
+
+      if (existingUser) {
+        return res.status(409).json({
+          ok: false,
+          error: 'Сотрудник с таким логином или e‑mail уже существует'
+        });
+      }
+
       const hash = await bcrypt.hash(
         password,
-        Number(process.env.BCRYPT_ROUNDS) || 12,
+        Number(process.env.BCRYPT_ROUNDS) || 12
       );
-
       const desiredRoles = Array.from(new Set(roles));
 
-      if (!user) {
-        user = await User.create({
-          email,
-          login,
-          name,
-          roles: desiredRoles,
-          password: hash,
-          bar_id: bar.id,
-        });
-      } else {
-        user.email = email;
-        user.login = login;
-        user.name = name;
-        user.bar_id = bar.id;
-        if (password) user.password = hash;
-        user.roles = desiredRoles;
-        await user.save();
-      }
+      const user = await User.create({
+        email,
+        login,
+        name,
+        roles: desiredRoles,
+        password: hash,
+        bar_id: bar.id
+      });
 
       return res.status(201).json({
         ok: true,
@@ -259,15 +258,15 @@ router.post(
           login: user.login,
           name: user.name,
           roles: user.roles,
-          bar_id: user.bar_id,
-        },
+          bar_id: user.bar_id
+        }
       });
     } catch (e) {
       if (e.errors || e.issues)
-        return res.status(400).json({ error: "Invalid payload" });
-      return res.status(500).json({ error: "Server error" });
+        return res.status(400).json({ error: 'Invalid payload' });
+      return res.status(500).json({ error: 'Server error' });
     }
-  },
+  }
 );
 
 export default router;

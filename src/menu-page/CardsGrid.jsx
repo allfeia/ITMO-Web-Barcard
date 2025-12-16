@@ -75,11 +75,10 @@ function CardsGrid({ cocktails }) {
                     onClick={() => openModal(cocktail)}
                 >
                     <CardActionArea>
-                        <CardMedia component="div" className="menu-card-media" style={{"width": 175, "height":220}}>
+                        <CardMedia component="div" className="menu-card-media">
                             <canvas
                                 className="cocktail-drawing"
                                 ref={(cocktailDrawer) => (canvasRef.current[cocktail.draw_file] = cocktailDrawer)}
-                                width="175" height="220"
                             />
                         </CardMedia>
                         <CardContent>

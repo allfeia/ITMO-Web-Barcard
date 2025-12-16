@@ -3,7 +3,7 @@ import { scaler } from "../scaler.js";
 export function drawHotToddy(canvas) {
   if (!canvas) return;
 
-  const ctx = scaler(canvas);
+  const ctx = scaler(canvas, 175, 220);
 
   //чашка
   ctx.beginPath();

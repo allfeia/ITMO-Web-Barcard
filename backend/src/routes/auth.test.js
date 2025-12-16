@@ -411,70 +411,38 @@ describe("auth endpoints", () => {
       expect(res.body).toEqual({ error: "Бар не найден" });
     });
 
-    it("201 creates new user if not exists", async () => {
-      Bar.findByPk.mockResolvedValue({ id: 7, name: "Bar7" });
-      const U = await import("../models.js");
-      U.User.findOne = vi.fn().mockResolvedValue(null);
-      U.User.create = vi.fn().mockResolvedValue({
-        id: 10,
-        email: "e@example.com",
-        login: "l",
-        name: "N",
-        roles: ["staff"],
-        bar_id: 7,
-      });
+    it("409 if user with same login or email already exists", async () => {
+  Bar.findByPk.mockResolvedValue({ id: 8, name: "Bar8" });
 
-      const app = appWithRouter();
-      const res = await request(app)
-        .post("/auth/super/users/register-in-bar")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
-        .send({
-          barId: 7,
-          roles: ["staff"],
-          name: "N",
-          login: "l",
-          email: "e@example.com",
-          password: "secret12",
-        });
+  User.findOne.mockResolvedValue({
+    id: 11,
+    email: "existing@example.com",
+    login: "existing",
+    name: "Existing",
+    roles: ["user"],
+    password: "hash:x",
+    bar_id: null,
+  });
 
-      expect(res.status).toBe(201);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.user).toMatchObject({ id: 10, bar_id: 7 });
+  const app = appWithRouter();
+  const res = await request(app)
+    .post("/auth/super/users/register-in-bar")
+    .set("Authorization", bearer({ id: 1, roles: ["bar_admin"] }))
+    .send({
+      barId: 8,
+      roles: ["staff", "bar_admin"],
+      name: "N",
+      login: "existing",          
+      email: "existing@example.com", 
+      password: "secret12",
     });
 
-    it("201 updates existing user", async () => {
-      Bar.findByPk.mockResolvedValue({ id: 8, name: "Bar8" });
-      const save = vi.fn();
-      User.findOne.mockResolvedValue({
-        id: 11,
-        email: "old@example.com",
-        login: "old",
-        name: "Old",
-        roles: ["user"],
-        password: "hash:x",
-        bar_id: null,
-        save,
-      });
-
-      const app = appWithRouter();
-      const res = await request(app)
-        .post("/auth/super/users/register-in-bar")
-        .set("Authorization", bearer({ id: 1, roles: ["bar_admin"] }))
-        .send({
-          barId: 8,
-          roles: ["staff", "bar_admin"],
-          name: "New",
-          login: "new",
-          email: "new@example.com",
-          password: "secret12",
-        });
-
-      expect(res.status).toBe(201);
-      expect(save).toHaveBeenCalled();
-      expect(res.body.user).toMatchObject({
-        bar_id: 8,
-        roles: ["staff", "bar_admin"],
-      });
-    });
+  expect(res.status).toBe(409);
+  expect(res.body).toEqual({
+    ok: false,
+    error: "Сотрудник с таким логином или e‑mail уже существует",
+  });
+});
+  
   });
 });

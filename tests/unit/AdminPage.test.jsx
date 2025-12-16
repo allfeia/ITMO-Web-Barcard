@@ -22,25 +22,27 @@ describe('AdminPage', () => {
   });
 
   it('не показывает супер-ссылки для обычного пользователя', () => {
-    useAuth.mockReturnValue({
-      role: 'user',
-      roles: ['staff'],
-      logout: vi.fn(),
-    });
+  useAuth.mockReturnValue({
+    role: 'user',
+    roles: ['staff'],
+    logout: vi.fn(),
+  });
 
-    render(
+  render(
     <MemoryRouter>
       <AdminPage />
     </MemoryRouter>
   );
 
-    expect(screen.queryByText('Создать бар')).toBeNull();
-    expect(screen.queryByText('Создать сотрудника')).toBeNull();
-    expect(screen.queryByText('Назначить бар‑админа')).toBeNull();
+  expect(screen.queryByText('Добавить бар')).not.toBeInTheDocument();
+  expect(screen.queryByText('Добавить сотрудника')).not.toBeInTheDocument();
+  expect(
+    screen.queryByText('Выдать/снять администраторские права для сотрудника бара')
+  ).not.toBeInTheDocument();
 
-    expect(screen.getByText('Административная панель')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();
-  });
+  expect(screen.getByText('Административная панель')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();
+});
 
   it('показывает супер-ссылки когда role = super_admin', () => {
   const logout = vi.fn();
@@ -56,9 +58,11 @@ describe('AdminPage', () => {
     </MemoryRouter>
   );
 
-  expect(screen.getByText('Создать бар')).toBeInTheDocument();
-  expect(screen.getByText('Создать сотрудника')).toBeInTheDocument();
-  expect(screen.getByText('Назначить бар‑админа')).toBeInTheDocument();
+  expect(screen.getByText('Добавить бар')).toBeInTheDocument();
+    expect(screen.getByText('Добавить сотрудника')).toBeInTheDocument();
+    expect(
+      screen.getByText('Выдать/снять администраторские права для сотрудника бара')
+    ).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: 'Выйти' }));
   expect(logout).toHaveBeenCalled();
@@ -77,8 +81,10 @@ it('показывает супер-ссылки когда roles включае
     </MemoryRouter>
   );
 
-  expect(screen.getByText('Создать бар')).toBeInTheDocument();
-  expect(screen.getByText('Создать сотрудника')).toBeInTheDocument();
-  expect(screen.getByText('Назначить бар‑админа')).toBeInTheDocument();
+  expect(screen.getByText('Добавить бар')).toBeInTheDocument();
+    expect(screen.getByText('Добавить сотрудника')).toBeInTheDocument();
+    expect(
+      screen.getByText('Выдать/снять администраторские права для сотрудника бара')
+    ).toBeInTheDocument();
 });
 });

@@ -4,7 +4,7 @@ import { drawRotatedRect } from "../drawRotateRect.js";
 export function drawNegroni(canvas) {
   if (!canvas) return;
 
-  const ctx = scaler(canvas);
+  const ctx = scaler(canvas, 175, 220);
 
   //бокал
   ctx.beginPath();

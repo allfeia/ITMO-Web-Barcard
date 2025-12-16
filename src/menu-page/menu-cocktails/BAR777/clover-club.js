@@ -4,7 +4,7 @@ import { drawTriangle } from "../../../bottoms-utils/drawTriangle.js";
 export function drawCloverClub(canvas) {
   if (!canvas) return;
 
-  const ctx = scaler(canvas);
+  const ctx = scaler(canvas, 175, 220);
 
   //малина
   ctx.beginPath();

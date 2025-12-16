@@ -88,7 +88,7 @@ describe('SuperAssignUserPage', () => {
     });
     render(<SuperAssignUserPage />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(await screen.findByText('Выберите бар')).toBeInTheDocument();
   });
 });

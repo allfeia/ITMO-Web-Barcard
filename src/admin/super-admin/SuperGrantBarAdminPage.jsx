@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../authContext/useAuth.js';
 import { TextField, Button, Typography, Box, MenuItem } from '@mui/material';
-import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import "../admin.css"
 
@@ -97,47 +96,45 @@ export default function SuperGrantBarAdminPage() {
   })), [staff]);
 
   return (
-    <><WestIcon
-      className="back-arrow-fav"
-      sx={{ fontSize: "30px" }}
-      onClick={() => goTo('/administration')} /><Box component="form" onSubmit={onSubmit} className="form" sx={{ maxWidth: 560 }}>
-        <Typography variant="h5" className='form-title'>Выдать/снять роль администратора бара</Typography>
+    <Box component="form" onSubmit={onSubmit} className="form" sx={{ maxWidth: 560 }}>
+      <Typography variant="h5" sx={{ mb: 2 }}>Выдать/снять роль bar_admin</Typography>
 
-        <TextField
-          className="form-input"
-          label="Бар"
-          select
-          value={barId}
-          onChange={e => setBarId(e.target.value)}
-          disabled={loadingBars}
-        >
-          {barsOptions.map(b => (
-            <MenuItem key={b.value} value={b.value}>{b.label}</MenuItem>
-          ))}
-        </TextField>
+      <TextField
+        className="form-input"
+        label="Бар"
+        select
+        value={barId}
+        onChange={e => setBarId(e.target.value)}
+        disabled={loadingBars}
+      >
+        {barsOptions.map(b => (
+          <MenuItem key={b.value} value={b.value}>{b.label}</MenuItem>
+        ))}
+      </TextField>
 
-        <TextField
-          className="form-input"
-          label="Сотрудник бара"
-          select
-          value={userId}
-          onChange={e => setUserId(e.target.value)}
-          disabled={!barId || loadingStaff}
-          helperText={!barId ? 'Выберите бар, чтобы отобразить сотрудников' : (staffOptions.length === 0 ? 'В этом баре пока нет сотрудников' : '')}
-        >
-          {staffOptions.map(u => (
-            <MenuItem key={u.value} value={u.value}>{u.label}</MenuItem>
-          ))}
-        </TextField>
+      <TextField
+        className="form-input"
+        label="Сотрудник бара"
+        select
+        value={userId}
+        onChange={e => setUserId(e.target.value)}
+        disabled={!barId || loadingStaff}
+        helperText={!barId ? 'Выберите бар, чтобы отобразить сотрудников' : (staffOptions.length === 0 ? 'В этом баре пока нет сотрудников' : '')}
+      >
+        {staffOptions.map(u => (
+          <MenuItem key={u.value} value={u.value}>{u.label}</MenuItem>
+        ))}
+      </TextField>
 
-        <TextField className="form-input" label="Действие" select value={make ? 'grant' : 'revoke'} onChange={e => setMake(e.target.value === 'grant')}>
-          <MenuItem value="grant">Выдать права администратора бара</MenuItem>
-          <MenuItem value="revoke">Убрать права администратора бара</MenuItem>
-        </TextField>
+      <TextField className="form-input" label="Действие" select value={make ? 'grant' : 'revoke'} onChange={e => setMake(e.target.value === 'grant')}>
+        <MenuItem value="grant">Выдать права администратора бара</MenuItem>
+        <MenuItem value="revoke">Убрать права администратора бара</MenuItem>
+      </TextField>
 
-        {err && <Typography color="error" sx={{ mt: 1 }}>{err}</Typography>}
-        {msg && <Typography color="success.main" sx={{ mt: 1 }}>{msg}</Typography>}
-        <Button type="submit" variant="contained" className='form-button'>Сохранить</Button>
-      </Box></>
+      {err && <Typography color="error" sx={{ mt: 1 }}>{err}</Typography>}
+      {msg && <Typography color="success.main" sx={{ mt: 1 }}>{msg}</Typography>}
+      <Button type="submit" variant="contained" className='form-button'>Сохранить</Button>
+      <Button variant="text" sx={{ mt: 1 }} onClick={() => goTo('/administration')} className='form-button'>На главную</Button>
+    </Box>
   );
 }

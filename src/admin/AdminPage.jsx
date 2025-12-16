@@ -13,35 +13,39 @@ function AdminPage() {
   const { role, roles, logout } = useAuth();
   const isSuper = role === "super_admin" || (roles || []).includes("super_admin");
   return (
-    <Box className="mode-container">
-        <Typography component="h1" className="mode-title">
+    <Box className="form-container">
+        <Typography component="h1" className="form-title">
           Административная панель
         </Typography>
 
         <Stack
+          component="nav"
+          direction="row"
           spacing={1.5}
           useFlexGap
           flexWrap="wrap"
           sx={{ mb: 2 }}
-          className="mode-buttons"
         >
           {isSuper && (
             <>
-              <MUILink component={RouterLink} to="/super/bars/new"  underline="none" className = "mode-button">
-                Добавить бар
+              <MUILink component={RouterLink} to="/super/bars/new" underline="hover" className = "mode-button">
+                <span>Создать бар</span>
               </MUILink>
-              <MUILink component={RouterLink} to="/super/assign"  underline="none" className = "mode-button">
-                Добавить сотрудника
+              <MUILink component={RouterLink} to="/super/assign" underline="hover" className = "mode-button">
+                <span>Создать сотрудника</span>
               </MUILink>
-              <MUILink component={RouterLink} to="/super/grant" underline="none" className = "mode-button">
-                Выдать/снять администраторские права для сотрудника бара
+              <MUILink component={RouterLink} to="/super/grant" underline="hover" className = "mode-button">
+                <span>Назначить бар‑админа</span>
               </MUILink>
             </>
           )}
         </Stack>
 
         <Button
+          variant="contained"
+          color="primary"
           onClick={logout}
+          sx={{ mt: 1 }}
           className="form-button"
         >
           Выйти

@@ -8,20 +8,19 @@ body {
     width: 100%;
     max-width: 100%;
     padding: 0 25px;
-    margin: 80px auto 0;
+    margin: 144px auto 0;
     box-sizing: border-box;
 }
 
 .mode-title {
     font-size: 64px;
-    margin-top:12%;
     margin-bottom: 30px;
     color: #333;
     line-height: 1.2;
 }
 
 .mode-buttons {
-    margin-top: 20px;
+    margin-top: 100px;
     display: flex;
     flex-direction: column;
     gap: 104px;
@@ -39,19 +38,9 @@ body {
     width: 100%;
     box-sizing: border-box;
     text-align: left;
+
     position: relative;
     transition: box-shadow 0.15s ease, transform 0.15s ease;
-
-    text-decoration: none;  
-    display: block;          
-}
-
-.mode-button:hover,
-.mode-button:focus,
-.mode-button:visited,
-.mode-button:active {
-    text-decoration: none;
-    color: #333;
 }
 .mode-button:active {
     box-shadow: 0 0 45px rgb(1, 1, 1);
@@ -72,8 +61,8 @@ body {
     align-items: center;
 }
 
-.form-title.MuiTypography-root{
-    font-size: 32px;
+.form_title {
+    font-size: 64px;
     margin-bottom: 30px;
     color: #333;
     line-height: 1.2;
@@ -104,14 +93,14 @@ body {
 }
 
 .form-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #333; 
+    border-color: #333;
 }
 
 .form-input .MuiInputLabel-root.Mui-focused {
-    color: #333; 
+    color: #333;
 }
 
-.form-button.MuiButton-root {
+.form-button .MuiButton-root {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 24px;
     border: 1px solid #333;
@@ -121,18 +110,4 @@ body {
     height: 56px;
     text-transform: none;
 
-}
-
-.back-arrow-fav {
-    margin-top: 25px;
-    margin-left: 20px;
-    margin-bottom: 10px;
-}
-
-.form-check-box .MuiCheckbox-root {
-  color: #333;
-}
-
-.form-check-box .MuiCheckbox-root.Mui-checked {
-  color: #333;
 }

@@ -48,22 +48,6 @@ export default function SuperAssignUserPage() {
     })();
   }, [token]);
 
-  function onChange(e) {
-    const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value }));
-    setOkMsg('');
-    setErr('');
-    if (name === 'password') {
-      setPasswordError('');
-      const len = value.length;
-      if (len > 0 && len < 6) {
-        setPasswordHint(`Пароль должен быть минимум 6 символов`);
-      } else {
-        setPasswordHint('');
-      }
-    }
-  }
-
   function onToggleRole(role) {
     setForm(p => {
       const set = new Set(p.roles || []);

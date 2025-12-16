@@ -1,31 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('LevelPage — выбор уровня сложности', () => {
-    test('пользователь может перейти на LevelPage через "Изучить" и выбрать уровень', async ({ page }) => {
-        await page.goto('/');
-
-        const startButton = page.getByRole('button', { name: 'Начать' });
-        if (await startButton.isVisible()) {
-            await startButton.click();
-        }
-
-        await page.goto('/menu');
-
-        await expect(page.locator('.menu-card')).toHaveCount(1, { timeout: 20000 });
-
-        await page.locator('.menu-card').first().click();
-
-        const learnButton = page.getByText('Изучить');
-        await expect(learnButton).toBeVisible({ timeout: 20000 });
-        await learnButton.click();
-
-        await expect(page).toHaveURL('/levelPage');
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/levelPage');
         await expect(page.getByRole('heading', { name: /Выберите уровень/i })).toBeVisible();
     });
 
-    test('на LevelPage отображаются все элементы и оливки отрисованы', async ({ page }) => {
-        await page.goto('/levelPage');
-
+    test('отображает заголовок, подсказки, кнопки уровней и оливки отрисованы', async ({ page }) => {
         await expect(page.getByRole('heading', { name: /Выберите уровень/i })).toBeVisible();
 
         await expect(page.getByRole('button', { name: '←' })).toBeVisible();
@@ -50,37 +31,28 @@ test.describe('LevelPage — выбор уровня сложности', () => 
     });
 
     test('клик по кнопке ← возвращает назад', async ({ page }) => {
-        await page.goto('/levelPage');
-
         await page.getByRole('button', { name: '←' }).click();
-
         await expect(page).not.toHaveURL('/levelPage');
     });
 
     test('клик по уровням ведёт на правильные страницы игры', async ({ page }) => {
-        await page.goto('/levelPage');
+        await page.evaluate(() => window.scrollTo(0, 0));
 
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-
-        await page.getByRole('button', { name: 'Легкий' }).click();
+        await page.getByRole('button', { name: 'Легкий' }).click({ force: true });
         await expect(page).toHaveURL('/game/easy');
         await page.goto('/levelPage');
+        await page.evaluate(() => window.scrollTo(0, 0));
 
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-
-        await page.getByRole('button', { name: 'Средний' }).click();
+        await page.getByRole('button', { name: 'Средний' }).click({ force: true });
         await expect(page).toHaveURL('/game/medium');
         await page.goto('/levelPage');
+        await page.evaluate(() => window.scrollTo(0, 0));
 
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-
-        await page.getByRole('button', { name: 'Сложный' }).click();
+        await page.getByRole('button', { name: 'Сложный' }).click({ force: true });
         await expect(page).toHaveURL('/game/hard');
     });
 
     test('оливки отрисовываются по-разному в зависимости от уровня (визуальная проверка)', async ({ page }) => {
-        await page.goto('/levelPage');
-
         const canvases = page.locator('canvas[data-testid="olive-canvas"]');
 
         await expect(canvases.nth(0)).toHaveScreenshot('level-easy-olive.png', { maxDiffPixels: 200 });

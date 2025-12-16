@@ -44,9 +44,12 @@ export default function SuperAssignUserPage() {
         });
         const data = await resp.json().catch(()=>[]);
         if (resp.ok) setBars(data);
-      } catch {}
+      } catch (e) {
+        console.error('Ошибка загрузки баров', e);
+      }
     })();
   }, [token]);
+
 
   function onToggleRole(role) {
     setForm(p => {

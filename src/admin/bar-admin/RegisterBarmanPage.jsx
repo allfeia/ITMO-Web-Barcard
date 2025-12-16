@@ -1,4 +1,4 @@
-import '../../commonStyles.css'
+import '../commonStyles.css'
 import AdminRegisterBarmanForm from "./AdminRegisterBarmanForm.jsx";
 import "../admin.css"
 
@@ -6,7 +6,6 @@ import "../admin.css"
 function RegisterBarmenPage() {
     return (
         <div className="container">
-            <h1 className="title">Регистрация бармена</h1>
             <div className="form">
                 <AdminRegisterBarmanForm/>
             </div>

@@ -87,7 +87,8 @@ Cocktail.init(
       references: { model: "bars", key: "id" },
     },
     name: { type: DataTypes.STRING, allowNull: false },
-    draw_file: { type: DataTypes.STRING },
+    description: { type: DataTypes.TEXT },
+    image: { type: DataTypes.STRING },
   },
   {
     sequelize,
@@ -113,6 +114,33 @@ Ingredient.init(
   },
 );
 
+export class CocktailRecipeStep extends Model {}
+CocktailRecipeStep.init(
+  {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    cocktail_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: "cocktails", key: "id" },
+    },
+    step_number: { type: DataTypes.INTEGER, allowNull: false },
+    action: { type: DataTypes.TEXT, allowNull: false },
+
+    ingredient_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "ingredients", key: "id" },
+    },
+    ingredient_case: { type: DataTypes.STRING, allowNull: true },
+  },
+  {
+    sequelize,
+    modelName: "CocktailRecipeStep",
+    tableName: "cocktail_recipe_steps",
+    underscored: true,
+  },
+);
+
 export class CocktailIngredient extends Model {}
 CocktailIngredient.init(
   {
@@ -127,6 +155,11 @@ CocktailIngredient.init(
       allowNull: false,
       references: { model: "ingredients", key: "id" },
     },
+    recipe_step_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "cocktail_recipe_steps", key: "id" },
+    },
     amount: { type: DataTypes.FLOAT, allowNull: true },
     unit: { type: DataTypes.STRING, allowNull: true },
     step_order: { type: DataTypes.INTEGER, allowNull: true },
@@ -135,33 +168,6 @@ CocktailIngredient.init(
     sequelize,
     modelName: "CocktailIngredient",
     tableName: "cocktail_ingredients",
-    underscored: true,
-  },
-);
-
-export class CocktailRecipeStep extends Model {}
-CocktailRecipeStep.init(
-  {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    cocktail_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: { model: "cocktails", key: "id" },
-    },
-    step_number: { type: DataTypes.INTEGER, allowNull: false },
-    action: { type: DataTypes.TEXT, allowNull: false },
-    ingredient_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: { model: "ingredients", key: "id" },
-    },
-    amount: { type: DataTypes.FLOAT, allowNull: true },
-    unit: { type: DataTypes.STRING, allowNull: true },
-  },
-  {
-    sequelize,
-    modelName: "CocktailRecipeStep",
-    tableName: "cocktail_recipe_steps",
     underscored: true,
   },
 );
@@ -228,7 +234,7 @@ UserFavourite.init(
   },
 );
 
-// Связи
+//Связи 
 Bar.hasMany(Cocktail, { foreignKey: "bar_id" });
 Bar.hasMany(User, { foreignKey: "bar_id", as: "employees" });
 
@@ -247,7 +253,34 @@ Ingredient.belongsToMany(Cocktail, {
 });
 
 Cocktail.hasMany(CocktailRecipeStep, { foreignKey: "cocktail_id" });
+
+CocktailRecipeStep.belongsTo(Ingredient, {
+  foreignKey: "ingredient_id",
+  as: "mainIngredient",});
+
 CocktailRecipeStep.belongsTo(Cocktail, { foreignKey: "cocktail_id" });
+
+CocktailRecipeStep.hasMany(CocktailIngredient, {
+  foreignKey: "recipe_step_id",
+  as: "stepIngredients",
+});
+
+Ingredient.hasMany(CocktailRecipeStep, {
+  foreignKey: "ingredient_id",
+  as: "stepsAsMainIngredient",
+});
+
+CocktailIngredient.belongsTo(CocktailRecipeStep, {
+  foreignKey: "recipe_step_id",
+  as: "step",
+});
+
+CocktailIngredient.belongsTo(Ingredient, {
+  foreignKey: "ingredient_id",
+});
+Ingredient.hasMany(CocktailIngredient, {
+  foreignKey: "ingredient_id",
+});
 
 User.belongsTo(Cocktail, {
   foreignKey: "saved_cocktail_id",

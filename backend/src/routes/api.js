@@ -174,80 +174,100 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
     const cocktail = await Cocktail.findByPk(id, {
       include: [
         {
-          model: Ingredient,
-          through: {
-            model: CocktailIngredient,
-            attributes: ["amount", "unit", "step_order"],
-          },
-          attributes: ["id", "name", "type"],
-        },
-        {
           model: CocktailRecipeStep,
+          as: "CocktailRecipeSteps", 
           attributes: [
             "id",
             "step_number",
             "action",
             "ingredient_id",
-            "amount",
-            "unit",
             "ingredient_case",
+          ],
+          include: [
+            {
+              model: CocktailIngredient,
+              as: "stepIngredients", 
+              attributes: ["id", "amount", "unit", "step_order"],
+              include: [
+                {
+                  model: Ingredient,
+                  attributes: ["id", "name", "type"],
+                },
+              ],
+            },
           ],
         },
       ],
       order: [
-        [CocktailRecipeStep, "step_number", "ASC"],
-        [Ingredient, CocktailIngredient, "step_order", "ASC"],
+        [{ model: CocktailRecipeStep, as: "CocktailRecipeSteps" }, "step_number", "ASC"],
+        [
+          { model: CocktailRecipeStep, as: "CocktailRecipeSteps" },
+          { model: CocktailIngredient, as: "stepIngredients" },
+          "step_order",
+          "ASC",
+        ],
       ],
     });
 
     if (!cocktail) return res.status(404).json({ error: "Not found" });
 
-    const allIngredients = cocktail.Ingredients.map((ing) => {
-      const ci = ing.CocktailIngredient;
-      let amountStr = "";
-      if (ci?.amount != null && ci?.amount !== "") {
-        amountStr = String(ci.amount);
-        if (ci.unit) {
-          amountStr += ` ${ci.unit}`;
+    const ingredientMap = new Map();
+
+    for (const step of cocktail.CocktailRecipeSteps || []) {
+      for (const ci of step.stepIngredients || []) {
+        const ing = ci.Ingredient;
+        if (!ing) continue;
+
+        const key = ing.id;
+
+        let amountStr = "";
+        if (ci.amount != null && ci.amount !== "") {
+          amountStr = String(ci.amount);
+          if (ci.unit) amountStr += ` ${ci.unit}`;
+        }
+
+        if (!ingredientMap.has(key)) {
+          ingredientMap.set(key, {
+            id: ing.id,
+            name: ing.name,
+            type: ing.type,
+            amount: ci.amount ?? null,
+            unit: ci.unit ?? null,
+            order: ci.step_order ?? 999,
+            amountStr,
+          });
         }
       }
+    }
 
-      return {
-        id: ing.id,
-        name: ing.name,
-        type: ing.type,
-        amount: ci?.amount ?? null,
-        unit: ci?.unit ?? null,
-        order: ci?.step_order ?? null,
-        amountStr,
-      };
-    }).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const allIngredients = Array.from(ingredientMap.values()).sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0)
+    );
 
     const mainIngredients = allIngredients.filter(
-      (ing) => ing.type !== "garnish",
+      (ing) => ing.type !== "garnish"
     );
     const garnishIngredients = allIngredients.filter(
-      (ing) => ing.type === "garnish",
+      (ing) => ing.type === "garnish"
     );
 
     let decoration = "";
     if (garnishIngredients.length > 0) {
       decoration = garnishIngredients
         .map((ing) =>
-          ing.amountStr ? `${ing.name} (${ing.amountStr})` : ing.name,
+          ing.amountStr ? `${ing.name} (${ing.amountStr})` : ing.name
         )
         .join(", ");
     }
 
-    const steps = cocktail.CocktailRecipeSteps.slice()
+    const steps = (cocktail.CocktailRecipeSteps || [])
+      .slice()
       .sort((a, b) => a.step_number - b.step_number)
       .map((s) => ({
         id: s.id,
         step_number: s.step_number,
         action: s.action,
         ingredient_id: s.ingredient_id,
-        amount: s.amount,
-        unit: s.unit,
         ingredient_case: s.ingredient_case,
       }));
 
@@ -344,16 +364,15 @@ router.delete(
         where: { user_id: userId, cocktail_id: cocktailId },
       });
 
-      return res.json({
-        ok: true,
-        cocktailId,
-        deleted: deleted > 0,
-      });
-    } catch (e) {
-      console.error(e);
-      return res.status(500).json({ error: "Server error" });
-    }
-  },
-);
+    return res.json({
+      ok: true,
+      cocktailId,
+      deleted: deleted > 0
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
 
 export default router;

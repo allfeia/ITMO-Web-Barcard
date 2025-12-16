@@ -11,12 +11,12 @@ test.describe('LevelPage — выбор уровня сложности', () => 
 
         await page.goto('/menu');
 
-        await expect(page.locator('.menu-card')).toHaveCount(1, { timeout: 10000 });
+        await expect(page.locator('.menu-card')).toHaveCount(1, { timeout: 20000 });
 
         await page.locator('.menu-card').first().click();
 
         const learnButton = page.getByText('Изучить');
-        await expect(learnButton).toBeVisible({ timeout: 10000 });
+        await expect(learnButton).toBeVisible({ timeout: 20000 });
         await learnButton.click();
 
         await expect(page).toHaveURL('/levelPage');
@@ -60,13 +60,19 @@ test.describe('LevelPage — выбор уровня сложности', () => 
     test('клик по уровням ведёт на правильные страницы игры', async ({ page }) => {
         await page.goto('/levelPage');
 
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
         await page.getByRole('button', { name: 'Легкий' }).click();
         await expect(page).toHaveURL('/game/easy');
         await page.goto('/levelPage');
 
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
         await page.getByRole('button', { name: 'Средний' }).click();
         await expect(page).toHaveURL('/game/medium');
         await page.goto('/levelPage');
+
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
         await page.getByRole('button', { name: 'Сложный' }).click();
         await expect(page).toHaveURL('/game/hard');

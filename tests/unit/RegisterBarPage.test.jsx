@@ -9,6 +9,7 @@ vi.mock('../../src/admin/super-admin/AdminRegisterBarForm.jsx', () => ({
 describe('RegisterBarPage', () => {
   it('рендерит заголовок и форму', () => {
     render(<RegisterBarPage />);
+    expect(screen.getByText('Регистрация бара')).toBeInTheDocument();
     expect(screen.getByTestId('admin-register-bar-form')).toBeInTheDocument();
   });
 });

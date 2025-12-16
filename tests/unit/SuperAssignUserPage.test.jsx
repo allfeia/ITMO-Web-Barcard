@@ -51,6 +51,8 @@ describe('SuperAssignUserPage', () => {
     const optionBarA = await screen.findByText('Бар А');
     fireEvent.click(optionBarA);
 
+    // (Больше не ждём /api/admin/bars/1/staff — этого запроса нет)
+
     // Роли по умолчанию: ['bar_admin']; переключим staff
     const staffCb = screen.getByLabelText('staff');
     fireEvent.click(staffCb);
@@ -61,7 +63,7 @@ describe('SuperAssignUserPage', () => {
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'new@ex.com' } });
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'secret' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenLastCalledWith(
@@ -88,7 +90,8 @@ describe('SuperAssignUserPage', () => {
     });
     render(<SuperAssignUserPage />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
+    // Пытаемся отправить без бара
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
     expect(await screen.findByText('Выберите бар')).toBeInTheDocument();
   });
 });

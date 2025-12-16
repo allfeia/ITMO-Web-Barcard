@@ -3,9 +3,10 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../authContext/useAuth.js';
-import "../admin.css"
+
 
 export default function AdminRegisterBarForm() {
   const goTo = useNavigate();
@@ -96,7 +97,6 @@ export default function AdminRegisterBarForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // передаём JWT супер-админа
           'Authorization': token ? `Bearer ${token}` : undefined
         },
         body: JSON.stringify(payload),
@@ -135,16 +135,20 @@ export default function AdminRegisterBarForm() {
   }
 
   return (
-    <Box component="form" onSubmit={onSubmit} className="form">
-      <TextField className="form-input" label="Название бара" variant="outlined" name="name" value={form.name} onChange={onChange} error={Boolean(nameError)} helperText={nameError} />
-      <TextField className="form-input" label="Адрес" variant="outlined" name="address" value={form.address} onChange={onChange} error={Boolean(addressError)} helperText={addressError} />
-      <TextField className="orm-input" label="Описание" variant="outlined" name="description" value={form.description} onChange={onChange} multiline minRows={3} error={Boolean(descriptionError)} helperText={descriptionError} />
-      <TextField className="form-input" label="Web‑site (URL)" variant="outlined" name="website" value={form.website} onChange={onChange} error={Boolean(websiteError)} helperText={websiteError} />
-      <TextField className="form-input" label="Ключ бара" variant="outlined" name="barKey" value={form.barKey} onChange={onChange} error={Boolean(barKeyError)} helperText={barKeyError} type="password" />
-      {commonErr && <Typography color="error" sx={{ mt: 1 }}>{commonErr}</Typography>}
-      {okMsg && <Typography color="success.main" sx={{ mt: 1 }}>{okMsg}</Typography>}
-      <Button variant="contained" type="submit" className="form-button" disabled={loading}>{loading ? 'Отправка...' : 'Создать бар'}</Button>
-      <Button variant="text" type="button" onClick={() => goTo('/administration')} sx={{ mt: 1 }} className='form-button'>На главную</Button>
-    </Box>
+    <><WestIcon
+      className="back-arrow-fav"
+      sx={{ fontSize: "30px" }}
+      onClick={() => goTo('/administration')} />
+      <Box component="form" onSubmit={onSubmit} className="form">
+        <Typography variant="h1" className="form-title">Добавить бар</Typography>
+        <TextField className="form-input" label="Название бара" variant="outlined" name="name" value={form.name} onChange={onChange} error={Boolean(nameError)} helperText={nameError} />
+        <TextField className="form-input" label="Адрес" variant="outlined" name="address" value={form.address} onChange={onChange} error={Boolean(addressError)} helperText={addressError} />
+        <TextField className="orm-input" label="Описание" variant="outlined" name="description" value={form.description} onChange={onChange} multiline minRows={3} error={Boolean(descriptionError)} helperText={descriptionError} />
+        <TextField className="form-input" label="Web‑site (URL)" variant="outlined" name="website" value={form.website} onChange={onChange} error={Boolean(websiteError)} helperText={websiteError} />
+        <TextField className="form-input" label="Ключ бара" variant="outlined" name="barKey" value={form.barKey} onChange={onChange} error={Boolean(barKeyError)} helperText={barKeyError} type="password" />
+        {commonErr && <Typography color="error" sx={{ mt: 1 }}>{commonErr}</Typography>}
+        {okMsg && <Typography color="success.main" sx={{ mt: 1 }}>{okMsg}</Typography>}
+        <Button variant="contained" type="submit" className="form-button" disabled={loading}>{loading ? 'Отправка...' : 'Создать бар'}</Button>
+      </Box></>
   );
 }

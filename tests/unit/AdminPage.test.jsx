@@ -34,9 +34,11 @@ describe('AdminPage', () => {
     </MemoryRouter>
   );
 
-    expect(screen.queryByText('Создать бар')).toBeNull();
-    expect(screen.queryByText('Создать сотрудника')).toBeNull();
-    expect(screen.queryByText('Назначить бар‑админа')).toBeNull();
+    expect(screen.getByText('Добавить бар')).toBeInTheDocument();
+    expect(screen.getByText('Добавить сотрудника')).toBeInTheDocument();
+    expect(
+      screen.getByText('Выдать/снять администраторские права для сотрудника бара')
+    ).toBeInTheDocument();
 
     expect(screen.getByText('Административная панель')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();

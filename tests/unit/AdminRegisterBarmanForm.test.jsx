@@ -65,7 +65,7 @@ describe('AdminRegisterBarmanForm', () => {
     fireEvent.change(screen.getByLabelText('Почта'), { target: { value: 'ivan-at-example.com' } });
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'secret' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
     expect(await screen.findByText('Некорректный e‑mail')).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();

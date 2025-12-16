@@ -1,0 +1,93 @@
+.screen {
+  min-height: 100vh;
+  background: #2E2E34;
+  color: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 32px;
+  padding: 24px 20px;
+  width: 430px;              
+  max-width: 100%;
+}
+
+.back-arrow {
+    margin-bottom: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row-compact {
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.username {
+  font-size: 22px;
+  font-weight: 400;
+  position: absolute;
+  margin-left: 35px;
+}
+
+.icon {
+  display: inline-block;
+  width: 20px;   
+  height: 20px;
+}
+
+.icon-inline {
+  width: 25px;
+  height: 25px;
+  margin-left: 5px;
+}
+
+.icon-user {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.rating {
+  margin-top: 24px;
+  font-size: 20px;
+}
+
+.label .rating,
+.rating .value {
+  margin: 0;
+}
+
+.linkRow {
+  display: block;
+  margin-top: 24px;
+  font-size: 20px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.linkRow:hover,
+.linkRow:focus {
+  text-decoration: underline;
+}
+
+.fav {
+  margin-top: 24px;
+  font-size: 20px;
+}
+
+.label { 
+  display: inline-block;
+}
+
+canvas {
+  background: transparent;
+}
+
+.linkFull {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}

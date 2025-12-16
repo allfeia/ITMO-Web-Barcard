@@ -19,10 +19,14 @@ jobs:
           path: |
             ~/.npm
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'backend/package-lock.json') }}
 
 
       - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: backend
         run: npm ci
 
       - name: Run ESLint
@@ -46,10 +50,28 @@ jobs:
             exit 1
           fi
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Run e2e Tests
+        run: npx playwright test
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy via SSH
         run: |
-          npx playwright install --with-deps
-          npm run build
-          npx vite preview &
-          npx wait-on http://localhost:4173
-          npm run test:e2e
+          ssh -o StrictHostKeyChecking=no root@85.117.234.255 "
+          cd ITMO-Web-Barcard &&
+          git pull &&
+          make run
+          "

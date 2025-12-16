@@ -1,0 +1,182 @@
+.account-icon {
+    position: absolute;
+    right: 35px;
+    top: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+.menu-template-title {
+    font-size: 64px;
+    margin-bottom: 30px;
+    color: #333;
+    line-height: 1.2;
+    margin-left: 35px;
+}
+
+.cocktail-search-container {
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+.cocktail-search {
+    position: absolute;
+    padding: 0 10px;
+    width: 100%;
+}
+
+.cocktail-search .MuiOutlinedInput-root {
+    height: 45px;
+}
+
+.bar-name {
+    margin-left: 35px;
+    font-size: 24px;
+    text-decoration: underline;
+    color: #333;
+    font-weight: 300;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.menu-cards {
+    margin-left: 35px;
+    margin-right: 35px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.menu-card {
+    box-shadow: 10px 10px 5px lightgrey !important;
+    border: 1px solid #333 !important;
+    border-radius: 4px;
+    background-color: #F7F6F3 !important;
+    position: relative !important;
+    z-index: 3 !important;
+}
+
+.menu-card-media {
+    width: 100%;
+    height: 220px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.cocktail-drawing {
+    width: 175px;
+    height: 220px;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    /*outline: 2px solid red;*/
+}
+
+.favourites {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+}
+
+.card-title {
+    display: flex;
+    justify-content: center;
+    transform: translateY(-18px);
+}
+
+.no-cocktail-text {
+    display: flex;
+    justify-content: center;
+    margin-top: 50%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #333;
+}
+
+.menu-flipped-card {
+    justify-content: center;
+    margin: 227px 27px;
+
+}
+
+.menu-flipped-card-content {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    border: 1px solid #333 !important;
+    border-radius: 4px;
+    background-color: #EFEEEC !important;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.cocktail-name {
+    margin-top: 0;
+    padding-top: 5px;
+    font-size: 32px;
+    padding-left: 20px;
+    padding-bottom: 30px;
+}
+
+.recipe-sections {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.8rem 1rem;
+    align-items: flex-start;
+}
+
+.recipe-section {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+
+.ing-list {
+    padding: 0;
+    margin: 0;
+}
+
+.recipe-lists {
+    padding-bottom: 5px;
+}
+
+.ing-list .MuiListItem-root {
+    padding: 0;
+    line-height: 1.6;
+}
+
+.recipe-steps {
+    padding: 0;
+    margin: 0;
+    list-style-position: inside;
+}
+
+.recipe-steps li {
+    margin-bottom: 0.5rem;
+}
+
+.learn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.learn-cocktail {
+    margin: 0;
+
+}
+
+.learn-arrow {
+    margin: 0;
+}

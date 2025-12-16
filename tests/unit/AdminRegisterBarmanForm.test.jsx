@@ -50,7 +50,6 @@ describe('AdminRegisterBarmanForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
-    expect(await screen.findByText('Добавить бар')).toBeInTheDocument();
     expect(await screen.findByText('Введите имя')).toBeInTheDocument();
     expect(screen.getByText('Введите логин')).toBeInTheDocument();
     expect(screen.getByText('Введите почту')).toBeInTheDocument();

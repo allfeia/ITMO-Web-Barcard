@@ -58,9 +58,11 @@ describe('AdminPage', () => {
     </MemoryRouter>
   );
 
-  expect(screen.getByText('Создать бар')).toBeInTheDocument();
-  expect(screen.getByText('Создать сотрудника')).toBeInTheDocument();
-  expect(screen.getByText('Назначить бар‑админа')).toBeInTheDocument();
+  expect(screen.getByText('Добавить бар')).toBeInTheDocument();
+    expect(screen.getByText('Добавить сотрудника')).toBeInTheDocument();
+    expect(
+      screen.getByText('Выдать/снять администраторские права для сотрудника бара')
+    ).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: 'Выйти' }));
   expect(logout).toHaveBeenCalled();
@@ -79,8 +81,10 @@ it('показывает супер-ссылки когда roles включае
     </MemoryRouter>
   );
 
-  expect(screen.getByText('Создать бар')).toBeInTheDocument();
-  expect(screen.getByText('Создать сотрудника')).toBeInTheDocument();
-  expect(screen.getByText('Назначить бар‑админа')).toBeInTheDocument();
+  expect(screen.getByText('Добавить бар')).toBeInTheDocument();
+    expect(screen.getByText('Добавить сотрудника')).toBeInTheDocument();
+    expect(
+      screen.getByText('Выдать/снять администраторские права для сотрудника бара')
+    ).toBeInTheDocument();
 });
 });

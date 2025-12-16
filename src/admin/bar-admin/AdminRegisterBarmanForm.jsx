@@ -7,11 +7,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {IconButton, InputAdornment} from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
-import { useGoTo } from '../../useGoTo.js';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../useAuth.js';
 
 export default function AdminRegisterBarmanForm() {
-  const goTo = useGoTo();
+  const goTo = useNavigate();
   const { token, roles, barId } = useAuth();
 
   const [form, setForm] = useState({

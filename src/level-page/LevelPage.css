@@ -1,0 +1,80 @@
+.page {
+    width: 100%;
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.back-btn {
+    font-size: 32px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    color: black !important;
+}
+
+.title {
+    font-size: clamp(64px, 8vw, 72px);
+    font-weight: 500;
+    margin: 100px auto 50px;
+    max-width: 377px;
+    text-align: left;
+}
+
+.level-block {
+    position: relative;
+    width: 100%;
+    max-width: 377px;
+    margin: 0 auto 60px;
+}
+
+.hint {
+    position: absolute;
+    top: -35px;
+    left: 40%;
+    width: 258px;
+    height: 52px;
+    background: #e5e5e5;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 20px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+.level-btn {
+    width: 100%;
+    max-width: 377px;
+    border: 2px solid black !important;
+    background: white !important;
+    color: black !important;
+    padding: 20px 16px !important;
+    font-size: 40px !important;
+    border-radius: 4px !important;
+    text-transform: none !important;
+    justify-content: flex-start !important;
+    display: block;
+    margin: 0 auto;
+}
+.olive-btn {
+    position: relative !important;
+    padding-right: 20px !important;
+    overflow: hidden !important;
+}
+
+.olive-canvas {
+    position: absolute !important;
+    top: 55%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: auto !important;
+    height: 70px !important;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.olive-btn > span {
+    width: 100%;
+    display: block;
+}

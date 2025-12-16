@@ -87,8 +87,7 @@ Cocktail.init(
       references: { model: "bars", key: "id" },
     },
     name: { type: DataTypes.STRING, allowNull: false },
-    description: { type: DataTypes.TEXT },
-    image: { type: DataTypes.STRING },
+    draw_file: { type: DataTypes.STRING },
   },
   {
     sequelize,

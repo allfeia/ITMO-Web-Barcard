@@ -151,7 +151,7 @@ describe('AdminRegisterBarmanForm', () => {
     });
 
     fillValidForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(await screen.findByText('Ошибка регистрации')).toBeInTheDocument();
   });
 });

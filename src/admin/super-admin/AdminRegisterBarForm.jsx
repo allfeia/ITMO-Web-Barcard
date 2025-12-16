@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../useAuth.js';
+import { useAuth } from '../../authContext/useAuth.js';
 
 
 export default function AdminRegisterBarForm() {

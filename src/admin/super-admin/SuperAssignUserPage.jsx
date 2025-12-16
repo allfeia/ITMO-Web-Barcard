@@ -11,7 +11,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {IconButton, InputAdornment} from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import Checkbox from '@mui/material/Checkbox';
-import { useAuth } from '../../useAuth.js';
+import { useAuth } from '../../authContext/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 import "../admin.css"
 

@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { useAuth } from '../../useAuth.js';
+import { useAuth } from '../../authContext/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 import "../admin.css";
 

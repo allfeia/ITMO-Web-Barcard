@@ -14,7 +14,7 @@ import SuperLoginPage from "./admin/super-admin/SuperLoginPage.jsx"
 import "./commonStyles.css";
 import { AuthProvider } from './authContext/AuthContext.jsx'
 import PersonalAccountPage from "./personal-acount-page/PersonalAccountPage.jsx";
-import LevelPage from "./LevelPage.jsx";
+import LevelPage from "./level-page/LevelPage.jsx";
 import FavouritesPage from "./favourites-page/FavouritesPage.jsx";
 
 import * as Sentry from "@sentry/react";

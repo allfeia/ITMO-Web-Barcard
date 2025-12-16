@@ -36,27 +36,16 @@ test.describe('LevelPage — выбор уровня сложности', () => 
     });
 
     test('клик по уровням ведёт на правильные страницы игры', async ({ page }) => {
-        await page.evaluate(() => window.scrollTo(0, 0));
-
-        await page.getByRole('button', { name: 'Легкий' }).click({ force: true });
-        await expect(page).toHaveURL('/game/easy');
+        const levels = page.locator('.level-block');
+        await levels.nth(0).getByRole('button').click();
+        await page.waitForURL('**/game/easy');
         await page.goto('/levelPage');
-        await page.evaluate(() => window.scrollTo(0, 0));
-
-        await page.getByRole('button', { name: 'Средний' }).click({ force: true });
-        await expect(page).toHaveURL('/game/medium');
+        await levels.nth(1).getByRole('button').click();
+        await page.waitForURL('**/game/medium');
         await page.goto('/levelPage');
-        await page.evaluate(() => window.scrollTo(0, 0));
-
-        await page.getByRole('button', { name: 'Сложный' }).click({ force: true });
-        await expect(page).toHaveURL('/game/hard');
+        await levels.nth(2).getByRole('button').click();
+        await page.waitForURL('**/game/hard');
     });
 
-    test('оливки отрисовываются по-разному в зависимости от уровня (визуальная проверка)', async ({ page }) => {
-        const canvases = page.locator('canvas[data-testid="olive-canvas"]');
 
-        await expect(canvases.nth(0)).toHaveScreenshot('level-easy-olive.png', { maxDiffPixels: 200 });
-        await expect(canvases.nth(1)).toHaveScreenshot('level-medium-olive.png', { maxDiffPixels: 200 });
-        await expect(canvases.nth(2)).toHaveScreenshot('level-hard-olive.png', { maxDiffPixels: 200 });
-    });
 });

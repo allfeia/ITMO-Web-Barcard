@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import LevelPage from '../../src/level-page/LevelPage';
 import drawOlive from '../../src/level-page/Olive.js';
+
+const mockNavigate = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+    };
+});
 
 vi.mock('../../src/level-page/Olive.js', () => ({
     default: vi.fn(),
@@ -10,8 +20,10 @@ vi.mock('../../src/level-page/Olive.js', () => ({
 
 describe('LevelPage', () => {
     beforeEach(() => {
+        mockNavigate.mockClear();
         vi.mocked(drawOlive).mockClear();
     });
+
     const renderLevelPage = () => {
         return render(
             <MemoryRouter>
@@ -19,23 +31,24 @@ describe('LevelPage', () => {
             </MemoryRouter>
         );
     };
+
     it('должна рендерить заголовок', () => {
         renderLevelPage();
-        expect(screen.getByText(/Выберите/i)).toBeInTheDocument();
-        expect(screen.getByText(/уровень/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Выберитеуровень' })).toBeInTheDocument();
     });
+
     it('должна рендерить кнопку назад', () => {
         renderLevelPage();
-        const backButton = screen.getByText('←');
+        const backButton = screen.getByTestId('back-button');
         expect(backButton).toBeInTheDocument();
-        expect(backButton.closest('button')).toHaveClass('back-btn');
+        expect(backButton).toHaveClass('back-btn');
     });
 
     it('должна рендерить три кнопки уровней с правильным текстом', () => {
         renderLevelPage();
-        expect(screen.getByText('Легкий')).toBeInTheDocument();
-        expect(screen.getByText('Средний')).toBeInTheDocument();
-        expect(screen.getByText('Сложный')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Легкий' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Средний' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Сложный' })).toBeInTheDocument();
     });
 
     it('должна рендерить подсказки (hint) над каждой кнопкой', () => {
@@ -53,26 +66,29 @@ describe('LevelPage', () => {
 
     it('должна иметь обработчик клика на кнопке назад', () => {
         renderLevelPage();
-        act(() => {
-            screen.getByText('←').click();
-        });
+        fireEvent.click(screen.getByTestId('back-button'));
+        expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
 
     it('должна иметь обработчики клика на кнопках уровней', () => {
         renderLevelPage();
-        act(() => {
-            screen.getByText('Легкий').click();
-            screen.getByText('Средний').click();
-            screen.getByText('Сложный').click();
-        });
+        fireEvent.click(screen.getByRole('button', { name: 'Легкий' }));
+        expect(mockNavigate).toHaveBeenCalledWith('/game/easy');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Средний' }));
+        expect(mockNavigate).toHaveBeenCalledWith('/game/medium');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Сложный' }));
+        expect(mockNavigate).toHaveBeenCalledWith('/game/hard');
     });
 
     it('должна вызывать drawOlive при монтировании с правильными аргументами', () => {
         renderLevelPage();
+        const canvases = screen.getAllByTestId('olive-canvas');
 
         expect(drawOlive).toHaveBeenCalledTimes(3);
-        expect(drawOlive).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 1);
-        expect(drawOlive).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 2);
-        expect(drawOlive).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 3);
+        expect(drawOlive).toHaveBeenCalledWith(canvases[0], 1);
+        expect(drawOlive).toHaveBeenCalledWith(canvases[1], 2);
+        expect(drawOlive).toHaveBeenCalledWith(canvases[2], 3);
     });
 });

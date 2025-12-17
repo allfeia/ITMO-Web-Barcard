@@ -51,7 +51,7 @@ describe('LevelPage', () => {
         expect(screen.getByRole('button', { name: 'Сложный' })).toBeInTheDocument();
     });
 
-    it('должна рендерить подсказки (hint) над каждой кнопкой', () => {
+    it('должна рендерить подсказки hint над каждой кнопкой', () => {
         renderLevelPage();
         expect(screen.getByText('С подсказками без штрафов')).toBeInTheDocument();
         expect(screen.getByText('С подсказками и штрафами')).toBeInTheDocument();

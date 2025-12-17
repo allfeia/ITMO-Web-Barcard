@@ -24,7 +24,6 @@ export default function LevelPage() {
                     className="back-btn"
                     variant="text"
                     onClick={() => navigate(-1)}
-                    data-testid="back-button"
                 >
                     <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
                 </Button>

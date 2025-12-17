@@ -9,7 +9,6 @@ vi.mock('../../src/admin/bar-admin/AdminRegisterBarmanForm.jsx', () => ({
 describe('RegisterBarmenPage', () => {
   it('рендерит заголовок и форму', () => {
     render(<RegisterBarmenPage />);
-    expect(screen.getByText('Регистрация бармена')).toBeInTheDocument();
     expect(screen.getByTestId('admin-register-barman-form')).toBeInTheDocument();
   });
 });

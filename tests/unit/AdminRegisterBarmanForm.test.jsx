@@ -48,7 +48,7 @@ describe('AdminRegisterBarmanForm', () => {
   it('показывает ошибки валидации при пустых полях', async () => {
     render(<AdminRegisterBarmanForm />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
     expect(await screen.findByText('Введите имя')).toBeInTheDocument();
     expect(screen.getByText('Введите логин')).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('AdminRegisterBarmanForm', () => {
     fireEvent.change(screen.getByLabelText('Почта'), { target: { value: 'ivan-at-example.com' } });
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'secret' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
     expect(await screen.findByText('Некорректный e‑mail')).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe('AdminRegisterBarmanForm', () => {
 
   fillValidForm();
 
-  fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
   expect(await screen.findByText('Нет контекста бара')).toBeInTheDocument();
   expect(fetchMock).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('AdminRegisterBarmanForm', () => {
     render(<AdminRegisterBarmanForm />);
     fillValidForm();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith('/api/super/users/register-in-bar', expect.objectContaining({
@@ -127,7 +127,7 @@ describe('AdminRegisterBarmanForm', () => {
 
     render(<AdminRegisterBarmanForm />);
     fillValidForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(await screen.findByText('Запрещено')).toBeInTheDocument();
 
     // 404
@@ -138,7 +138,7 @@ describe('AdminRegisterBarmanForm', () => {
     });
 
     fillValidForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(await screen.findByText('Не найдено')).toBeInTheDocument();
 
     // 500
@@ -150,7 +150,7 @@ describe('AdminRegisterBarmanForm', () => {
     });
 
     fillValidForm();
-    fireEvent.click(screen.getByRole('button', { name: 'Зарегистрировать' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(await screen.findByText('Ошибка регистрации')).toBeInTheDocument();
   });
 });

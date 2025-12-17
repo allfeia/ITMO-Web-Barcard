@@ -1,9 +1,3 @@
-body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
 .mode-container {
     width: 100%;
     max-width: 100%;
@@ -41,7 +35,6 @@ body {
     text-align: left;
     position: relative;
     transition: box-shadow 0.15s ease, transform 0.15s ease;
-
     text-decoration: none;  
     display: block;          
 }
@@ -53,14 +46,17 @@ body {
     text-decoration: none;
     color: #333;
 }
+
 .mode-button:active {
     box-shadow: 0 0 45px rgb(1, 1, 1);
     transform: scale(0.98);
 }
+
 .mode-button canvas {
     position: absolute;
     z-index: 0;
 }
+
 .mode-button span {
     position: relative;
     z-index: 1;

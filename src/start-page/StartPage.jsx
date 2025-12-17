@@ -52,7 +52,7 @@ function StartPage() {
 
     return (
         <div className="StartPage">
-            <h1 className="title">Barcard</h1>
+            <h1 className="titleStart">Barcard</h1>
             <div className="tracks-container">
                 <div className="tracks-rotated">
                     {tracks.map((track, trackIndex) => (

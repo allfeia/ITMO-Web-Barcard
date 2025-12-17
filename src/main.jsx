@@ -39,63 +39,63 @@ if (import.meta.env.MODE === 'development') {
 }
 
 createRoot(document.getElementById('root')).render(
- <BrowserRouter>
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<StartPage />} />
-        <Route path="/signInPage" element={<SignInPage />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/account" element={<PersonalAccountPage />} />
-        <Route path="/levelPage" element={<LevelPage />} />
-        <Route path="/favourities" element={<FavouritesPage />} />
-        
-        {/* Супер-админ*/}
-          <Route path="/super/login" element={<SuperLoginPage />} />
-          <Route
-            path="/super/bars/new"
-            element={
-              <ProtectedRoute allow={['super_admin']}>
-                <AdminRegisterBarForm />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/super/assign"
-            element={
-              <ProtectedRoute allow={['super_admin']}>
-                <SuperAssignUserPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/super/grant"
-            element={
-              <ProtectedRoute allow={['super_admin']}>
-                <SuperGrantBarAdminPage />
-              </ProtectedRoute>
-            }
-          />
+    <BrowserRouter>
+        <AuthProvider>
+            <Routes>
+                <Route path="/" element={<StartPage />} />
+                <Route path="/signInPage" element={<SignInPage />} />
+                <Route path="/menu" element={<MenuPage />} />
+                <Route path="/account" element={<PersonalAccountPage />} />
+                <Route path="/levelPage" element={<LevelPage />} />
+                <Route path="/favourities" element={<FavouritesPage />} />
 
-          {/* Бар-админ */}
-          <Route
-            path="/admin/staff/register"
-            element={
-              <ProtectedRoute allow={['bar_admin']}>
-                <AdminRegisterBarmanForm />
-              </ProtectedRoute>
-            }
-          />
+                {/* Супер-админ*/}
+                <Route path="/super/login" element={<SuperLoginPage />} />
+                <Route
+                    path="/super/bars/new"
+                    element={
+                        <ProtectedRoute allow={['super_admin']}>
+                            <AdminRegisterBarForm />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/super/assign"
+                    element={
+                        <ProtectedRoute allow={['super_admin']}>
+                            <SuperAssignUserPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/super/grant"
+                    element={
+                        <ProtectedRoute allow={['super_admin']}>
+                            <SuperGrantBarAdminPage />
+                        </ProtectedRoute>
+                    }
+                />
 
-          {/* Общая админская страница */}
-          <Route
-            path="/administration"
-            element={
-              <ProtectedRoute allow={['super_admin','bar_admin']}>
-                <AdminPage />
-              </ProtectedRoute>
-            }
-          />
-      </Routes>
-    </AuthProvider>
-  </BrowserRouter>
+                {/* Бар-админ */}
+                <Route
+                    path="/admin/staff/register"
+                    element={
+                        <ProtectedRoute allow={['bar_admin']}>
+                            <AdminRegisterBarmanForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Общая админская страница */}
+                <Route
+                    path="/administration"
+                    element={
+                        <ProtectedRoute allow={['super_admin','bar_admin']}>
+                            <AdminPage />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </AuthProvider>
+    </BrowserRouter>
 )

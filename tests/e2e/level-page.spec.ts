@@ -8,13 +8,10 @@ test.describe('LevelPage — выбор уровня сложности', () => 
 
     test('отображает заголовок, подсказки, кнопки уровней и оливки отрисованы', async ({ page }) => {
         await expect(page.getByRole('heading', { name: /Выберите уровень/i })).toBeVisible();
-
-        await expect(page.getByRole('button', { name: '←' })).toBeVisible();
-
+        await expect(page.getByTestId('back-button')).toBeVisible();
         await expect(page.getByText('С подсказками без штрафов')).toBeVisible();
         await expect(page.getByText('С подсказками и штрафами')).toBeVisible();
         await expect(page.getByText('Без подсказок и штрафами за ошибки')).toBeVisible();
-
         await expect(page.getByRole('button', { name: 'Легкий' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Средний' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Сложный' })).toBeVisible();
@@ -31,22 +28,22 @@ test.describe('LevelPage — выбор уровня сложности', () => 
     });
 
     test('клик по кнопке ← возвращает назад', async ({ page }) => {
-        await page.getByRole('button', { name: '←' }).click();
+        await page.getByTestId('back-button').click();
         await expect(page).not.toHaveURL('/levelPage');
     });
 
     test('клик по уровням ведёт на правильные страницы игры', async ({ page }) => {
         const levels = page.locator('.level-block');
+
         await levels.nth(0).getByRole('button').click();
         await page.waitForURL('**/game/easy');
         await page.goto('/levelPage');
+
         await levels.nth(1).getByRole('button').click();
         await page.waitForURL('**/game/medium');
         await page.goto('/levelPage');
+
         await levels.nth(2).getByRole('button').click();
         await page.waitForURL('**/game/hard');
     });
-
-
-
 });

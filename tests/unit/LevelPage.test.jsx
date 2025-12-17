@@ -34,7 +34,7 @@ describe('LevelPage', () => {
 
     it('должна рендерить заголовок', () => {
         renderLevelPage();
-        expect(screen.getByRole('heading', { name: /выберите уровень/i })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Выберитеуровень' })).toBeInTheDocument();
     });
 
     it('должна рендерить кнопку назад', () => {

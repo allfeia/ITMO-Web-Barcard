@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import drawOlive from "./Olive.js";
 import "./LevelPage.css";
+import WestIcon from '@mui/icons-material/West';
 
 export default function LevelPage() {
     const navigate = useNavigate();
@@ -24,7 +25,7 @@ export default function LevelPage() {
                 variant="text"
                 onClick={() => navigate(-1)}
             >
-                ←
+                <WestIcon className="learn-arrow" sx={{ fontSize: "30px" }} />
             </Button>
             <h1 className="title">
                 Выберите<br />уровень

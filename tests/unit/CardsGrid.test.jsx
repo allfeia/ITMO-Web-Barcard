@@ -1,18 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CardsGrid from "../../src/menu-page/CardsGrid.jsx";
-import {drawCocktailMap} from "../../src/menu-page/menu-cocktails/drawCocktailMap.js";
 import drawHeartIcon from "../../src/icons/heartIcon.js";
+import { drawCocktailMap } from "../../src/menu-page/menu-cocktails/drawCocktailMap.js";
 
-vi.mock("../../src/authContext/useAuth.js", () => ({
-    useAuth: () => ({
-        savedCocktailsId: mockSavedIds,
-        setSavedCocktailsId: mockSetSavedIds,
-    }),
-}));
-
-vi.mock("../../src/icons/heartIcon.js", () => ({
-    default: vi.fn(),
+vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
+    default: ({ open, cocktail }) =>
+        open ? <div data-testid="recipe-modal">{cocktail.name}</div> : null,
 }));
 
 vi.mock("../../src/menu-page/menu-cocktails/drawCocktailMap.js", () => ({
@@ -24,17 +18,20 @@ vi.mock("../../src/menu-page/menu-cocktails/drawCocktailMap.js", () => ({
 }));
 
 vi.mock("../../src/icons/heartIcon.js", () => ({
-    default: vi.fn()
-}))
-
-vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
-    default: ({ open, cocktail }) =>
-        open ? <div data-testid="recipe-modal">{cocktail.name}</div> : null,
+    default: vi.fn(),
 }));
 
+vi.mock("../../src/authContext/useAuth.js", () => ({
+    useAuth: () => ({
+        isBarman: true,
+        token: "fake-jwt-token",
+        savedCocktailsId: mockSavedIds,
+        setSavedCocktailsId: mockSetSavedIds,
+    }),
+}));
 
-let mockSavedIds;
-let mockSetSavedIds;
+let mockSavedIds = [];
+let mockSetSavedIds = vi.fn();
 
 beforeEach(() => {
     mockSavedIds = [];
@@ -46,12 +43,14 @@ beforeEach(() => {
         }
     });
 
-
     global.fetch = vi.fn(() =>
         Promise.resolve({
-            json: () => Promise.resolve({ cocktailId: 1 }),
+            json: () => Promise.resolve({ cocktailId: expect.any(Number) }),
         })
     );
+
+    drawHeartIcon.mockClear();
+    Object.values(drawCocktailMap).forEach(mock => mock.mockClear());
 });
 
 const cocktails = [
@@ -61,7 +60,6 @@ const cocktails = [
 ];
 
 describe("CardsGrid", () => {
-
     it("рендерит карточки", () => {
         render(<CardsGrid cocktails={cocktails} />);
 
@@ -81,9 +79,14 @@ describe("CardsGrid", () => {
     it("вызывает drawHeartIcon для каждого сердца", () => {
         render(<CardsGrid cocktails={cocktails} />);
 
-        expect(drawHeartIcon).toHaveBeenCalled();
-        const canvasRef = screen.getAllByTestId("favourites-canvas");
-        expect(canvasRef).toHaveLength(3);
+        expect(drawHeartIcon).toHaveBeenCalledTimes(3);
+        expect(drawHeartIcon).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), {
+            color: "#333",
+            filled: false,
+        });
+
+        const heartCanvases = screen.getAllByTestId("favourites-canvas");
+        expect(heartCanvases).toHaveLength(3);
     });
 
     it("открывает модалку с рецептом при клике", () => {
@@ -95,39 +98,40 @@ describe("CardsGrid", () => {
     });
 
     it("добавляет коктейль в избранное при клике на сердечко", async () => {
-    render(<CardsGrid cocktails={cocktails} />);
+        render(<CardsGrid cocktails={cocktails} />);
 
-    const heart = screen.getAllByTestId("favourites-canvas")[0];
+        const hearts = screen.getAllByTestId("favourites-canvas");
+        fireEvent.click(hearts[0]);
 
-    fireEvent.click(heart);
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith("/api/favourites/add/1", {
+                method: "PATCH",
+                headers: { Authorization: "Bearer fake-jwt-token" },
+            });
+        });
 
-    await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith("/api/favourites/add/1", {
-            method: "PATCH",
-            headers: { Authorization: "Bearer undefined" }, 
+        await waitFor(() => {
+            expect(mockSetSavedIds).toHaveBeenCalledWith(expect.any(Function));
         });
     });
 
-    await waitFor(() => {
-        expect(mockSetSavedIds).toHaveBeenCalled();
-    });
-});
+    it("удаляет из избранного, если уже в избранном", async () => {
+        mockSavedIds = [2];
 
-it("удаляет из избранного, если уже в избранном", async () => {
-    mockSavedIds = [2];
+        render(<CardsGrid cocktails={cocktails} />);
 
-    render(<CardsGrid cocktails={cocktails} />);
+        const hearts = screen.getAllByTestId("favourites-canvas");
+        fireEvent.click(hearts[1]);
 
-    const heart = screen.getAllByTestId("favourites-canvas")[1];
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith("/api/favourites/remove/2", {
+                method: "DELETE",
+                headers: { Authorization: "Bearer fake-jwt-token" },
+            });
+        });
 
-    fireEvent.click(heart);
-
-    await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith("/api/favourites/remove/2", {
-            method: "DELETE",
-            headers: { Authorization: "Bearer undefined" },
+        await waitFor(() => {
+            expect(mockSetSavedIds).toHaveBeenCalledWith(expect.any(Function));
         });
     });
-});
-
 });

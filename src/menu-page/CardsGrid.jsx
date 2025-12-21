@@ -12,7 +12,7 @@ function CardsGrid({ cocktails }) {
     const [selectedCocktail, setSelectedCocktail] = useState(null);
     const canvasRefsHeart = useRef({});
 
-    const { setSavedCocktailsId, savedCocktailsId, token } = useAuth();
+    const { setSavedCocktailsId, savedCocktailsId, token, isBarman  } = useAuth();
 
     const openModal = (cocktail) => {
         setSelectedCocktail(cocktail)
@@ -32,6 +32,7 @@ function CardsGrid({ cocktails }) {
     }, [cocktails]);
 
     useEffect(() => {
+        if (!isBarman) return;
         cocktails.forEach(cocktail => {
             const canvas = canvasRefsHeart.current[cocktail.id];
             if (canvas) {
@@ -39,10 +40,11 @@ function CardsGrid({ cocktails }) {
                 drawHeartIcon(canvas, { color: '#333', filled: isFilled });
             }
         });
-    }, [cocktails, savedCocktailsId]);
+    }, [cocktails, savedCocktailsId, isBarman]);
 
 
     const addFavouriteCocktail = (cocktailId) => {
+        if (!isBarman) return;
         fetch(`/api/favourites/add/${cocktailId}`, {
             method: "PATCH",
             headers: { Authorization: `Bearer ${token}` },
@@ -57,6 +59,7 @@ function CardsGrid({ cocktails }) {
     };
 
     const removeFavouriteCocktail = (cocktailId) => {
+        if (!isBarman) return;
         fetch(`/api/favourites/remove/${cocktailId}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },

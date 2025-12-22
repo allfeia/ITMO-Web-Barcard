@@ -5,6 +5,10 @@
     align-items: center;
     min-height: 100vh;
     display: flex;
+    max-width: 100%;
+    flex-direction: column;
+    box-sizing: border-box;
+    position: relative;
 }
 
 .back-btn {
@@ -12,17 +16,21 @@
     min-width: 0 !important;
     padding: 0 !important;
     color: #333 !important;
-    align-self: flex-start;
+    margin-left: 20px;
+    position: absolute !important;
+    left: 20px;
+    top: 20px;
 }
 
 .title {
     font-size: clamp(64px, 8vw, 72px);
     font-weight: 700;
-    margin: 15px auto 50px;
+    margin: 70px auto 50px;
     max-width: 377px;
     text-align: left;
     pointer-events: none;
     color : #333;
+    width: 100%;
 }
 
 .level-block {

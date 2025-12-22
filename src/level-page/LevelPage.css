@@ -14,11 +14,12 @@
 
 .title {
     font-size: clamp(64px, 8vw, 72px);
-    font-weight: 500;
-    margin: 50px auto 50px;
+    font-weight: 700;
+    margin: 25px auto 50px;
     max-width: 377px;
     text-align: left;
     pointer-events: none;
+    color : #333;
 }
 
 .level-block {

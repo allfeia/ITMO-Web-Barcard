@@ -100,7 +100,7 @@ router.post("/barman/auth", async (req, res) => {
 
     if (!user.password)
       return res.status(403).json({
-          error: { password: "Пароль не установлен" }
+          errors: { password: "Пароль не установлен" }
       });
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {

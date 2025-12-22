@@ -101,7 +101,7 @@ describe('BarmanAuthForm', () => {
                 ok: false,
                 status: 403,
                 json: () => Promise.resolve({
-                    error: { password: "Неверный пароль" },
+                    errors: { password: "Неверный пароль" },
                 }),
             })
         );
@@ -135,7 +135,7 @@ describe('BarmanAuthForm', () => {
                 ok: false,
                 status: 403,
                 json: () => Promise.resolve({
-                    error: { barKey: "Неверный ключ бара" }
+                    errors: { barKey: "Неверный ключ бара" }
                 }),
             })
         );

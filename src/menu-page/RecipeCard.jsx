@@ -27,7 +27,7 @@ function RecipeCard({ open, onClose, cocktail }) {
     }, [open, cocktail?.id]);
 
     const formatIngredientLine = (name, amountStr) => {
-        const totalWidth = 30;
+        const totalWidth = 22;
         const namePart = name;
         const amountPart = amountStr || "";
 
@@ -66,7 +66,7 @@ function RecipeCard({ open, onClose, cocktail }) {
                                 {recipeData.name}
                             </Typography>
 
-                            {/* Основной контейнер для секций */}
+
                             <Box className="recipe-sections">
                                 <Typography variant="h7" className="recipeHeader">Ингредиенты</Typography>
                                 <Box className="recipe-content">

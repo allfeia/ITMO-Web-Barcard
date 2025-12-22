@@ -74,9 +74,13 @@ router.post("/barman/auth", async (req, res) => {
     const bar = await Bar.findByPk(barId);
     if (!bar) return res.status(404).json({ error: "Бар не найден" });
 
+    const errors = {};
+
     const okKey = await bcrypt.compare(barKey, bar.pass_key);
     if (!okKey) {
-      return res.status(403).json({ error: "Неверный ключ бара" });
+        return res.status(403).json({
+            errors: { barKey: "Неверный ключ бара" },
+        });
     }
 
     const user = await User.findOne({
@@ -95,9 +99,19 @@ router.post("/barman/auth", async (req, res) => {
         .json({ error: "Пользователь привязан к другому бару" });
 
     if (!user.password)
-      return res.status(403).json({ error: "Пароль не установлен" });
+      return res.status(403).json({
+          errors: { password: "Пароль не установлен" }
+      });
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(403).json({ error: "Неверный пароль" });
+    if (!ok) {
+        return res.status(403).json({
+            errors: { password: "Неверный пароль" },
+        });
+    }
+
+    if (Object.keys(errors).length > 0) {
+        return res.status(403).json({ errors });
+    }
 
     const favourites = await UserFavourite.findAll({
       where: { user_id: user.id },

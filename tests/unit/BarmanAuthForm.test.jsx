@@ -100,7 +100,9 @@ describe('BarmanAuthForm', () => {
             Promise.resolve({
                 ok: false,
                 status: 403,
-                json: () => Promise.resolve({ error: "Неверный пароль" }),
+                json: () => Promise.resolve({
+                    errors: { password: "Неверный пароль" },
+                }),
             })
         );
 
@@ -118,7 +120,11 @@ describe('BarmanAuthForm', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
-        expect(await screen.findByText(/Неверный пароль/i)).toBeInTheDocument();
+        expect(
+            await screen.findByText((text) =>
+                text.includes("Неверный пароль")
+            )
+        ).toBeInTheDocument();
     });
 
     it('показывает ошибку при неверном барном ключе', async () => {
@@ -128,7 +134,9 @@ describe('BarmanAuthForm', () => {
             Promise.resolve({
                 ok: false,
                 status: 403,
-                json: () => Promise.resolve({ error: "Неверный барный ключ" }),
+                json: () => Promise.resolve({
+                    errors: { barKey: "Неверный ключ бара" }
+                }),
             })
         );
 
@@ -146,7 +154,11 @@ describe('BarmanAuthForm', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
-        expect(await screen.findByText(/Неверный барный ключ/i)).toBeInTheDocument();
+        expect(
+            await screen.findByText((text) =>
+                text.includes("Неверный ключ бара")
+            )
+        ).toBeInTheDocument();
     });
 
 

@@ -9,7 +9,6 @@ import drawUserIcon from "./icons/userIcon.js";
 function CocktailListPage({
                                              cocktails,
                                              title,
-                                             showBarLink = false,
                                              barName = "",
                                              barSite = "",
                                              showAccountIcon = false,
@@ -44,9 +43,8 @@ function CocktailListPage({
 
             <h1 className="menu-template-title">{title}</h1>
 
-            {showBarLink && (
-                <a className="bar-name" href={barSite}>{barName}</a>
-            )}
+            <a className="bar-name" href={barSite}>{barName}</a>
+
 
             <div className="cocktail-search-container">
                 <TextField

@@ -20,14 +20,15 @@ export default function LevelPage() {
 
     return (
         <div className="page">
-                <Button
-                    className="back-btn"
-                    variant="text"
-                    onClick={() => navigate(-1)}
-                    data-testid="back-button"
-                >
-                    <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
-                </Button>
+            <Button
+                className="back-btn"
+                variant="text"
+                onClick={() => navigate(-1)}
+                data-testid="back-button"
+            >
+                <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
+            </Button>
+            <div className="page-content">
                 <h1 className="title">
                     Выберите<br/>уровень
                 </h1>
@@ -68,5 +69,6 @@ export default function LevelPage() {
                     </Button>
                 </div>
             </div>
+        </div>
             );
             }

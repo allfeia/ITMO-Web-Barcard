@@ -29,7 +29,6 @@ function MenuPage() {
         <CocktailListPage
             cocktails={cocktails}
             title="Выберите коктейль"
-            showBarLink={true}
             barName={barName}
             barSite={barSite}
             showAccountIcon={isBarman}

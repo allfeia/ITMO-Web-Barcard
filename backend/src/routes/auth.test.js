@@ -141,7 +141,11 @@ describe("auth endpoints", () => {
         .post("/auth/barman/auth")
         .send({ barId: 2, username: "u", password: "p", barKey: "bad" });
       expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "Неверный ключ бара" });
+      expect(res.body).toEqual({
+          errors: {
+              barKey: "Неверный ключ бара",
+          },
+      });
     });
 
     it("404 user not found", async () => {
@@ -212,7 +216,11 @@ describe("auth endpoints", () => {
         .post("/auth/barman/auth")
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
       expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "Пароль не установлен" });
+      expect(res.body).toEqual({
+          errors: {
+              password: "Пароль не установлен",
+          },
+      });
     });
 
     it("403 wrong password", async () => {
@@ -232,7 +240,11 @@ describe("auth endpoints", () => {
         .post("/auth/barman/auth")
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
       expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "Неверный пароль" });
+      expect(res.body).toEqual({
+          errors: {
+              password: "Неверный пароль",
+          },
+      });
     });
 
     it("200 login ok", async () => {

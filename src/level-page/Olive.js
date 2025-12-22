@@ -36,8 +36,8 @@ export default function drawOlive(canvas, count = 1) {
     const dpr = window.devicePixelRatio || 1;
 
     const oliveSize = 70;
-    const gap = 45;
-    const scale = 0.3;
+    const gap = 38;
+    const scale = 0.25;
     const quality = 2;
 
     const cssWidth = oliveSize + (count - 1) * gap;

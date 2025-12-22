@@ -95,7 +95,7 @@
 .olive-canvas {
     position: absolute !important;
     top: 55%;
-    right: 10px;
+    right: 3px;
     transform: translateY(-50%);
     width: auto !important;
     height: 70px !important;

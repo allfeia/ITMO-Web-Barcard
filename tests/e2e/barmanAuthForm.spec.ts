@@ -58,7 +58,9 @@ test.describe('BarmanAuthForm E2E', () => {
             await route.fulfill({
                 status: 403,
                 contentType: 'application/json',
-                body: JSON.stringify({ error: 'Неверный пароль' }),
+                body: JSON.stringify({
+                    errors: { password: 'Неверный пароль' }
+                }),
             });
         });
 

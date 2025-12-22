@@ -120,7 +120,11 @@ describe('BarmanAuthForm', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
-        expect(await screen.findByText(/Неверный пароль/i)).toBeInTheDocument();
+        expect(
+            await screen.findByText((text) =>
+                text.includes("Неверный пароль")
+            )
+        ).toBeInTheDocument();
     });
 
     it('показывает ошибку при неверном барном ключе', async () => {
@@ -150,7 +154,11 @@ describe('BarmanAuthForm', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
-        expect(await screen.findByText(/Неверный ключ бара/i)).toBeInTheDocument();
+        expect(
+            await screen.findByText((text) =>
+                text.includes("Неверный ключ бара")
+            )
+        ).toBeInTheDocument();
     });
 
 

@@ -99,7 +99,9 @@ router.post("/barman/auth", async (req, res) => {
         .json({ error: "Пользователь привязан к другому бару" });
 
     if (!user.password)
-      return res.status(403).json({ error: "Пароль не установлен" });
+      return res.status(403).json({
+          error: { password: "Пароль не установлен" }
+      });
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
         return res.status(403).json({

@@ -2,6 +2,8 @@
     width: 100%;
     padding: 20px;
     font-family: sans-serif;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .back-btn {
@@ -15,7 +17,7 @@
 .title {
     font-size: clamp(64px, 8vw, 72px);
     font-weight: 700;
-    margin: 25px auto 50px;
+    margin: 15px auto 50px;
     max-width: 377px;
     text-align: left;
     pointer-events: none;

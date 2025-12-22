@@ -78,7 +78,9 @@ router.post("/barman/auth", async (req, res) => {
 
     const okKey = await bcrypt.compare(barKey, bar.pass_key);
     if (!okKey) {
-        errors.barKey = "Неверный ключ бара";
+        return res.status(403).json({
+            errors: { barKey: "Неверный ключ бара" },
+        });
     }
 
     const user = await User.findOne({
@@ -100,7 +102,9 @@ router.post("/barman/auth", async (req, res) => {
       return res.status(403).json({ error: "Пароль не установлен" });
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
-        errors.password = "Неверный пароль";
+        return res.status(403).json({
+            errors: { password: "Неверный пароль" },
+        });
     }
 
     if (Object.keys(errors).length > 0) {

@@ -131,7 +131,7 @@ describe('BarmanAuthForm', () => {
                 ok: false,
                 status: 403,
                 json: () => Promise.resolve({
-                    error: { barKey: "Неверный барный ключ" }
+                    error: { barKey: "Неверный ключ бара" }
                 }),
             })
         );
@@ -150,7 +150,7 @@ describe('BarmanAuthForm', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
-        expect(await screen.findByText(/Неверный барный ключ/i)).toBeInTheDocument();
+        expect(await screen.findByText(/Неверный ключ бара/i)).toBeInTheDocument();
     });
 
 

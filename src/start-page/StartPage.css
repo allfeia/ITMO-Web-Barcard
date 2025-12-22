@@ -21,7 +21,7 @@
     top: 20.3%;
     left: 50%;
     transform: translateX(-50%);
-    font-weight: 500;
+    font-weight: 700;
     font-size: clamp(64px, 13vw, 72px);
 }
 

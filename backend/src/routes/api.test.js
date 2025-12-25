@@ -31,19 +31,21 @@ vi.mock("bcryptjs", () => ({
 import router from "./api.js";
 import { Bar, User, Point, Cocktail, UserFavourite } from "../models.js";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 function appWithRouter() {
   const app = express();
+  app.use(cookieParser());
   app.use(express.json());
   app.use("/api", router);
   return app;
 }
 
-function bearer(user) {
+function authCookie(user) {
   const token = jwt.sign(user, process.env.JWT_SECRET || "dev", {
     expiresIn: "1h",
   });
-  return `Bearer ${token}`;
+  return `access_token=${token}`;
 }
 
 describe("api router", () => {
@@ -61,16 +63,16 @@ describe("api router", () => {
   describe("GET /me", () => {
     it("401 if no user id in token", async () => {
       const app = appWithRouter();
-      const auth = bearer({ roles: ["user"] }); // без id
-      const res = await request(app).get("/api/me").set("Authorization", auth);
+      const auth = authCookie({ roles: ["user"] }); // без id
+      const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(res.status).toBe(401);
     });
 
     it("404 if user not found", async () => {
       User.findByPk.mockResolvedValue(null);
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["user"] });
-      const res = await request(app).get("/api/me").set("Authorization", auth);
+      const auth = authCookie({ id: 1, roles: ["user"] });
+      const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(User.findByPk).toHaveBeenCalledWith(1, {
         attributes: ["id", "email", "login", "name", "roles", "bar_id"],
       });
@@ -91,8 +93,8 @@ describe("api router", () => {
       Point.findOne.mockResolvedValue({ get: vi.fn().mockReturnValue("42") });
 
       const app = appWithRouter();
-      const auth = bearer({ id: 2, roles: ["user"] });
-      const res = await request(app).get("/api/me").set("Authorization", auth);
+      const auth = authCookie({ id: 2, roles: ["user"] });
+      const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
         id: 2,
@@ -108,8 +110,8 @@ describe("api router", () => {
     it("handles server error", async () => {
       User.findByPk.mockRejectedValue(new Error("db down"));
       const app = appWithRouter();
-      const auth = bearer({ id: 3, roles: ["user"] });
-      const res = await request(app).get("/api/me").set("Authorization", auth);
+      const auth = authCookie({ id: 3, roles: ["user"] });
+      const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Server error" });
     });
@@ -118,10 +120,10 @@ describe("api router", () => {
   describe("GET /admin/bars", () => {
     it("requires super_admin", async () => {
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["user"] });
+      const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app)
         .get("/api/admin/bars")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(403);
     });
 
@@ -131,10 +133,10 @@ describe("api router", () => {
         { id: 2, name: "B" },
       ]);
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(200);
       expect(res.body).toEqual([
         { id: 1, name: "A" },
@@ -147,10 +149,10 @@ describe("api router", () => {
   describe("GET /bars?query=", () => {
     it("returns [] for empty query", async () => {
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/bars")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(200);
       expect(res.body).toEqual([]);
     });
@@ -158,10 +160,10 @@ describe("api router", () => {
     it("searches by name (ilike)", async () => {
       Bar.findAll.mockResolvedValue([{ id: 5, name: "Foo" }]);
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/bars?query=Fo")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(200);
       expect(res.body).toEqual([{ id: 5, name: "Foo" }]);
     });
@@ -170,10 +172,10 @@ describe("api router", () => {
   describe("POST /admin/bars", () => {
     it("400 on invalid payload", async () => {
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .post("/api/admin/bars")
-        .set("Authorization", auth)
+        .set("Cookie", auth)
         .send({ name: "", barKey: "" });
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ error: "Invalid payload" });
@@ -182,10 +184,10 @@ describe("api router", () => {
     it("201 on valid payload", async () => {
       Bar.create.mockResolvedValue({ id: 10, name: "NewBar" });
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .post("/api/admin/bars")
-        .set("Authorization", auth)
+        .set("Cookie", auth)
         .send({
           name: "NewBar",
           address: "Street 1",
@@ -207,10 +209,10 @@ describe("api router", () => {
   describe("GET /admin/bars/:barId/staff", () => {
     it("400 on invalid barId", async () => {
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars/xyz/staff")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ error: "Invalid bar id" });
     });
@@ -218,10 +220,10 @@ describe("api router", () => {
     it("404 if bar not found", async () => {
       Bar.findByPk.mockResolvedValue(null);
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars/7/staff")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: "Бар не найден" });
     });
@@ -247,10 +249,10 @@ describe("api router", () => {
         },
       ]);
       const app = appWithRouter();
-      const auth = bearer({ id: 1, roles: ["super_admin"] });
+      const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars/7/staff")
-        .set("Authorization", auth);
+        .set("Cookie", auth);
       expect(res.status).toBe(200);
       expect(res.body).toEqual([
         {
@@ -314,10 +316,10 @@ describe("POST /favourites", () => {
 
   it("400 invalid payload", async () => {
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .post("/api/favourites")
-      .set("Authorization", auth)
+      .set("Cookie", auth)
       .send({ savedCocktailsId: "not-array" });
     expect(res.status).toBe(400);
     expect(res.body.error).toBe("Invalid payload");
@@ -328,10 +330,10 @@ describe("POST /favourites", () => {
       { id: 1, name: "A", description: "d", image: "i", bar_id: 1 },
     ]);
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .post("/api/favourites")
-      .set("Authorization", auth)
+      .set("Cookie", auth)
       .send({ savedCocktailsId: [1] });
     expect(res.status).toBe(200);
     expect(res.body).toEqual([
@@ -349,10 +351,10 @@ describe("PATCH /favourites/add/:cocktailId", () => {
 
   it("400 invalid cocktail id", async () => {
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .patch("/api/favourites/add/abc")
-      .set("Authorization", auth);
+      .set("Cookie", auth);
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ error: "Invalid cocktail id" });
   });
@@ -360,10 +362,10 @@ describe("PATCH /favourites/add/:cocktailId", () => {
   it("404 cocktail not found", async () => {
     Cocktail.findByPk.mockResolvedValue(null);
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .patch("/api/favourites/add/5")
-      .set("Authorization", auth);
+      .set("Cookie", auth);
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: "Cocktail not found" });
   });
@@ -373,10 +375,10 @@ describe("PATCH /favourites/add/:cocktailId", () => {
     UserFavourite.findOrCreate.mockResolvedValue([{ id: 1 }, true]);
 
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .patch("/api/favourites/add/5")
-      .set("Authorization", auth);
+      .set("Cookie", auth);
 
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
@@ -394,10 +396,10 @@ describe("DELETE /favourites/remove/:cocktailId", () => {
 
   it("400 invalid cocktail id", async () => {
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .delete("/api/favourites/remove/abc")
-      .set("Authorization", auth);
+      .set("Cookie", auth);
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ error: "Invalid cocktail id" });
   });
@@ -405,10 +407,10 @@ describe("DELETE /favourites/remove/:cocktailId", () => {
   it("ok and deleted=false when nothing deleted", async () => {
     UserFavourite.destroy.mockResolvedValue(0);
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .delete("/api/favourites/remove/5")
-      .set("Authorization", auth);
+      .set("Cookie", auth);
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true, cocktailId: 5, deleted: false });
   });
@@ -416,10 +418,10 @@ describe("DELETE /favourites/remove/:cocktailId", () => {
   it("ok and deleted=true when record deleted", async () => {
     UserFavourite.destroy.mockResolvedValue(1);
     const app = appWithRouter();
-    const auth = bearer({ id: 1, roles: ["user"] });
+    const auth = authCookie({ id: 1, roles: ["user"] });
     const res = await request(app)
       .delete("/api/favourites/remove/5")
-      .set("Authorization", auth);
+      .set("Cookie", auth);
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true, cocktailId: 5, deleted: true });
   });

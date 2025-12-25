@@ -22,7 +22,6 @@ vi.mock("../../src/authContext/useAuth.js", async (importOriginal) => {
     return {
         ...actual,
         useAuth: () => ({
-            setToken: mockSetToken,
             setRoles: mockSetRoles,
             setBarName: mockSetBarName,
             setBarSite: mockSetBarSite,
@@ -36,7 +35,6 @@ describe('BarmanAuthForm', () => {
     beforeEach(() => {
         sessionStorage.clear();
         mockNavigate.mockClear();
-        mockSetToken.mockClear();
         mockSetRoles.mockClear();
         mockSetBarName.mockClear();
         mockSetBarSite.mockClear();
@@ -93,16 +91,14 @@ describe('BarmanAuthForm', () => {
         expect(consoleSpy).toHaveBeenCalledWith("Ошибка: barId не найден. QR не был сканирован.");
     });
 
-    it('показывает ошибку при неверном пароле', async () => {
+    it('показывает ошибку при неверных учетных данных', async () => {
         sessionStorage.setItem("barId", "1");
 
         global.fetch = vi.fn(() =>
             Promise.resolve({
                 ok: false,
                 status: 403,
-                json: () => Promise.resolve({
-                    errors: { password: "Неверный пароль" },
-                }),
+                json: () => Promise.resolve({ error: "Неверные учетные данные" }),
             })
         );
 
@@ -120,56 +116,18 @@ describe('BarmanAuthForm', () => {
 
         await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
 
-        expect(
-            await screen.findByText((text) =>
-                text.includes("Неверный пароль")
-            )
-        ).toBeInTheDocument();
-    });
-
-    it('показывает ошибку при неверном барном ключе', async () => {
-        sessionStorage.setItem("barId", "1");
-
-        global.fetch = vi.fn(() =>
-            Promise.resolve({
-                ok: false,
-                status: 403,
-                json: () => Promise.resolve({
-                    errors: { barKey: "Неверный ключ бара" }
-                }),
-            })
-        );
-
-        render(
-            <AuthProvider>
-                <MemoryRouter>
-                    <BarmanAuthForm />
-                </MemoryRouter>
-            </AuthProvider>
-        );
-
-        await userEvent.type(screen.getByLabelText(/Почта \/ Логин \/ Имя/i, { selector: 'input' }), 'user');
-        await userEvent.type(screen.getByLabelText(/Пароль/i, { selector: 'input' }), '123456');
-        await userEvent.type(screen.getByLabelText(/Барный ключ/i, { selector: 'input' }), 'wrongkey');
-
-        await userEvent.click(screen.getByRole('button', { name: /Войти/i }));
-
-        expect(
-            await screen.findByText((text) =>
-                text.includes("Неверный ключ бара")
-            )
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Неверные учетные данные")).toBeInTheDocument();
     });
 
 
-    it('успешный вход вызывает setToken, setRoles и navigate', async () => {
+    it('успешный вход вызывает setRoles и navigate', async () => {
         sessionStorage.setItem("barId", "1");
 
         global.fetch = vi.fn(() =>
             Promise.resolve({
                 ok: true,
                 status: 200,
-                json: () => Promise.resolve({ token: '123', user: { roles: ['BARMAN'] } }),
+                json: () => Promise.resolve({ user: { roles: ['BARMAN'] } }),
             })
         );
 
@@ -192,7 +150,6 @@ describe('BarmanAuthForm', () => {
         }));
 
         await waitFor(() => {
-            expect(mockSetToken).toHaveBeenCalledWith('123');
             expect(mockSetRoles).toHaveBeenCalledWith(['BARMAN']);
             expect(mockNavigate).toHaveBeenCalledWith("/menu");
         });

@@ -4,12 +4,12 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {IconButton, InputAdornment} from "@mui/material";
+import {IconButton, InputAdornment, Typography} from "@mui/material";
 import {useNavigate} from "react-router-dom";
 import { useAuth } from "../authContext/useAuth.js";
 
 export default function BarmanAuthForm() {
-    const { setToken, setRoles, setSavedCocktailsId, setBarName, setBarSite } = useAuth();
+    const { setRoles, setSavedCocktailsId, setBarName, setBarSite } = useAuth();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -18,6 +18,7 @@ export default function BarmanAuthForm() {
     const [usernameError, setUsernameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [barKeyError, setBarKeyError] = useState("");
+    const [loginError, setLoginError] = useState("");
 
     const [showPass, setShowPass] = useState(true);
     const [showKey, setShowKey] = useState(true);
@@ -55,6 +56,7 @@ export default function BarmanAuthForm() {
         try {
             const response = await fetch("/api/barman/auth", {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     barId:Number(barId),
@@ -67,20 +69,14 @@ export default function BarmanAuthForm() {
             const data = await response.json();
             console.log(data);
 
-            if (response.status === 403 && data.errors) {
-                setPasswordError(data.errors.password || "");
-                setBarKeyError(data.errors.barKey || "");
-                return;
-            }
 
             if (!response.ok) {
-                console.log("API ERROR:", data.error);
+                setLoginError(data.error || "Неверные учетные данные");
                 return;
             }
 
-            if (data?.token) {
-                setToken(data.token);
-                setRoles(Array.isArray(data?.user?.roles) ? data.user.roles : []);
+            if (response.ok) {
+                setRoles(data.user.roles);
                 setBarName(data.barName);
                 setBarSite(data.barSite);
                 setSavedCocktailsId(data.saved_cocktails_id);
@@ -127,7 +123,6 @@ export default function BarmanAuthForm() {
                             <IconButton onClick={() => setShowPass(!showPass)}>
                                 { showPass ? <VisibilityIcon /> : <VisibilityOffIcon /> }
                             </IconButton>
-
                         </InputAdornment>
                     ),
                 }}
@@ -150,11 +145,15 @@ export default function BarmanAuthForm() {
                             <IconButton onClick={() => setShowKey(!showKey)}>
                                 { showKey ? <VisibilityIcon /> : <VisibilityOffIcon /> }
                             </IconButton>
-
                         </InputAdornment>
                     ),
                 }}
             />
+            {loginError && !usernameError && !passwordError && !barKeyError && (
+                <Typography color="error" variant="body1">
+                    {loginError}
+                </Typography>
+            )}
 
             <Button variant="contained" type="submit" className="sign-in-form-button">
                 Войти

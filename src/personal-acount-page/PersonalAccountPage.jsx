@@ -13,7 +13,7 @@ function PersonalAccountPage() {
   const canvasRefStar = useRef(null);
   const canvasRefUser = useRef(null);
 
-  const { token, roles } = useAuth();
+  const { roles } = useAuth();
   const isBarAdmin = Array.isArray(roles) && roles.includes("bar_admin");
 
   const [username, setUsername] = useState('');
@@ -28,14 +28,13 @@ function PersonalAccountPage() {
   }, []);
 
   useEffect(() => {
-    if (!token) return; 
 
     let aborted = false;
 
     (async () => {
       try {
         const resp = await fetch('/api/me', {
-          headers: { Authorization: `Bearer ${token}` } 
+          credentials: 'include',
         });
         if (!resp.ok) {
           return;
@@ -50,7 +49,7 @@ function PersonalAccountPage() {
     })();
 
     return () => { aborted = true; };
-  }, [token]);
+  }, []);
 
   return (
     <div className="screen">

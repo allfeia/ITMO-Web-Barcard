@@ -12,7 +12,7 @@ import { useAuth } from '../../authContext/useAuth.js';
 
 export default function AdminRegisterBarmanForm() {
   const goTo = useNavigate();
-  const { token, roles, barId } = useAuth();
+  const { roles, barId } = useAuth();
 
   const [form, setForm] = useState({
     name: '',
@@ -97,9 +97,9 @@ async function onSubmit(e) {
   try {
     const resp = await fetch('/api/super/users/register-in-bar', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : undefined
       },
       body: JSON.stringify({
         barId: Number(sessionStorage.getItem('barId')),

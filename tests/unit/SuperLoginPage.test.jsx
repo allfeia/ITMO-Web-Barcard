@@ -17,7 +17,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 vi.mock('../../src/authContext/useAuth.js', () => ({
-  useAuth: () => ({ setToken, setRoles, setBarId }),
+  useAuth: () => ({ setRoles, setBarId }),
 }));
 
 describe('SuperLoginPage', () => {
@@ -34,10 +34,10 @@ describe('SuperLoginPage', () => {
     expect(await screen.findByText('Введите логин и пароль')).toBeInTheDocument();
   });
 
-  it('успешный логин выставляет токен/роли и редиректит', async () => {
+  it('успешный логин выставляет роли и редиректит', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ token: 'jwt', user: { roles: ['super_admin'] } }),
+      json: async () => ({ user: { roles: ['super_admin'] } }),
     });
 
     render(<SuperLoginPage />);
@@ -47,7 +47,6 @@ describe('SuperLoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Войти' }));
 
     await waitFor(() => {
-      expect(setToken).toHaveBeenCalledWith('jwt');
       expect(setRoles).toHaveBeenCalledWith(['super_admin']);
       expect(setBarId).toHaveBeenCalledWith(null);
       expect(goToMock).toHaveBeenCalledWith('/administration');

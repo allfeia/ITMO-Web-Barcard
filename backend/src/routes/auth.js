@@ -2,10 +2,19 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { User, Bar, UserFavourite } from "../models.js";
-import { signJwt, authRequired, requireRole } from "../middleware/auth.js";
+import {authRequired, requireRole, signJwt} from "../middleware/auth.js";
 import { Op } from "sequelize";
 
 const router = Router();
+
+function setAuthCookie(res, token) {
+    res.cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60,
+    });
+}
 
 const superLoginSchema = z.object({
   username: z.string().min(1),
@@ -20,34 +29,25 @@ router.post("/super/login", async (req, res) => {
         [Op.or]: [{ email: username }, { login: username }, { name: username }],
       },
     });
-    if (!user) return res.status(404).json({ error: "Not found" });
+    if (
+        !user ||
+        !user.password ||
+        !user.roles?.includes("super_admin") ||
+        !(await bcrypt.compare(password, user.password))
+    ) {
+        return res.status(404).json({ error: "Неверные учетные данные" });
+    }
 
-    const roles = new Set(user.roles || []);
-    if (!roles.has("super_admin"))
-      return res.status(403).json({ error: "Forbidden" });
-
-    if (!user.password)
-      return res.status(403).json({ error: "No password set" });
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(403).json({ error: "Invalid password" });
-
-    const token = signJwt({
-      id: user.id,
-      login: user.login,
-      email: user.email,
-      name: user.name,
-      roles: Array.from(roles),
-      bar_id: user.bar_id ?? null,
-    });
+    const token = signJwt(user);
+    setAuthCookie(res, token);
 
     return res.json({
-      token,
       user: {
         id: user.id,
         email: user.email,
         login: user.login,
         name: user.name,
-        roles: Array.from(roles),
+        roles: user.roles,
         bar_id: user.bar_id ?? null,
       },
     });
@@ -74,44 +74,29 @@ router.post("/barman/auth", async (req, res) => {
     const bar = await Bar.findByPk(barId);
     if (!bar) return res.status(404).json({ error: "Бар не найден" });
 
-    const errors = {};
 
-    const okKey = await bcrypt.compare(barKey, bar.pass_key);
-    if (!okKey) {
-        return res.status(403).json({
-            errors: { barKey: "Неверный ключ бара" },
-        });
+    if (!(await bcrypt.compare(barKey, bar.pass_key))) {
+        return res.status(403).json({ error: "Неверные учетные данные" });
     }
 
     const user = await User.findOne({
       where: {
+        bar_id: bar.id,
         [Op.or]: [{ email: username }, { login: username }, { name: username }],
       },
     });
 
-    if (!user) return res.status(404).json({ error: "Пользователь не найден" });
-    const roles = new Set(user.roles || []);
-    if (!roles.has("staff") && !roles.has("bar_admin"))
-      return res.status(403).json({ error: "Пользователь не сотрудник бара" });
-    if (user.bar_id !== bar.id)
-      return res
-        .status(403)
-        .json({ error: "Пользователь привязан к другому бару" });
-
-    if (!user.password)
-      return res.status(403).json({
-          errors: { password: "Пароль не установлен" }
-      });
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) {
-        return res.status(403).json({
-            errors: { password: "Неверный пароль" },
-        });
+    if (
+        !user ||
+        !user.password ||
+        !["staff", "bar_admin"].some(r => user.roles?.includes(r)) ||
+        !(await bcrypt.compare(password, user.password))
+    ) {
+        return res.status(403).json({ error: "Неверные учетные данные" });
     }
 
-    if (Object.keys(errors).length > 0) {
-        return res.status(403).json({ errors });
-    }
+    const token = signJwt(user);
+    setAuthCookie(res, token);
 
     const favourites = await UserFavourite.findAll({
       where: { user_id: user.id },
@@ -120,25 +105,16 @@ router.post("/barman/auth", async (req, res) => {
 
     const savedCocktailsId = favourites.map((f) => f.cocktail_id);
 
-    const token = signJwt({
-      id: user.id,
-      login: user.login,
-      email: user.email,
-      name: user.name,
-      roles: Array.from(roles),
-      bar_id: user.bar_id,
-    });
     return res.json({
       ok: true,
       mode: "login",
       message: "Успешный вход",
-      token,
       user: {
         id: user.id,
         email: user.email,
         login: user.login,
         name: user.name,
-        roles: Array.from(roles),
+        roles: user.roles,
         bar_id: user.bar_id,
       },
       barName: bar.name,
@@ -277,10 +253,21 @@ router.post(
       });
     } catch (e) {
       if (e.errors || e.issues)
-        return res.status(400).json({ error: 'Invalid payload' });
+        return  res.status(400).json({ error: 'Invalid payload' });
+      console.log(req.body);
       return res.status(500).json({ error: 'Server error' });
     }
   }
 );
+
+router.post("/logout", (req, res) => {
+    res.clearCookie("access_token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+    });
+    res.json({ ok: true });
+});
+
 
 export default router;

@@ -54,7 +54,8 @@ describe("authRequired", () => {
 
   it("responds 401 on invalid token", () => {
     const res = mkRes();
-    authRequired(mkReq({ authorization: "Bearer bad" }), res, next);
+    authRequired(
+        { cookies: { access_token: "bad" } }, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ error: "Invalid token" });
     expect(next).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe("authRequired", () => {
       { expiresIn: "1h" },
     );
     const res = mkRes();
-    const req = mkReq({ authorization: `Bearer ${token}` });
+    const req = { cookies: { access_token: token } };
     authRequired(req, res, next);
     expect(next).toHaveBeenCalled();
     expect(req.user.id).toBe(10);
@@ -85,11 +86,11 @@ describe("requireRole", () => {
 
   beforeEach(() => next.mockReset());
 
-  it("401 if no req.user", () => {
+  it("403 if no req.user", () => {
     const res = mkRes();
     requireRole("admin")({}, res, next);
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ error: "Unauthorized" });
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({ error: "Forbidden" });
     expect(next).not.toHaveBeenCalled();
   });
 

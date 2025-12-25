@@ -114,11 +114,7 @@ describe("StartPage", () => {
 
         renderWithAuth(<StartPage />);
 
-        expect(screen.getByText("Barcard")).toBeInTheDocument();
-        expect(screen.getByText("Начать")).toBeInTheDocument();
-
-        fireEvent.click(screen.getByText("Начать"));
-        expect(mockNavigate).not.toHaveBeenCalled();
+        expect(screen.getByText("Пожалуйста, отсканируйте QR-код, чтобы продолжить")).toBeInTheDocument();
 
         expect(sessionStorage.getItem("barId")).toBeNull();
         expect(sessionStorage.getItem("isBarman")).toBeNull();

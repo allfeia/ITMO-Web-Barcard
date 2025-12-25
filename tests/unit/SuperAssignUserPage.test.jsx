@@ -12,10 +12,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-vi.mock('../../src/authContext/useAuth.js', () => ({
-  useAuth: () => ({ token: 'jwt' }),
-}));
-
 
 describe('SuperAssignUserPage', () => {
   const fetchMock = vi.fn();
@@ -68,9 +64,9 @@ describe('SuperAssignUserPage', () => {
         '/api/super/users/register-in-bar',
         expect.objectContaining({
           method: 'POST',
+          credentials: 'include',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer jwt',
           }),
         })
       );

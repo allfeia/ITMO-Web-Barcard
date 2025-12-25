@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import "../admin.css";
 
 export default function SuperLoginPage() {
-  const { setToken, setRoles, setBarId } = useAuth();
+  const { setRoles, setBarId } = useAuth();
   const goTo = useNavigate();
 
   const [username, setUsername] = useState('');
@@ -27,6 +27,7 @@ export default function SuperLoginPage() {
     try {
       const resp = await fetch('/api/super/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
@@ -38,7 +39,6 @@ export default function SuperLoginPage() {
         return;
       }
 
-      if (data.token) setToken(data.token);
       setRoles(Array.isArray(data?.user?.roles) ? data.user.roles : ['super_admin']);
       setBarId(null);
 

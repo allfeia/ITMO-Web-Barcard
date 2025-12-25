@@ -12,9 +12,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-vi.mock('../../src/authContext/useAuth.js', () => ({
-  useAuth: () => ({ token: 'jwt-super' }),
-}));
 
 describe('AdminRegisterBarForm', () => {
   const fetchMock = vi.fn();
@@ -70,9 +67,9 @@ fireEvent.change(
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith('/api/admin/bars', expect.objectContaining({
         method: 'POST',
+        credentials: 'include',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer jwt-super',
         }),
       }));
     });

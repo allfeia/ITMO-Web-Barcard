@@ -4,6 +4,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import "dotenv/config";
 import * as Sentry from "@sentry/node";
+import cookieParser from "cookie-parser";
 
 import { sequelize } from "./db.js";
 import "./models.js";
@@ -22,6 +23,7 @@ Sentry.init({
 });
 
 const app = express();
+app.use(cookieParser());
 
 app.use(helmet());
 app.use(

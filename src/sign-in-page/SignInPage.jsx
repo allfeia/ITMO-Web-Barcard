@@ -19,13 +19,14 @@ function SignInPage() {
 
     //style={{border: "1px solid #999"}}
     return (
-        <div className="sign-in-container">
-            <canvas className="sign-in-olive" ref={canvasRefOlive} width="100" height="55"></canvas>
-            <h1 className="sign-in-title">Вход</h1>
-            <div className="sign-in-form">
-                <BarmanAuthForm />
+        <div className="sign-in-page">
+            <div className="sign-in-container">
+                <canvas className="sign-in-olive" ref={canvasRefOlive} width="100" height="55"></canvas>
+                <h1 className="sign-in-title">Вход</h1>
+                <div className="sign-in-form">
+                    <BarmanAuthForm />
+                </div>
             </div>
-
         </div>
 
     )

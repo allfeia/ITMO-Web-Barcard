@@ -34,22 +34,7 @@ describe('PersonalAccountPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('не делает запрос, если нет token', async () => {
-    const fetchSpy = vi.spyOn(global, 'fetch')
-    renderWithProviders()
-
-    // username/points по умолчанию
-    expect(screen.getByText('Рейтинг:')).toBeInTheDocument()
-    expect(screen.getByText('0')).toBeInTheDocument()
-    // username пустая строка — элемента со span.username может не быть в выборке текста,
-    // но сам элемент есть: проверим по классу
-    expect(document.querySelector('.username')).toBeInTheDocument()
-
-    expect(fetchSpy).not.toHaveBeenCalled()
-  })
-
-  it('делает запрос /api/me с Authorization, показывает username и points', async () => {
-    sessionStorage.setItem('token', 'abc')
+  it('делает запрос /api/me с cookie, показывает username и points', async () => {
     sessionStorage.setItem('roles', JSON.stringify(['user']))
 
     const mockData = { login: 'john', points: 123 }
@@ -66,12 +51,11 @@ describe('PersonalAccountPage', () => {
     })
 
     expect(fetchSpy).toHaveBeenCalledWith('/api/me', {
-      headers: { Authorization: 'Bearer abc' },
+      credentials: 'include',
     })
   })
 
   it('если роль bar_admin — рендерит ссылку "Добавить сотрудника"', async () => {
-    sessionStorage.setItem('token', 't')
     sessionStorage.setItem('roles', JSON.stringify(['user', 'bar_admin']))
 
     vi.spyOn(global, 'fetch').mockResolvedValueOnce({
@@ -91,7 +75,6 @@ describe('PersonalAccountPage', () => {
   })
 
   it('если нет роли bar_admin — нет ссылки "Добавить сотрудника"', async () => {
-    sessionStorage.setItem('token', 't')
     sessionStorage.setItem('roles', JSON.stringify(['user']))
 
     vi.spyOn(global, 'fetch').mockResolvedValueOnce({
@@ -111,7 +94,6 @@ describe('PersonalAccountPage', () => {
   })
 
   it('мягко обрабатывает не-OK ответ', async () => {
-    sessionStorage.setItem('token', 't')
     sessionStorage.setItem('roles', JSON.stringify(['user']))
 
     vi.spyOn(global, 'fetch').mockResolvedValueOnce({

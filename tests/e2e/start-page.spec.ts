@@ -12,11 +12,4 @@ test.describe("StartPage — E2E тесты", () => {
         await page.getByRole("button", { name: "Начать" }).click();
         await expect(page).toHaveURL(/.*menu/);
     });
-
-    test("при отсутствии параметров приложение работает и редиректит по умолчанию", async ({ page }) => {
-        await page.goto("/");
-        const button = page.getByRole("button", { name: "Начать" });
-        await button.click();
-        await expect(page.locator(".StartPage")).toBeVisible();
-    });
 });

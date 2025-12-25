@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -133,12 +133,18 @@ export default function AdminRegisterBarForm() {
   }
 
   return (
-    <><WestIcon
-      className="back-arrow-fav"
-      sx={{ fontSize: "30px" }}
-      onClick={() => goTo('/administration')} />
+    <>
+        <Button
+            className="back-btn"
+            variant="text"
+            onClick={() => goTo(-1)}
+            data-testid="back-button"
+            style={{ cursor: 'pointer' }}
+        >
+            <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
+        </Button>
       <Box component="form" onSubmit={onSubmit} className="form">
-        <Typography variant="h1" className="form-title">Добавить бар</Typography>
+        <Typography variant="h1" className="form-title" sx={{ mt: 6 }}>Добавить бар</Typography>
         <TextField className="form-input" label="Название бара" variant="outlined" name="name" value={form.name} onChange={onChange} error={Boolean(nameError)} helperText={nameError} />
         <TextField className="form-input" label="Адрес" variant="outlined" name="address" value={form.address} onChange={onChange} error={Boolean(addressError)} helperText={addressError} />
         <TextField className="orm-input" label="Описание" variant="outlined" name="description" value={form.description} onChange={onChange} multiline minRows={3} error={Boolean(descriptionError)} helperText={descriptionError} />

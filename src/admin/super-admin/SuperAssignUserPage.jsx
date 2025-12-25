@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -160,11 +160,18 @@ async function onSubmit(e) {
 }
 
   return (
-    <><WestIcon
-      className="back-arrow-fav"
-      sx={{ fontSize: "30px" }}
-      onClick={() => goTo('/administration')} /><Box component="form" onSubmit={onSubmit} className="form" sx={{ maxWidth: 560 }}>
-        <Typography variant="h1" sx={{ mb: 2 }} className='form-title'>Добавить сотрудника</Typography>
+    <>
+        <Button
+            className="back-btn"
+            variant="text"
+            onClick={() => goTo(-1)}
+            data-testid="back-button"
+            style={{ cursor: 'pointer' }}
+        >
+            <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
+        </Button>
+        <Box component="form" onSubmit={onSubmit} className="form" sx={{ maxWidth: 560 }}>
+        <Typography variant="h1" className='form-title' sx={{ mt: 10 }}>Добавить сотрудника</Typography>
 
         <TextField className="form-input" label="Бар" name="barName" select value={form.barName} onChange={onChange}>
           {bars.map(b => <MenuItem key={b.id} value={b.name}>{b.name}</MenuItem>)}

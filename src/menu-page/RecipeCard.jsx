@@ -1,4 +1,4 @@
-import { Fade, Modal, Paper, Typography, Box } from "@mui/material";
+import {Fade, Modal, Paper, Typography, Box, Button} from "@mui/material";
 import EastIcon from '@mui/icons-material/East';
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -94,7 +94,7 @@ function RecipeCard({ open, onClose, cocktail }) {
                                 </Box>
                             </Box>
 
-                            <Box
+                            <button
                                 className="learn"
                                 onClick={() => goTo("/levelPage")}
                             >
@@ -102,7 +102,7 @@ function RecipeCard({ open, onClose, cocktail }) {
                                     Изучить
                                 </Typography>
                                 <EastIcon className="learn-arrow" sx={{ fontSize: "30px" }} />
-                            </Box>
+                            </button>
                         </>
                     )}
                 </Paper>

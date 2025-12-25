@@ -12,10 +12,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-vi.mock('../../src/authContext/useAuth.js', () => ({
-  useAuth: () => ({ token: 'jwt' }),
-}));
-
 
 describe('SuperGrantBarAdminPage', () => {
   const fetchMock = vi.fn();
@@ -66,9 +62,9 @@ describe('SuperGrantBarAdminPage', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenLastCalledWith('/api/super/grant-bar-admin', expect.objectContaining({
         method: 'POST',
+        credentials: 'include',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer jwt',
         }),
         body: expect.any(String),
       }));

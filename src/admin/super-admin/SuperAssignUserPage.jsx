@@ -11,12 +11,10 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {IconButton, InputAdornment} from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import Checkbox from '@mui/material/Checkbox';
-import { useAuth } from '../../authContext/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 import "../admin.css"
 
 export default function SuperAssignUserPage() {
-  const { token } = useAuth();
   const goTo = useNavigate();
 
   const [bars, setBars] = useState([]);
@@ -40,7 +38,7 @@ export default function SuperAssignUserPage() {
     (async () => {
       try {
         const resp = await fetch('/api/admin/bars', {
-          headers: { Authorization: token ? `Bearer ${token}` : undefined }
+          credentials: 'include',
         });
         const data = await resp.json().catch(()=>[]);
         if (resp.ok) setBars(data);
@@ -48,7 +46,7 @@ export default function SuperAssignUserPage() {
         console.error('Ошибка загрузки баров', e);
       }
     })();
-  }, [token]);
+  }, []);
 
 
   function onToggleRole(role) {
@@ -97,6 +95,14 @@ async function onSubmit(e) {
     return;
   }
 
+  if (!form.email.trim()) {
+      setErr('Введите email');
+      return;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setErr('Некорректный email');
+      return;
+  }
+
   if (!form.password.trim()) {
     setPasswordError('Введите пароль');
     hasError = true;
@@ -119,9 +125,9 @@ async function onSubmit(e) {
   try {
     const resp = await fetch('/api/super/users/register-in-bar', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : undefined
       },
       body: JSON.stringify({
         barName: form.barName.trim(),

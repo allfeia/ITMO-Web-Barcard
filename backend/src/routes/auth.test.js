@@ -20,19 +20,21 @@ vi.mock("bcryptjs", () => ({
 import router from "./auth.js";
 import { User, Bar, UserFavourite } from "../models.js";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 function appWithRouter() {
   const app = express();
+  app.use(cookieParser());
   app.use(express.json());
   app.use("/auth", router);
   return app;
 }
 
-function bearer(user) {
+function authCookie(user) {
   const token = jwt.sign(user, process.env.JWT_SECRET || "dev", {
     expiresIn: "1h",
   });
-  return `Bearer ${token}`;
+  return `access_token=${token}`;
 }
 
 describe("auth endpoints", () => {
@@ -53,17 +55,17 @@ describe("auth endpoints", () => {
         .post("/auth/super/login")
         .send({ username: "root", password: "x" });
       expect(res.status).toBe(404);
-      expect(res.body).toEqual({ error: "Not found" });
+      expect(res.body).toEqual({ error: "Неверные учетные данные" });
     });
 
-    it("403 when not super_admin", async () => {
+    it("404 when not super_admin", async () => {
       User.findOne.mockResolvedValue({ roles: ["user"] });
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/login")
         .send({ username: "u", password: "x" });
-      expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "Forbidden" });
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: "Неверные учетные данные" });
     });
 
     it("403 when no password set", async () => {
@@ -75,11 +77,11 @@ describe("auth endpoints", () => {
       const res = await request(app)
         .post("/auth/super/login")
         .send({ username: "u", password: "x" });
-      expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "No password set" });
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: "Неверные учетные данные" });
     });
 
-    it("403 when invalid password", async () => {
+    it("404 when invalid password", async () => {
       // compare вернет false т.к. password !== user.password
       User.findOne.mockResolvedValue({
         id: 1,
@@ -93,8 +95,8 @@ describe("auth endpoints", () => {
       const res = await request(app)
         .post("/auth/super/login")
         .send({ username: "u", password: "x" });
-      expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "Invalid password" });
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: "Неверные учетные данные" });
     });
 
     it("200 returns token & user", async () => {
@@ -112,7 +114,12 @@ describe("auth endpoints", () => {
         .send({ username: "root", password: "pass" });
       expect(res.status).toBe(200);
       expect(res.body.user).toMatchObject({ id: 1, roles: ["super_admin"] });
-      expect(typeof res.body.token).toBe("string");
+      expect(res.headers['set-cookie']).toBeDefined();
+      expect(
+          res.headers['set-cookie'].some(c =>
+              c.startsWith('access_token=')
+          )
+      ).toBe(true);
     });
   });
 
@@ -142,9 +149,7 @@ describe("auth endpoints", () => {
         .send({ barId: 2, username: "u", password: "p", barKey: "bad" });
       expect(res.status).toBe(403);
       expect(res.body).toEqual({
-          errors: {
-              barKey: "Неверный ключ бара",
-          },
+          error: "Неверные учетные данные",
       });
     });
 
@@ -159,11 +164,11 @@ describe("auth endpoints", () => {
       const res = await request(app)
         .post("/auth/barman/auth")
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
-      expect(res.status).toBe(404);
-      expect(res.body).toEqual({ error: "Пользователь не найден" });
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({ error: "Неверные учетные данные" });
     });
 
-    it("403 not staff", async () => {
+    it("404 not staff", async () => {
       Bar.findByPk.mockResolvedValue({ id: 2, pass_key: "k" });
       const { default: bcrypt } = await import("bcryptjs");
       bcrypt.compare.mockResolvedValueOnce(true); // ключ бара ок
@@ -178,18 +183,15 @@ describe("auth endpoints", () => {
         .post("/auth/barman/auth")
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
       expect(res.status).toBe(403);
-      expect(res.body).toEqual({ error: "Пользователь не сотрудник бара" });
+      expect(res.body).toEqual({ error: "Неверные учетные данные" });
     });
 
-    it("403 attached to another bar", async () => {
+    it("404 attached to another bar", async () => {
       Bar.findByPk.mockResolvedValue({ id: 2, pass_key: "k" });
       const { default: bcrypt } = await import("bcryptjs");
-      bcrypt.compare.mockResolvedValueOnce(true); // ключ бара ок
-      User.findOne.mockResolvedValue({
-        roles: ["staff"],
-        bar_id: 3,
-        password: "p",
-      });
+      bcrypt.compare.mockResolvedValueOnce(true) // ключ бара ок
+
+      User.findOne.mockResolvedValue(null);
 
       const app = appWithRouter();
       const res = await request(app)
@@ -197,7 +199,7 @@ describe("auth endpoints", () => {
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
       expect(res.status).toBe(403);
       expect(res.body).toEqual({
-        error: "Пользователь привязан к другому бару",
+        error: "Неверные учетные данные",
       });
     });
 
@@ -217,13 +219,11 @@ describe("auth endpoints", () => {
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
       expect(res.status).toBe(403);
       expect(res.body).toEqual({
-          errors: {
-              password: "Пароль не установлен",
-          },
+          error: "Неверные учетные данные",
       });
     });
 
-    it("403 wrong password", async () => {
+    it("404 wrong password", async () => {
       Bar.findByPk.mockResolvedValue({ id: 2, pass_key: "k" });
       const { default: bcrypt } = await import("bcryptjs");
       bcrypt.compare
@@ -241,9 +241,7 @@ describe("auth endpoints", () => {
         .send({ barId: 2, username: "u", password: "p", barKey: "k" });
       expect(res.status).toBe(403);
       expect(res.body).toEqual({
-          errors: {
-              password: "Неверный пароль",
-          },
+          error: "Неверные учетные данные",
       });
     });
 
@@ -277,7 +275,12 @@ describe("auth endpoints", () => {
       expect(res.body.mode).toBe("login");
       expect(res.body.user).toMatchObject({ id: 10, bar_id: 2 });
       expect(res.body.saved_cocktails_id).toEqual([1, 3]);
-      expect(typeof res.body.token).toBe("string");
+      expect(res.headers['set-cookie']).toBeDefined();
+      expect(
+          res.headers['set-cookie'].some(c =>
+              c.startsWith('access_token=')
+          )
+      ).toBe(true);
     });
   });
 
@@ -286,7 +289,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/grant-bar-admin")
-        .set("Authorization", bearer({ id: 1, roles: ["user"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["user"] }))
         .send({ userId: 1, makeBarAdmin: true });
       expect(res.status).toBe(403);
     });
@@ -295,7 +298,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/grant-bar-admin")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({});
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ error: "Invalid payload" });
@@ -307,7 +310,7 @@ describe("auth endpoints", () => {
       User.findByPk.mockResolvedValue(null);
       const res = await request(app)
         .post("/auth/super/grant-bar-admin")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({ userId: 99, makeBarAdmin: true });
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: "Сотрудник не найден" });
@@ -321,7 +324,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/grant-bar-admin")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({ userId: 2, makeBarAdmin: true });
       expect(res.status).toBe(200);
       expect(save).toHaveBeenCalled();
@@ -337,7 +340,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/grant-bar-admin")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({ userId: 2, makeBarAdmin: true });
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ error: "Сотрудник должен работать в баре" });
@@ -351,7 +354,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/grant-bar-admin")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({ userId: 3, makeBarAdmin: false });
       expect(res.status).toBe(200);
       expect(save).toHaveBeenCalled();
@@ -364,7 +367,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/users/register-in-bar")
-        .set("Authorization", bearer({ id: 1, roles: ["user"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["user"] }))
         .send({});
       expect(res.status).toBe(403);
     });
@@ -373,7 +376,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/users/register-in-bar")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({
           // нет barId/barName
           roles: ["staff"],
@@ -391,7 +394,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/users/register-in-bar")
-        .set("Authorization", bearer({ id: 1, roles: ["super_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["super_admin"] }))
         .send({
           barId: 5,
           roles: ["staff"],
@@ -410,7 +413,7 @@ describe("auth endpoints", () => {
       const app = appWithRouter();
       const res = await request(app)
         .post("/auth/super/users/register-in-bar")
-        .set("Authorization", bearer({ id: 1, roles: ["bar_admin"] }))
+        .set("Cookie", authCookie({ id: 1, roles: ["bar_admin"] }))
         .send({
           barName: "X",
           roles: ["staff"],
@@ -439,7 +442,7 @@ describe("auth endpoints", () => {
   const app = appWithRouter();
   const res = await request(app)
     .post("/auth/super/users/register-in-bar")
-    .set("Authorization", bearer({ id: 1, roles: ["bar_admin"] }))
+    .set("Cookie", authCookie({ id: 1, roles: ["bar_admin"] }))
     .send({
       barId: 8,
       roles: ["staff", "bar_admin"],

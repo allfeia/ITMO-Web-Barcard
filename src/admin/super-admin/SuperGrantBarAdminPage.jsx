@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../../authContext/useAuth.js';
 import { TextField, Button, Typography, Box, MenuItem } from '@mui/material';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import "../admin.css"
 
 export default function SuperGrantBarAdminPage() {
-  const { token } = useAuth();
   const goTo = useNavigate();
 
   const [bars, setBars] = useState([]);
@@ -25,9 +23,7 @@ export default function SuperGrantBarAdminPage() {
       setLoadingBars(true);
       try {
         const resp = await fetch('/api/admin/bars', {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : undefined
-          }
+          credentials: 'include',
         });
         const data = await resp.json().catch(() => ([]));
         if (!abort) {
@@ -42,7 +38,7 @@ export default function SuperGrantBarAdminPage() {
     }
     loadBars();
     return () => { abort = true; };
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     let abort = false;
@@ -53,9 +49,7 @@ export default function SuperGrantBarAdminPage() {
       setLoadingStaff(true);
       try {
         const resp = await fetch(`/api/admin/bars/${barId}/staff`, {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : undefined
-          }
+          credentials: 'include',
         });
         const data = await resp.json().catch(() => ([]));
         if (!abort) {
@@ -70,7 +64,7 @@ export default function SuperGrantBarAdminPage() {
     }
     loadStaff();
     return () => { abort = true; };
-  }, [barId, token]);
+  }, [barId]);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -80,7 +74,8 @@ export default function SuperGrantBarAdminPage() {
     try {
       const resp = await fetch('/api/super/grant-bar-admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : undefined },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', },
         body: JSON.stringify({ userId: Number(userId), makeBarAdmin: make })
       });
       const data = await resp.json().catch(()=>({}));

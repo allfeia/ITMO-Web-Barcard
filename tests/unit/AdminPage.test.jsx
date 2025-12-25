@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import AdminPage from '../../src/admin/AdminPage.jsx';
 import { useAuth } from '../../src/authContext/useAuth.js';
 import { MemoryRouter } from 'react-router-dom';
@@ -41,7 +41,7 @@ describe('AdminPage', () => {
   ).not.toBeInTheDocument();
 
   expect(screen.getByText('Административная панель')).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();
+  // expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();
 });
 
   it('показывает супер-ссылки когда role = super_admin', () => {
@@ -64,8 +64,8 @@ describe('AdminPage', () => {
       screen.getByText('Выдать/снять администраторские права для сотрудника бара')
     ).toBeInTheDocument();
 
-  fireEvent.click(screen.getByRole('button', { name: 'Выйти' }));
-  expect(logout).toHaveBeenCalled();
+  // fireEvent.click(screen.getByRole('button', { name: 'Выйти' }));
+  // expect(logout).toHaveBeenCalled();
 });
 
 it('показывает супер-ссылки когда roles включает super_admin', () => {

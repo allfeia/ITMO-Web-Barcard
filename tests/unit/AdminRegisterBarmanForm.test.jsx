@@ -26,7 +26,6 @@ describe('AdminRegisterBarmanForm', () => {
     global.fetch = fetchMock;
     // Контекст бар-админа
     useAuth.mockReturnValue({
-      token: 'jwt-token',
       roles: ['bar_admin'],
       barId: 123,
     });
@@ -77,7 +76,6 @@ describe('AdminRegisterBarmanForm', () => {
   global.fetch = fetchMock;
 
   useAuth.mockReturnValue({
-    token: 'jwt',
     roles: ['staff'], // нет bar_admin
     barId: null,
   });
@@ -107,9 +105,9 @@ describe('AdminRegisterBarmanForm', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith('/api/super/users/register-in-bar', expect.objectContaining({
         method: 'POST',
+        credentials: 'include',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer jwt-token',
         }),
       }));
     });

@@ -4,18 +4,9 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
 
-    const [token, setToken] = useState(() => sessionStorage.getItem("token") || null);
     const [roles, setRoles] = useState(() => {
         try { return JSON.parse(sessionStorage.getItem('roles') || '[]'); } catch { return []; }
     });
-
-    useEffect(() => {
-        if (token) {
-            sessionStorage.setItem("token", token);
-        } else {
-            sessionStorage.removeItem("token");
-        }
-    }, [token]);
 
     useEffect(() => {
         sessionStorage.setItem('roles', JSON.stringify(roles || []));
@@ -94,21 +85,18 @@ export function AuthProvider({ children }) {
             setBarName,
             setBarSite,
 
-            token,
-            roles,
             savedCocktailsId,
+            roles,
             setRoles,
-            setToken,
             setSavedCocktailsId,
 
             logout() {
-                setToken(null);
                 setRoles([]);
                 setBarId(null);
                 setIsBarman(null);
             }
         }),
-        [token, barId, isBarman, barName, barSite, roles, savedCocktailsId]
+        [roles, barId, isBarman, barName, barSite, savedCocktailsId]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

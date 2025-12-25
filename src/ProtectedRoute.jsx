@@ -2,9 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from './authContext/useAuth.js';
 
 export default function ProtectedRoute({ children, allow = [] }) {
-  const { token, role, roles } = useAuth();
-
-  if (!token) return <Navigate to="/" replace />;
+  const { role, roles } = useAuth();
 
   if (allow.length) {
     const userRoles = new Set([role, ...(roles || [])].filter(Boolean));

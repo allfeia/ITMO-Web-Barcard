@@ -36,8 +36,7 @@ test.describe('BarmanAuthForm E2E', () => {
                     ok: true,
                     mode: "login",
                     message: "Успешный вход",
-                    token: "fake-token",
-                    roles: ["BARMAN"],
+                    user: { roles: ["BARMAN"] },
                     barId: 123,
                     barName: "Olive Bar"
                 }),
@@ -53,14 +52,12 @@ test.describe('BarmanAuthForm E2E', () => {
         await expect(page).toHaveURL('/menu');
     });
 
-    test('показывает ошибку при неверном пароле', async ({ page }) => {
+    test('показывает ошибку при неверных учетных данных', async ({ page }) => {
         await page.route('/api/barman/auth', async (route) => {
             await route.fulfill({
                 status: 403,
                 contentType: 'application/json',
-                body: JSON.stringify({
-                    errors: { password: 'Неверный пароль' }
-                }),
+                body: JSON.stringify({ error: 'Неверные учетные данные' }),
             });
         });
 
@@ -70,10 +67,7 @@ test.describe('BarmanAuthForm E2E', () => {
 
         await page.getByRole('button', { name: 'Войти' }).click();
 
-        await expect(page.locator('#auth-password-helper-text'))
-            .toHaveText('Неверный пароль');
-        await expect(page.locator('#auth-password-helper-text'))
-            .toBeVisible();
+        await expect(page.getByText('Неверные учетные данные')).toBeVisible();
     });
 
     test('показывает ошибку при отсутствии barId', async ({ page }) => {

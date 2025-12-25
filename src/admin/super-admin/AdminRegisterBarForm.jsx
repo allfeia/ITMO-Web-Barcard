@@ -5,12 +5,10 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../authContext/useAuth.js';
 
 
 export default function AdminRegisterBarForm() {
   const goTo = useNavigate();
-  const { token } = useAuth();
 
   const [form, setForm] = useState({
     name: '',
@@ -95,9 +93,9 @@ export default function AdminRegisterBarForm() {
 
       const resp = await fetch('/api/admin/bars', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : undefined
         },
         body: JSON.stringify(payload),
       });

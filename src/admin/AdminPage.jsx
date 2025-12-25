@@ -1,4 +1,4 @@
-import { Link as RouterLink } from "react-router-dom";
+import {Link as RouterLink} from "react-router-dom";
 import { useAuth } from "../authContext/useAuth.js";
 import {
   Box,
@@ -10,7 +10,7 @@ import {
 import './admin.css'
 
 function AdminPage() {
-  const { role, roles, logout } = useAuth();
+  const { role, roles } = useAuth();
   const isSuper = role === "super_admin" || (roles || []).includes("super_admin");
   return (
     <Box className="mode-container">
@@ -39,13 +39,6 @@ function AdminPage() {
             </>
           )}
         </Stack>
-
-        <Button
-          onClick={logout}
-          className="form-button"
-        >
-          Выйти
-        </Button>
     </Box>
   );
 }

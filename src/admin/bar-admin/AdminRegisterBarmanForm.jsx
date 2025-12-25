@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -143,12 +143,17 @@ async function onSubmit(e) {
   }
 
   return (
-    <><WestIcon
-      className="back-arrow-fav"
-      sx={{ fontSize: "30px" }}
-      onClick={() => goTo('/account')} />
+    <>
+        <Button
+            className="back-btn"
+            onClick={() => goTo(-1)}
+            data-testid="back-button"
+            style={{ cursor: 'pointer' }}
+        >
+            <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
+        </Button>
       <Box component="form" onSubmit={onSubmit} className="form">
-        <Typography variant="h2" className='form-title'>Добавить бармена</Typography>
+        <Typography variant="h2" className='form-title' sx={{ mt: 6 }}>Добавить бармена</Typography>
 
         <TextField
           className="form-input"

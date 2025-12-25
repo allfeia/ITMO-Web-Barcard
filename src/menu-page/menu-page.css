@@ -169,8 +169,9 @@
     align-items: center;
     gap: 5px;
     margin-top: 20px;
-    cursor: pointer;
     justify-content: flex-end;
+    cursor: pointer;
+    border: none;
 }
 
 .learn-cocktail {

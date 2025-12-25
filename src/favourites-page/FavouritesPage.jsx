@@ -4,7 +4,8 @@ import './favourities-page.css';
 import '../commonStyles.css';
 import CocktailListPage from "../CocktailsListPage.jsx";
 import {useAuth} from "../authContext/useAuth.js";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
+import Button from "@mui/material/Button";
 
 function FavouritesPage() {
 
@@ -36,11 +37,15 @@ function FavouritesPage() {
 
     return (
         <div className="favourites-container">
-            <WestIcon
-                className="back-arrow-fav"
-                sx={{ fontSize: "30px" }}
-                onClick={() => goTo('/account')}
-            />
+            <Button
+                className="back-btn"
+                variant="text"
+                onClick={() => goTo(-1)}
+                data-testid="back-button"
+                style={{ cursor: 'pointer' }}
+            >
+                <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
+            </Button>
             {savedCocktails.length === 0 ? (
                 <h2 className="empty-favourites">Сохранений нет</h2>
             ) : (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TextField, Button, Typography, Box, MenuItem } from '@mui/material';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
@@ -92,11 +92,18 @@ export default function SuperGrantBarAdminPage() {
   })), [staff]);
 
   return (
-    <><WestIcon
-      className="back-arrow-fav"
-      sx={{ fontSize: "30px" }}
-      onClick={() => goTo('/administration')} /><Box component="form" onSubmit={onSubmit} className="form" sx={{ maxWidth: 560 }}>
-        <Typography variant="h5" className='form-title'>Выдать/снять роль администратора бара</Typography>
+    <>
+        <Button
+            className="back-btn"
+            variant="text"
+            onClick={() => goTo(-1)}
+            data-testid="back-button"
+            style={{ cursor: 'pointer' }}
+        >
+            <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
+        </Button>
+        <Box component="form" onSubmit={onSubmit} className="form" sx={{ maxWidth: 560 }}>
+        <Typography variant="h1" className='form-title' sx={{ mt: 8 }}>Выдать/снять роль администратора бара</Typography>
 
         <TextField
           className="form-input"

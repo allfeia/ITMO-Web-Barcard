@@ -1,5 +1,5 @@
 import {Link, useNavigate} from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../authContext/useAuth.js'; 
 import drawHeartIcon from '../icons/heartIcon.js';
 import drawStarIcon from '../icons/starIcon.js';
@@ -7,6 +7,7 @@ import drawUserIcon from '../icons/userIcon.js';
 import './personal-account.css';
 import '../commonStyles.css';
 import WestIcon from '@mui/icons-material/West';
+import Button from "@mui/material/Button";
 
 function PersonalAccountPage() {
   const canvasRefHeart = useRef(null);
@@ -53,12 +54,16 @@ function PersonalAccountPage() {
 
   return (
     <div className="screen">
-        <WestIcon
-            className="back-arrow"
-            sx={{ fontSize: "30px" }}
-            onClick={() => goTo('/menu')}
-        />
-      <div className="row row-compact">
+        <Button
+            className="back-btn"
+            variant="text"
+            onClick={() => goTo(-1)}
+            data-testid="back-button"
+            style={{ cursor: 'pointer' }}
+        >
+            <WestIcon className="learn-arrow" sx={{fontSize: "30px", color: 'white'}}/>
+        </Button>
+      <div className="row row-compact" style={{ marginTop: '30px' }}>
         <canvas
           className="icon icon-user"
           ref={canvasRefUser}

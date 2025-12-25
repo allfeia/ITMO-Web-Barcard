@@ -52,7 +52,7 @@ export default function SuperLoginPage() {
 
   return (
     <Box component="form" onSubmit={onSubmit} autoComplete="off" className="form">
-      <Typography variant="h2"  className="form-title">
+      <Typography variant="h2"  className="form-title" sx={{ mt: 6 }}>
         Вход супер-админа
       </Typography>
 

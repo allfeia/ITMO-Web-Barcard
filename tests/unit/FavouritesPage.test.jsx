@@ -101,7 +101,7 @@ describe("FavouritesPage", () => {
 
         await userEvent.click(arrow);
 
-        expect(mockNavigate).toHaveBeenCalledWith("/account");
+        expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
 
     it("передаёт barName, barSite и список коктейлей в CocktailListPage", async () => {

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SuperLoginPage from '../../src/admin/super-admin/SuperLoginPage.jsx';
 
-const setToken = vi.fn();
 const setRoles = vi.fn();
 const setBarId = vi.fn();
 

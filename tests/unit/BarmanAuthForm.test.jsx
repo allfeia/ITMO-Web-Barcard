@@ -6,7 +6,6 @@ import { AuthProvider } from "../../src/authContext/AuthContext.jsx";
 import { MemoryRouter } from "react-router-dom";
 
 const mockNavigate = vi.fn();
-const mockSetToken = vi.fn();
 const mockSetRoles = vi.fn();
 const mockSetBarName = vi.fn();
 const mockSetBarSite = vi.fn();

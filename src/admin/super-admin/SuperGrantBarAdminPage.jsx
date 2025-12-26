@@ -3,9 +3,11 @@ import { TextField, Button, Typography, Box, MenuItem } from '@mui/material';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import "../admin.css"
+import { useApiFetch } from "../../apiFetch.js";
 
 export default function SuperGrantBarAdminPage() {
   const goTo = useNavigate();
+  const apiFetch = useApiFetch();
 
   const [bars, setBars] = useState([]);
   const [barId, setBarId] = useState('');
@@ -48,7 +50,7 @@ export default function SuperGrantBarAdminPage() {
       if (!barId) return;
       setLoadingStaff(true);
       try {
-        const resp = await fetch(`/api/admin/bars/${barId}/staff`, {
+        const resp = await apiFetch(`/api/admin/bars/${barId}/staff`, {
           credentials: 'include',
         });
         const data = await resp.json().catch(() => ([]));

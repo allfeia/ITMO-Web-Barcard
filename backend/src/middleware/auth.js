@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev";
+const REFRESH_SECRET = process.env.REFRESH_SECRET || 'refresh_dev';
 
 export function signJwt(payload) {
     return jwt.sign(
@@ -10,13 +11,30 @@ export function signJwt(payload) {
                 ? payload.roles.filter(Boolean)
                 : [],
             bar_id: typeof payload.bar_id === "number"
-                ? payload.barId
+                ? payload.bar_id
                 : (payload.barId ?? null)
         },
         JWT_SECRET,
-        { expiresIn: "2h" }
+        { expiresIn: "15min" }
     );
 }
+
+export function signRefreshToken(payload) {
+    return jwt.sign(
+        {
+            id: payload.id,
+            roles: Array.isArray(payload.roles)
+                ? payload.roles.filter(Boolean)
+                : [],
+            bar_id: typeof payload.bar_id === "number"
+                ? payload.bar_id
+                : (payload.barId ?? null)
+        },
+        REFRESH_SECRET,
+        { expiresIn: '3h' }
+    );
+}
+
 
 export function authRequired(req, res, next) {
     const token = req.cookies?.access_token;

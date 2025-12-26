@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminRegisterBarForm from '../../src/admin/super-admin/AdminRegisterBarForm.jsx';
 
 const goToMock = vi.fn();
+const apiFetchMock = vi.fn();
 
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal();
@@ -12,15 +13,11 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
+vi.mock('../../src/apiFetch.js', () => ({
+    useApiFetch: () => apiFetchMock,
+}));
 
 describe('AdminRegisterBarForm', () => {
-  const fetchMock = vi.fn();
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    global.fetch = fetchMock;
-  });
-
   function fillBase(valid = true) {
   const [nameInput] = screen.getAllByLabelText('Название бара');
   fireEvent.change(nameInput, { target: { value: 'Бар 1' } });
@@ -49,11 +46,11 @@ fireEvent.change(
     fireEvent.change(screen.getByLabelText('Ключ бара'), { target: { value: 'k' } });
     fireEvent.click(screen.getByRole('button', { name: 'Создать бар' }));
     expect(await screen.findByText('Некорректный URL')).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(apiFetchMock).not.toHaveBeenCalled();
   });
 
   it('успешный POST и сообщение ok', async () => {
-    fetchMock.mockResolvedValueOnce({
+    apiFetchMock.mockResolvedValueOnce({
       ok: true,
       status: 200,
       json: async () => ({ message: 'Бар создан: Бар 1', name: 'Бар 1' }),
@@ -65,7 +62,7 @@ fireEvent.change(
     fireEvent.click(screen.getByRole('button', { name: 'Создать бар' }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith('/api/admin/bars', expect.objectContaining({
+      expect(apiFetchMock).toHaveBeenCalledWith('/api/admin/bars', expect.objectContaining({
         method: 'POST',
         credentials: 'include',
         headers: expect.objectContaining({
@@ -89,17 +86,17 @@ fireEvent.change(
     };
 
     // 401
-    fetchMock.mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      json: async () => ({}),
-    });
+    apiFetchMock.mockResolvedValueOnce({
+            ok: false,
+            status: 401,
+            json: async () => ({ error: 'Не авторизовано' }),
+        });
     renderAndFill();
     clickSubmit();
     expect(await screen.findByText('Не авторизовано')).toBeInTheDocument();
 
     // 403
-    fetchMock.mockResolvedValueOnce({
+    apiFetchMock.mockResolvedValueOnce({
       ok: false,
       status: 403,
       json: async () => ({ error: 'Доступ запрещён' }),
@@ -109,7 +106,7 @@ fireEvent.change(
     expect(await screen.findByText('Доступ запрещён')).toBeInTheDocument();
 
     // 400 с ключом
-    fetchMock.mockResolvedValueOnce({
+    apiFetchMock.mockResolvedValueOnce({
       ok: false,
       status: 400,
       json: async () => ({ error: 'Некорректный ключ бара' }),

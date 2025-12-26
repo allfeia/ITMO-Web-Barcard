@@ -37,6 +37,11 @@ app.use(express.json({ limit: "1mb" }));
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use("/auth/", authLimiter);
 
+app.use("/api", (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
+
 app.use("/api", authRoutes);
 app.use("/api", apiRoutes);
 

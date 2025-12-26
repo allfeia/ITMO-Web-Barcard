@@ -2,17 +2,27 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { User, Bar, UserFavourite } from "../models.js";
-import {authRequired, requireRole, signJwt} from "../middleware/auth.js";
+import {authRequired, requireRole, signJwt, signRefreshToken} from "../middleware/auth.js";
 import { Op } from "sequelize";
+import jwt from "jsonwebtoken";
+
+const REFRESH_SECRET = process.env.REFRESH_SECRET || "refresh_dev";
 
 const router = Router();
 
-function setAuthCookie(res, token) {
+function setAuthCookie(res, token, refreshToken) {
     res.cookie("access_token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60,
+        maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000,
     });
 }
 
@@ -39,7 +49,8 @@ router.post("/super/login", async (req, res) => {
     }
 
     const token = signJwt(user);
-    setAuthCookie(res, token);
+    const refreshToken = signRefreshToken(user);
+    setAuthCookie(res, token, refreshToken);
 
     return res.json({
       user: {
@@ -96,7 +107,8 @@ router.post("/barman/auth", async (req, res) => {
     }
 
     const token = signJwt(user);
-    setAuthCookie(res, token);
+    const refreshToken = signRefreshToken(user);
+    setAuthCookie(res, token, refreshToken);
 
     const favourites = await UserFavourite.findAll({
       where: { user_id: user.id },
@@ -259,6 +271,32 @@ router.post(
     }
   }
 );
+
+router.post('/refresh-token', (req, res) => {
+    const refreshToken = req.cookies?.refresh_token;
+    if (!refreshToken) return res.status(401).json({ error: "No refresh token" });
+
+    try {
+        const payload = jwt.verify(refreshToken, REFRESH_SECRET);
+
+        const newAccessToken = signJwt({
+            id: payload.id,
+            roles: payload.roles,
+            bar_id: payload.bar_id,
+        });
+
+        res.cookie("access_token", newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.json({ ok: true });
+    } catch {
+        return res.status(401).json({ error: "Invalid refresh token" });
+    }
+});
 
 router.post("/logout", (req, res) => {
     res.clearCookie("access_token", {

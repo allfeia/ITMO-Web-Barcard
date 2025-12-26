@@ -13,9 +13,11 @@ import WestIcon from "@mui/icons-material/West";
 import Checkbox from '@mui/material/Checkbox';
 import { useNavigate } from 'react-router-dom';
 import "../admin.css"
+import { useApiFetch } from "../../apiFetch.js";
 
 export default function SuperAssignUserPage() {
   const goTo = useNavigate();
+  const apiFetch = useApiFetch();
 
   const [bars, setBars] = useState([]);
   const [form, setForm] = useState({
@@ -123,7 +125,7 @@ async function onSubmit(e) {
 
   setLoading(true);
   try {
-    const resp = await fetch('/api/super/users/register-in-bar', {
+    const resp = await apiFetch('/api/super/users/register-in-bar', {
       method: 'POST',
       credentials: 'include',
       headers: {

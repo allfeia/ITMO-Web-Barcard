@@ -9,9 +9,11 @@ import {IconButton, InputAdornment} from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../authContext/useAuth.js';
+import { useApiFetch } from "../../apiFetch.js";
 
 export default function AdminRegisterBarmanForm() {
   const goTo = useNavigate();
+  const apiFetch = useApiFetch();
   const { roles, barId } = useAuth();
 
   const [form, setForm] = useState({
@@ -95,7 +97,7 @@ async function onSubmit(e) {
 
   setLoading(true);
   try {
-    const resp = await fetch('/api/super/users/register-in-bar', {
+    const resp = await apiFetch('/api/super/users/register-in-bar', {
       method: 'POST',
       credentials: 'include',
       headers: {

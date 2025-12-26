@@ -6,10 +6,12 @@ import CocktailListPage from "../CocktailsListPage.jsx";
 import {useAuth} from "../authContext/useAuth.js";
 import React, {useEffect, useState} from "react";
 import Button from "@mui/material/Button";
+import { useApiFetch } from "../apiFetch.js";
 
 function FavouritesPage() {
 
     const goTo = useNavigate();
+    const apiFetch = useApiFetch();
     const [savedCocktails, setSavedCocktails] = useState([]);
 
     const { barId, barName, barSite, savedCocktailsId } = useAuth();
@@ -17,7 +19,7 @@ function FavouritesPage() {
     useEffect(() => {
         if (!barId || !savedCocktailsId) return;
 
-        fetch("/api/favourites", {
+        apiFetch("/api/favourites", {
             method: "POST",
             credentials: "include",
             headers: {

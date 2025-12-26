@@ -5,10 +5,12 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
+import { useApiFetch } from "../../apiFetch.js";
 
 
 export default function AdminRegisterBarForm() {
   const goTo = useNavigate();
+  const apiFetch = useApiFetch();
 
   const [form, setForm] = useState({
     name: '',
@@ -91,7 +93,7 @@ export default function AdminRegisterBarForm() {
         barKey: form.barKey.trim(),
       };
 
-      const resp = await fetch('/api/admin/bars', {
+      const resp = await apiFetch('/api/admin/bars', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -103,7 +105,7 @@ export default function AdminRegisterBarForm() {
       const data = await resp.json().catch(() => ({}));
 
       if (resp.status === 401) {
-        setCommonErr('Не авторизовано');
+        setCommonErr(data?.error || 'Не авторизовано');
         return;
       }
       if (resp.status === 403) {

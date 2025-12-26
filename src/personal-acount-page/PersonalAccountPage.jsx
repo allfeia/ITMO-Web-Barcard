@@ -8,6 +8,7 @@ import './personal-account.css';
 import '../commonStyles.css';
 import WestIcon from '@mui/icons-material/West';
 import Button from "@mui/material/Button";
+import { useApiFetch } from "../apiFetch.js";
 
 function PersonalAccountPage() {
   const canvasRefHeart = useRef(null);
@@ -21,6 +22,7 @@ function PersonalAccountPage() {
   const [points, setPoints] = useState(0);
 
   const goTo = useNavigate();
+  const apiFetch = useApiFetch();
 
   useEffect(() => {
     drawUserIcon(canvasRefUser.current, { color: '#fff', filled: true });
@@ -34,7 +36,7 @@ function PersonalAccountPage() {
 
     (async () => {
       try {
-        const resp = await fetch('/api/me', {
+        const resp = await apiFetch('/api/me', {
           credentials: 'include',
         });
         if (!resp.ok) {

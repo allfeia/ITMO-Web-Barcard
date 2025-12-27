@@ -72,7 +72,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@85.117.234.255 "
           cd ITMO-Web-Barcard
-          cat > .env << 'EOT'
+          cat > backend/.env << 'EOT'
           PORT=${{ secrets.PORT }}
 
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
@@ -97,7 +97,7 @@ jobs:
           INVITE_SECRET=${{secrets.INVITE_SECRET}}
           EOT
 
-          chmod 600 .env
+          chmod 600 backend/.env
           git pull &&
           make run
           "

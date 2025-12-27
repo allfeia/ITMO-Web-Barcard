@@ -70,8 +70,36 @@ jobs:
 
       - name: Deploy via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no root@85.117.234.255 "
-          cd ITMO-Web-Barcard &&
+          ssh -o StrictHostKeyChecking=no root@85.117.234.255 << 'EOF'
+          set -e
+          cd ITMO-Web-Barcard
+          rm -f backend/.env
+          cat > backend/.env << 'EOT'
+          PORT=${{ secrets.PORT }}
+
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+          SUPER_ADMIN_PASSWORD=${{ secrets.SUPER_ADMIN_PASSWORD }}
+          JWT_EXPIRES=${{ secrets.JWT_EXPIRES }}
+          BCRYPT_ROUNDS=${{ secrets.BCRYPT_ROUNDS }}
+          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+
+          SMTP_HOST=${{secrets.SMTP_HOST}}
+          SMTP_PORT=${{secrets.SMTP_PORT}}
+          SMTP_USER=${{secrets.SMTP_USER}}
+          SMTP_PASS=${{secrets.SMTP_PASS}}
+          SMTP_FROM=${{secrets.SMTP_FROM}}
+          APP_PUBLIC_URL=${{secrets.APP_PUBLIC_URL}}
+          INVITE_SECRET=${{secrets.INVITE_SECRET}}
+          EOT
+
+          chmod 600 backend/.env
           git pull &&
           make run
-          "
+          EOF

@@ -56,8 +56,8 @@ describe("icons canvas draw helpers", () => {
       // eslint-disable-next-line no-unused-vars
       try {
         delete window.devicePixelRatio;
-      } catch (_) {
-        // ignore
+      } catch (e) {
+        console.log(e);
       }
     } else {
       window.devicePixelRatio = prevDpr;

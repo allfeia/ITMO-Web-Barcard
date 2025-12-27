@@ -290,27 +290,33 @@ return res.status(201).json({
 );
 
 router.post("/password/invite/session", async (req, res) => {
-  const schema = z.object({ token: z.string().min(1) });
-  const { token } = schema.parse(req.body);
+  try {
+    const schema = z.object({ token: z.string().min(1) });
+    const { token } = schema.parse(req.body);
 
-  const row = await PasswordToken.findOne({
-    where: { token_hash: sha256(token), purpose: "invite" },
-    attributes: ["id", "user_id", "expires_at", "used_at"],
-  });
+    const row = await PasswordToken.findOne({
+      where: { token_hash: sha256(token), purpose: "invite" },
+      attributes: ["id", "user_id", "expires_at", "used_at"],
+    });
 
-  if (!row) return res.status(400).json({ ok: false, error: "Ссылка недействительна" });
-  if (row.used_at) return res.status(400).json({ ok: false, error: "Ссылка уже была использована" });
-  if (new Date(row.expires_at).getTime() < Date.now())
-    return res.status(400).json({ ok: false, error: "Срок действия ссылки истек" });
+    if (!row) return res.status(400).json({ ok: false, error: "Ссылка недействительна" });
+    if (row.used_at) return res.status(400).json({ ok: false, error: "Ссылка уже была использована" });
+    if (new Date(row.expires_at).getTime() < Date.now())
+      return res.status(400).json({ ok: false, error: "Срок действия ссылки истек" });
 
-  const inviteJwt = signInviteSession({
-    userId: row.user_id,
-    passwordTokenId: row.id,
-  });
+    const inviteJwt = signInviteSession({
+      userId: row.user_id,
+      passwordTokenId: row.id,
+    });
 
-  setInviteCookie(res, inviteJwt);
-
-  return res.json({ ok: true });
+    setInviteCookie(res, inviteJwt);
+    return res.json({ ok: true });
+  } catch (e) {
+    if (e?.errors || e?.issues) {
+      return res.status(400).json({ error: "Invalid payload" });
+    }
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
 
@@ -400,36 +406,43 @@ const confirmCodeSchema = z.object({
 });
 
 router.post("/password/confirm-code", authRequired, async (req, res) => {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-  const { code, password } = confirmCodeSchema.parse(req.body);
+    const { code, password } = confirmCodeSchema.parse(req.body);
 
-  const tokenHash = sha256(code);
-  const row = await PasswordToken.findOne({
-    where: {
-      token_hash: tokenHash,
-      user_id: userId,
-      purpose: "reset",
-    },
-  });
+    const tokenHash = sha256(code);
+    const row = await PasswordToken.findOne({
+      where: {
+        token_hash: tokenHash,
+        user_id: userId,
+        purpose: "reset",
+      },
+    });
 
-  if (!row) return res.status(400).json({ error: "Код недействителен или истёк" });
-  if (row.used_at) return res.status(400).json({ error: "Код уже использован" });
-  if (new Date(row.expires_at).getTime() < Date.now())
-    return res.status(400).json({ error: "Срок действия кода истёк" });
+    if (!row) return res.status(400).json({ error: "Код недействителен или истёк" });
+    if (row.used_at) return res.status(400).json({ error: "Код уже использован" });
+    if (new Date(row.expires_at).getTime() < Date.now())
+      return res.status(400).json({ error: "Срок действия кода истёк" });
 
-  const user = await User.findByPk(userId);
-  if (!user) return res.status(404).json({ error: "Пользователь не найден" });
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: "Пользователь не найден" });
 
-  const hash = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
-  user.password = hash;
-  await user.save();
+    const hash = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 12);
+    user.password = hash;
+    await user.save();
 
-  row.used_at = new Date();
-  await row.save();
+    row.used_at = new Date();
+    await row.save();
 
-  return res.json({ ok: true, purpose: "reset" });
+    return res.json({ ok: true, purpose: "reset" });
+  } catch (e) {
+    if (e?.errors || e?.issues) {
+      return res.status(400).json({ error: "Invalid payload" });
+    }
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
 router.post("/password/request-invite-again", inviteSessionRequired, async (req, res) => {

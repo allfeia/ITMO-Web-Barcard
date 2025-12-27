@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import PasswordPage from "./../src/password-page/PasswordPage.jsx";
+import PasswordPage from "../../src/password-page/PasswordPage.jsx";
 
 const navigateMock = vi.fn();
 let locationState = { search: "", hash: "" };

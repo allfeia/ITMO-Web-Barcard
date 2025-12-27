@@ -232,7 +232,7 @@ router.post(
   requireRole('super_admin', 'bar_admin'),
   async (req, res) => {
     try {
-      const { barId, barName, roles, name, login, email, password } =
+      const { barId, barName, roles, name, login, email} =
         superRegisterInBarSchema.parse(req.body);
 
       let bar = null;

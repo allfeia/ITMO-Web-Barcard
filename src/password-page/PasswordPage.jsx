@@ -225,7 +225,9 @@ const tokenFromHash = hashParams.get("token");
         try {
           const j = await resp.json();
           msg = j?.message || j?.error || msg;
-        } catch (_) {}
+        } catch (err) {
+          console.warn("Failed to parse error JSON", err);
+        }
         throw new Error(msg);
       }
       showSnack("success", "Письмо отправлено повторно. Проверьте почту.", 5000);
@@ -256,7 +258,9 @@ const tokenFromHash = hashParams.get("token");
       try {
         const j = await resp.json();
         msg = j?.message || j?.error || msg;
-      } catch (_) {}
+      } catch (err) {
+          console.warn("Failed to parse error JSON", err);
+        }
       throw new Error(msg);
     }
 

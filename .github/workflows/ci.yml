@@ -73,6 +73,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@85.117.234.255 << 'EOF'
           set -e
           cd ITMO-Web-Barcard
+          rm -f backend/.env
+          git pull
           cat > backend/.env << 'EOT'
           PORT=${{ secrets.PORT }}
 
@@ -99,6 +101,5 @@ jobs:
           EOT
 
           chmod 600 backend/.env
-          git pull &&
           make run
           EOF

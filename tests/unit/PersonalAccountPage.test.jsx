@@ -65,7 +65,7 @@ describe('PersonalAccountPage', () => {
     })
     useApiFetch.mockReturnValue(apiFetchMock)
 
-    renderWithProviders()
+    renderPage()
 
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()

@@ -24,14 +24,13 @@ describe('SuperAssignUserPage', () => {
     global.fetch = fetchMock;
   });
 
-    it('загружает бары и позволяет выбрать роли и отправить форму', async () => {
-    // GET /api/admin/bars
+  it('загружает бары и позволяет выбрать роли и отправить форму', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ([
+      json: async () => [
         { id: 1, name: 'Бар А' },
         { id: 2, name: 'Бар B' },
-      ]),
+      ],
     });
 
     fetchMock.mockResolvedValueOnce({

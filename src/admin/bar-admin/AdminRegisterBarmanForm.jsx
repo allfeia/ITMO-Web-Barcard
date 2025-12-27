@@ -17,7 +17,6 @@ export default function AdminRegisterBarmanForm() {
     name: '',
     login: '',
     email: '',
-    password: '',
   });
 
   const [loading, setLoading] = useState(false);

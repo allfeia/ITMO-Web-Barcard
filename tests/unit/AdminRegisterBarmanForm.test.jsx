@@ -59,7 +59,6 @@ describe('AdminRegisterBarmanForm', () => {
     fireEvent.change(screen.getByLabelText('Имя'), { target: { value: 'Иван' } });
     fireEvent.change(screen.getByLabelText('Логин'), { target: { value: 'ivan' } });
     fireEvent.change(screen.getByLabelText('Почта'), { target: { value: 'ivan-at-example.com' } });
-    fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'secret' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
@@ -134,7 +133,6 @@ describe('AdminRegisterBarmanForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(await screen.findByText('Запрещено')).toBeInTheDocument();
 
-    // 404
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 404,

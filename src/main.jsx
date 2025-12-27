@@ -16,6 +16,7 @@ import { AuthProvider } from './authContext/AuthContext.jsx'
 import PersonalAccountPage from "./personal-acount-page/PersonalAccountPage.jsx";
 import LevelPage from "./level-page/LevelPage.jsx";
 import FavouritesPage from "./favourites-page/FavouritesPage.jsx";
+import PasswordPage from "./password-page/PasswordPage.jsx";
 
 import * as Sentry from "@sentry/react";
 
@@ -48,6 +49,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/account" element={<PersonalAccountPage />} />
                 <Route path="/levelPage" element={<LevelPage />} />
                 <Route path="/favourities" element={<FavouritesPage />} />
+                <Route path="/password" element={<PasswordPage />} />
 
                 {/* Супер-админ*/}
                 <Route path="/super/login" element={<SuperLoginPage />} />

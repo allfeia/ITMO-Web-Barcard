@@ -6,9 +6,6 @@ import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import FormGroup from '@mui/material/FormGroup'; 
 import FormControlLabel from '@mui/material/FormControlLabel'; 
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {IconButton, InputAdornment} from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import Checkbox from '@mui/material/Checkbox';
 import { useNavigate } from 'react-router-dom';
@@ -26,15 +23,11 @@ export default function SuperAssignUserPage() {
     name: '',
     login: '',
     email: '',
-    password: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [okMsg, setOkMsg] = useState('');
   const [err, setErr] = useState('');
-  const [passwordHint, setPasswordHint] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [showPass, setShowPass] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -67,20 +60,6 @@ export default function SuperAssignUserPage() {
   setForm(p => ({ ...p, [name]: value }));
   setOkMsg('');
   setErr('');
-
-  if (name === 'password') {
-    setPasswordError('');
-    const len = value.length;
-
-    if (/\s/.test(value)) {
-      setPasswordError('Пароль не должен содержать пробелы');
-      setPasswordHint('');
-    } else if (len > 0 && len < 6) {
-      setPasswordHint('Пароль должен быть минимум 6 символов');
-    } else {
-      setPasswordHint('');
-    }
-  }
 }
 
 async function onSubmit(e) {
@@ -89,10 +68,9 @@ async function onSubmit(e) {
 
   setOkMsg('');
   setErr('');
-  setPasswordError('');
 
   if (!form.barName.trim()) { setErr('Выберите бар'); return; }
-  if (!form.name.trim() || !form.login.trim() || !form.email.trim() || !form.password.trim()) {
+  if (!form.name.trim() || !form.login.trim() || !form.email.trim()) {
     setErr('Заполните все поля пользователя'); 
     return;
   }
@@ -103,17 +81,6 @@ async function onSubmit(e) {
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       setErr('Некорректный email');
       return;
-  }
-
-  if (!form.password.trim()) {
-    setPasswordError('Введите пароль');
-    hasError = true;
-  } else if (/\s/.test(form.password)) {
-    setPasswordError('Пароль не должен содержать пробелы');
-    hasError = true;
-  } else if (form.password.length < 6) {
-    setPasswordError('Пароль должен быть минимум 6 символов');
-    hasError = true;
   }
 
   const roles = Array.from(new Set(form.roles || [])).filter(
@@ -137,7 +104,6 @@ async function onSubmit(e) {
         name: form.name.trim(),
         login: form.login.trim(),
         email: form.email.trim(),
-        password: form.password
       })
     });
 
@@ -198,26 +164,6 @@ async function onSubmit(e) {
         <TextField className="form-input" label="Имя пользователя" name="name" value={form.name} onChange={onChange} />
         <TextField className="form-input" label="Логин" name="login" value={form.login} onChange={onChange} />
         <TextField className="form-input" label="Email" name="email" value={form.email} onChange={onChange} />
-        <TextField
-          className="form-input"
-          label="Пароль"
-          variant="outlined"
-          type={showPass ? "password" : "text"}
-          name="password"
-          value={form.password}
-          onChange={onChange}
-          error={Boolean(passwordError)}
-          helperText={passwordError || passwordHint}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPass(!showPass)}>
-                  {showPass ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                </IconButton>
-
-              </InputAdornment>
-            ),
-          }} />
 
         {err && <Typography color="error" sx={{ mt: 1 }}>{err}</Typography>}
         {okMsg && <Typography color="success.main" sx={{ mt: 1 }}>{okMsg}</Typography>}

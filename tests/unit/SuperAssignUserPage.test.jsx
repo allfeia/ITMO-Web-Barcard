@@ -12,6 +12,9 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
+vi.mock('../../src/apiFetch.js', () => ({
+  useApiFetch: () => global.fetch,
+}));
 
 describe('SuperAssignUserPage', () => {
   const fetchMock = vi.fn();
@@ -21,17 +24,15 @@ describe('SuperAssignUserPage', () => {
     global.fetch = fetchMock;
   });
 
-    it('загружает бары и позволяет выбрать роли и отправить форму', async () => {
-    // GET /api/admin/bars
+  it('загружает бары и позволяет выбрать роли и отправить форму', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ([
+      json: async () => [
         { id: 1, name: 'Бар А' },
         { id: 2, name: 'Бар B' },
-      ]),
+      ],
     });
 
-    // POST /api/super/users/register-in-bar
     fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ message: 'Готово' }),
@@ -39,49 +40,48 @@ describe('SuperAssignUserPage', () => {
 
     render(<SuperAssignUserPage />);
 
-    // Бары подгрузились
     await screen.findByLabelText('Бар');
 
-    // Выбираем бар
     fireEvent.mouseDown(screen.getByLabelText('Бар'));
     const optionBarA = await screen.findByText('Бар А');
     fireEvent.click(optionBarA);
 
-    // Роли по умолчанию: ['bar_admin']; переключим staff
     const staffCb = screen.getByLabelText('staff');
     fireEvent.click(staffCb);
 
-    // Заполняем пользователя
     fireEvent.change(screen.getByLabelText('Имя пользователя'), { target: { value: 'Новый' } });
     fireEvent.change(screen.getByLabelText('Логин'), { target: { value: 'new' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'new@ex.com' } });
-    fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'secret' } });
 
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenLastCalledWith(
-        '/api/super/users/register-in-bar',
-        expect.objectContaining({
-          method: 'POST',
-          credentials: 'include',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-        })
-      );
-    });
+  expect(fetchMock).toHaveBeenLastCalledWith(
+    '/api/super/users/register-in-bar',
+    expect.objectContaining({
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        barName: 'Бар А',
+        roles: ['bar_admin', 'staff'],
+        name: 'Новый',
+        login: 'new',
+        email: 'new@ex.com',
+      }),
+    })
+  );
+});
 
     expect(await screen.findByText('Готово')).toBeInTheDocument();
   });
 
-
   it('показывает ошибки валидации на форме', async () => {
-    // GET bars
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ([]),
+      json: async () => [],
     });
+
     render(<SuperAssignUserPage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));

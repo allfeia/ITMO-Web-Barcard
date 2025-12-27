@@ -45,6 +45,15 @@ app.use("/api", (req, res, next) => {
 app.use("/api", authRoutes);
 app.use("/api", apiRoutes);
 
+const passwordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use("/api/password/", passwordLimiter);
+
 const port = process.env.PORT || 4000;
 (async () => {
     try {

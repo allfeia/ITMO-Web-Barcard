@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev";
 const REFRESH_SECRET = process.env.REFRESH_SECRET || 'refresh_dev';
+const INVITE_SECRET = process.env.INVITE_SECRET || "invite_dev";
 
 export function signJwt(payload) {
     return jwt.sign(
@@ -35,6 +36,26 @@ export function signRefreshToken(payload) {
     );
 }
 
+export function signInviteSession(payload) {
+  return jwt.sign(
+    { purpose: "invite", uid: payload.userId, ptid: payload.passwordTokenId },
+    INVITE_SECRET,
+    { expiresIn: "15m" }
+  );
+}
+
+export function inviteSessionRequired(req, res, next) {
+  const t = req.cookies?.invite_session;
+  if (!t) return res.status(401).json({ error: "Ссылка не действительна" });
+  try {
+    const p = jwt.verify(t, INVITE_SECRET);
+    if (p.purpose !== "invite") throw new Error("bad purpose");
+    req.invite = { userId: p.uid, passwordTokenId: p.ptid };
+    next();
+  } catch {
+    return res.status(401).json({ error: "Ссылка не действительна или срок ее действия истек" });
+  }
+}
 
 export function authRequired(req, res, next) {
     const token = req.cookies?.access_token;

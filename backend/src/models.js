@@ -44,9 +44,9 @@ User.init(
         const has = (r) => set.has(r);
 
         if (has("staff") || has("bar_admin")) {
-          if (!this.password || !this.bar_id) {
+          if (!this.bar_id) {
             throw new Error(
-              "Для ролей staff/bar_admin обязательны пароль и ID бара.",
+              "Для ролей staff/bar_admin обязателен ID бара.",
             );
           }
         }
@@ -233,6 +233,38 @@ UserFavourite.init(
   },
 );
 
+export class PasswordToken extends Model {}
+PasswordToken.init(
+  {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: "users", key: "id" },
+      onDelete: "CASCADE",
+    },
+    token_hash: { type: DataTypes.STRING, allowNull: false, unique: true },
+    purpose: {
+      type: DataTypes.ENUM("invite", "reset"),
+      allowNull: false,
+    },
+    expires_at: { type: DataTypes.DATE, allowNull: false },
+    used_at: { type: DataTypes.DATE, allowNull: true },
+  },
+  {
+    sequelize,
+    modelName: "PasswordToken",
+    tableName: "password_tokens",
+    underscored: true,
+    timestamps: true,
+    indexes: [
+      { fields: ["user_id"] },
+      { fields: ["token_hash"] },
+      { fields: ["expires_at"] },
+    ],
+  }
+);
+
 //Связи 
 Bar.hasMany(Cocktail, { foreignKey: "bar_id" });
 Bar.hasMany(User, { foreignKey: "bar_id", as: "employees" });
@@ -305,3 +337,6 @@ Cocktail.belongsToMany(User, {
   otherKey: "user_id",
   as: "usersWhoFavourited",
 });
+
+User.hasMany(PasswordToken, { foreignKey: "user_id", as: "passwordTokens" });
+PasswordToken.belongsTo(User, { foreignKey: "user_id" });

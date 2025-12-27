@@ -3,9 +3,6 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {IconButton, InputAdornment} from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../authContext/useAuth.js';
@@ -20,7 +17,6 @@ export default function AdminRegisterBarmanForm() {
     name: '',
     login: '',
     email: '',
-    password: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -30,10 +26,7 @@ export default function AdminRegisterBarmanForm() {
   const [nameError, setNameError] = useState('');
   const [loginError, setLoginError] = useState('');
   const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
 
-  const [passwordHint, setPasswordHint] = useState('');
-  const [showPass, setShowPass] = useState(true);
 
   function onChange(e) {
   const { name, value } = e.target;
@@ -42,18 +35,6 @@ export default function AdminRegisterBarmanForm() {
   if (name === 'name') setNameError('');
   if (name === 'login') setLoginError('');
   if (name === 'email') setEmailError('');
-  if (name === 'password') {
-    setPasswordError('');
-    const len = value.length;
-    if (/\s/.test(value)) {
-      setPasswordError('Пароль не должен содержать пробелы');
-      setPasswordHint('');
-    } else if (len > 0 && len < 6) {
-      setPasswordHint('Пароль должен быть минимум 6 символов');
-    } else {
-      setPasswordHint('');
-    }
-  }
 
   setCommonErr(null);
   setOkMsg(null);
@@ -68,7 +49,6 @@ async function onSubmit(e) {
   setNameError('');
   setLoginError('');
   setEmailError('');
-  setPasswordError('');
 
   if (!form.name.trim()) { setNameError('Введите имя'); hasError = true; }
   if (!form.login.trim()) { setLoginError('Введите логин'); hasError = true; }
@@ -78,16 +58,6 @@ async function onSubmit(e) {
     setEmailError('Некорректный e‑mail'); hasError = true;
   }
 
-  if (!form.password.trim()) {
-    setPasswordError('Введите пароль');
-    hasError = true;
-  } else if (/\s/.test(form.password)) {
-    setPasswordError('Пароль не должен содержать пробелы');
-    hasError = true;
-  } else if (form.password.length < 6) {
-    setPasswordError('Пароль должен быть минимум 6 символов');
-    hasError = true;
-  }
   if (hasError) return;
 
   if (!Array.isArray(roles) || !roles.includes('bar_admin') || !barId) {
@@ -109,7 +79,6 @@ async function onSubmit(e) {
         name: form.name.trim(),
         login: form.login.trim(),
         email: form.email.trim(),
-        password: form.password
       })
     });
       const data = await resp.json().catch(() => ({}));
@@ -186,27 +155,6 @@ async function onSubmit(e) {
           onChange={onChange}
           error={Boolean(emailError)}
           helperText={emailError} />
-
-        <TextField
-          className="form-input"
-          label="Пароль"
-          variant="outlined"
-          type={showPass ? "password" : "text"}
-          name="password"
-          value={form.password}
-          onChange={onChange}
-          error={Boolean(passwordError)}
-          helperText={passwordError || passwordHint}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPass(!showPass)}>
-                  {showPass ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                </IconButton>
-
-              </InputAdornment>
-            ),
-          }} />
 
         {commonErr && (
           <Typography color="error" sx={{ mt: 1 }}>

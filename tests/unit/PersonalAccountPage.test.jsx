@@ -34,14 +34,15 @@ describe('PersonalAccountPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('делает запрос /api/me с cookie, показывает username и points', async () => {
-    sessionStorage.setItem('roles', JSON.stringify(['user']))
+  it('делает запрос /api/me через apiFetch с credentials, показывает username и points', async () => {
+    useAuth.mockReturnValue({ roles: ['user'] })
 
     const mockData = { login: 'john', points: 123 }
-    const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    const apiFetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     })
+    useApiFetch.mockReturnValue(apiFetchMock)
 
     renderWithProviders()
 
@@ -50,18 +51,19 @@ describe('PersonalAccountPage', () => {
       expect(screen.getByText('123')).toBeInTheDocument()
     })
 
-    expect(fetchSpy).toHaveBeenCalledWith('/api/me', {
+    expect(apiFetchMock).toHaveBeenCalledWith('/api/me', {
       credentials: 'include',
     })
   })
 
   it('если роль bar_admin — рендерит ссылку "Добавить сотрудника"', async () => {
-    sessionStorage.setItem('roles', JSON.stringify(['user', 'bar_admin']))
+    useAuth.mockReturnValue({ roles: ['user', 'bar_admin'] })
 
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    const apiFetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => ({ login: 'admin', points: 5 }),
     })
+    useApiFetch.mockReturnValue(apiFetchMock)
 
     renderWithProviders()
 
@@ -69,44 +71,74 @@ describe('PersonalAccountPage', () => {
       expect(screen.getByText('admin')).toBeInTheDocument()
     })
 
-    expect(
-      screen.getByRole('link', { name: 'Добавить сотрудника' })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Добавить сотрудника' })).toBeInTheDocument()
   })
 
   it('если нет роли bar_admin — нет ссылки "Добавить сотрудника"', async () => {
-    sessionStorage.setItem('roles', JSON.stringify(['user']))
+    useAuth.mockReturnValue({ roles: ['user'] })
 
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    const apiFetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => ({ login: 'usr', points: 10 }),
     })
+    useApiFetch.mockReturnValue(apiFetchMock)
 
-    renderWithProviders()
+    renderPage()
 
     await waitFor(() => {
       expect(screen.getByText('usr')).toBeInTheDocument()
     })
 
-    expect(
-      screen.queryByRole('link', { name: 'Добавить сотрудника' })
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Добавить сотрудника' })).not.toBeInTheDocument()
   })
 
-  it('мягко обрабатывает не-OK ответ', async () => {
-    sessionStorage.setItem('roles', JSON.stringify(['user']))
+  it('мягко обрабатывает не-OK ответ /api/me (оставляет username пустым, points = 0)', async () => {
+    useAuth.mockReturnValue({ roles: ['user'] })
 
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+    const apiFetchMock = vi.fn().mockResolvedValueOnce({
       ok: false,
       json: async () => ({}),
     })
+    useApiFetch.mockReturnValue(apiFetchMock)
 
-    renderWithProviders()
+    renderPage()
 
     // username останется пустой, points — 0
     await waitFor(() => {
       expect(screen.getByText('Рейтинг:')).toBeInTheDocument()
     })
     expect(screen.getByText('0')).toBeInTheDocument()
+  })
+
+  it('по клику "Сменить пароль" вызывает POST /api/password/request-reset (с include и JSON headers)', async () => {
+    useAuth.mockReturnValue({ roles: ['user'] })
+
+    const apiFetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ login: 'john', points: 1 }),
+    })
+    useApiFetch.mockReturnValue(apiFetchMock)
+
+    const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({}),
+    })
+
+    renderPage()
+
+    // Дождёмся, что профиль подгрузился (чтобы эффект apiFetch отработал)
+    await waitFor(() => {
+      expect(screen.getByText('john')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('link', { name: 'Сменить пароль' }))
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith('/api/password/request-reset', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
   })
 })

@@ -21,6 +21,8 @@ function PersonalAccountPage() {
   const [username, setUsername] = useState('');
   const [points, setPoints] = useState(0);
 
+  const [resetLoading, setResetLoading] = useState(false);
+
   const goTo = useNavigate();
   const apiFetch = useApiFetch();
 
@@ -53,6 +55,31 @@ function PersonalAccountPage() {
 
     return () => { aborted = true; };
   }, []);
+
+  const requestPasswordReset = async () => {
+  if (resetLoading) return;
+
+  setResetLoading(true);
+  try {
+    const resp = await fetch("/api/password/request-reset", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!resp.ok) {
+      let msg = "Не удалось отправить код. Попробуйте позже.";
+      try {
+        const j = await resp.json();
+        msg = j?.message || j?.error || msg;
+      } catch (_) {}
+      return;
+    }
+  } catch (e) {
+  } finally {
+    setResetLoading(false);
+  }
+};
 
   return (
     <div className="screen">
@@ -94,14 +121,19 @@ function PersonalAccountPage() {
         </span>
       </Link>
 
-        {isBarAdmin && (
-          <Link
-            to="/admin/staff/register"
-            className="linkRow"
-          >
-            <span className="linkFull">Добавить сотрудника</span>
-          </Link>
-        )}
+      <Link
+        to="/password?mode=reset"
+        className="linkRow"
+        onClick={requestPasswordReset}
+      >
+        Сменить пароль
+      </Link>
+
+      {isBarAdmin && (
+        <Link to="/admin/staff/register" className="linkRow">
+          <span className="linkFull">Добавить сотрудника</span>
+        </Link>
+      )}
     </div>
   );
 }

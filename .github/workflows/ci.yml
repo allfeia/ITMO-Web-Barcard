@@ -67,14 +67,13 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Deploy via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no root@85.117.234.255 << EOF
-          set -e
+          ssh -o StrictHostKeyChecking=no root@85.117.234.255 << 'EOF'
+          set -euo pipefail
           cd ITMO-Web-Barcard
-          rm -f .env
-          cat > .env << 'EOT'
+          
+          ENV_CONTENT=$(cat << 'EOT'
           PORT=${{ secrets.PORT }}
 
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
@@ -90,16 +89,21 @@ jobs:
           BCRYPT_ROUNDS=${{ secrets.BCRYPT_ROUNDS }}
           CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
 
-          SMTP_HOST=${{secrets.SMTP_HOST}}
-          SMTP_PORT=${{secrets.SMTP_PORT}}
-          SMTP_USER=${{secrets.SMTP_USER}}
-          SMTP_PASS=${{secrets.SMTP_PASS}}
-          SMTP_FROM=${{secrets.SMTP_FROM}}
-          APP_PUBLIC_URL=${{secrets.APP_PUBLIC_URL}}
-          INVITE_SECRET=${{secrets.INVITE_SECRET}}
+          SMTP_HOST=${{ secrets.SMTP_HOST }}
+          SMTP_PORT=${{ secrets.SMTP_PORT }}
+          SMTP_USER=${{ secrets.SMTP_USER }}
+          SMTP_PASS=${{ secrets.SMTP_PASS }}
+          SMTP_FROM=${{ secrets.SMTP_FROM }}
+          APP_PUBLIC_URL=${{ secrets.APP_PUBLIC_URL }}
+          INVITE_SECRET=${{ secrets.INVITE_SECRET }}
           EOT
+          )
+          
+          rm -f .env backend/.env
+          printf '%s\n' "$ENV_CONTENT" | tee .env backend/.env > /dev/null
 
-          chmod 600 backend/.env
-          git pull &&
+          chmod 600 .env backend/.env
+
+          git pull
           make run
           EOF

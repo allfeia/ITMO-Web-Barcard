@@ -2,6 +2,7 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import PasswordPage from "../../src/password-page/PasswordPage.jsx";
+import { useAuth } from '../../src/authContext/useAuth.js';
 
 const navigateMock = vi.fn();
 let locationState = { search: "", hash: "" };
@@ -19,7 +20,7 @@ const setBarIdMock = vi.fn();
 const setRolesMock = vi.fn();
 const setIsBarmanMock = vi.fn();
 
-vi.mock("../authContext/useAuth", () => ({
+vi.mock("../../src/authContext/useAuth.js", () => ({
   useAuth: () => ({
     setBarId: setBarIdMock,
     setRoles: setRolesMock,

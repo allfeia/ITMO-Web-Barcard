@@ -56,21 +56,22 @@ describe('SuperAssignUserPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Добавить' }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenLastCalledWith(
-        '/api/super/users/register-in-bar',
-        expect.objectContaining({
-          method: 'POST',
-          credentials: 'include',
-          body: JSON.stringify({
-            barName: 'Бар А',
-            roles: expect.arrayContaining(['bar_admin', 'staff']),
-            name: 'Новый',
-            login: 'new',
-            email: 'new@ex.com',
-          }),
-        })
-      );
-    });
+  expect(fetchMock).toHaveBeenLastCalledWith(
+    '/api/super/users/register-in-bar',
+    expect.objectContaining({
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        barName: 'Бар А',
+        roles: ['bar_admin', 'staff'],
+        name: 'Новый',
+        login: 'new',
+        email: 'new@ex.com',
+      }),
+    })
+  );
+});
 
     expect(await screen.findByText('Готово')).toBeInTheDocument();
   });

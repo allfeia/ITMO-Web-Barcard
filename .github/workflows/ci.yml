@@ -73,8 +73,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@85.117.234.255 << EOF
           set -e
           cd ITMO-Web-Barcard
-          rm -f backend/.env
-          cat > backend/.env << 'EOT'
+          rm -f .env
+          cat > .env << 'EOT'
           PORT=${{ secrets.PORT }}
 
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}

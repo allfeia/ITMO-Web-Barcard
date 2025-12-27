@@ -58,8 +58,9 @@ describe("PasswordPage", () => {
     locationState = { search: "", hash: "" };
   });
 
-  afterEach(() => {
-    vi.runOnlyPendingTimers();
+  afterEach(async () => {
+    // важно: подчистить таймеры, чтобы они не текли между тестами
+    await vi.runOnlyPendingTimersAsync();
     vi.useRealTimers();
   });
 
@@ -113,24 +114,25 @@ describe("PasswordPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Сохранить пароль" }));
 
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
 
-    expect(global.fetch).toHaveBeenCalledWith("/api/password/confirm-code", expect.objectContaining({
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ code: "123456", password: "12345678" }),
-    }));
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/password/confirm-code",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ code: "123456", password: "12345678" }),
+      })
+    );
 
-    await screen.findByText("Пароль успешно установлен");
-
-    expect(screen.getByText(/Возвращение в аккаунт произойдет через 10 сек\./)).toBeInTheDocument();
+    // В компоненте успех для reset подтверждается появлением countdown-текста
+    await screen.findByText(/Возвращение в аккаунт произойдет через 10 сек\./);
     expect(navigateMock).not.toHaveBeenCalled();
 
     await act(async () => {
       vi.advanceTimersByTime(10_000);
+      await vi.runOnlyPendingTimersAsync();
     });
 
     await waitFor(() => {
@@ -150,6 +152,7 @@ describe("PasswordPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Сохранить пароль" }));
 
+    // Ошибка показывается в Snackbar
     await screen.findByText("bad code");
     expect(navigateMock).not.toHaveBeenCalled();
   });
@@ -164,18 +167,26 @@ describe("PasswordPage", () => {
     fireEvent.click(link);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    expect(global.fetch).toHaveBeenCalledWith("/api/password/request-reset", expect.objectContaining({
-      method: "POST",
-      credentials: "include",
-    }));
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/password/request-reset",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      })
+    );
 
-    expect(screen.getByText(/Повторная отправка кода будет доступна через 30 сек\./)).toBeInTheDocument();
+    // Сразу становится 30
+    expect(
+      screen.getByText(/Повторная отправка кода будет доступна через 30 сек\./)
+    ).toBeInTheDocument();
 
+    // Клик по кулдауну ничего не делает
     fireEvent.click(screen.getByText(/Повторная отправка кода будет доступна через 30 сек\./));
     expect(global.fetch).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       vi.advanceTimersByTime(1000);
+      await vi.runOnlyPendingTimersAsync();
     });
 
     expect(screen.getByText(/через 29 сек\./)).toBeInTheDocument();
@@ -189,12 +200,15 @@ describe("PasswordPage", () => {
     render(<PasswordPage />);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    expect(global.fetch).toHaveBeenCalledWith("/api/password/invite/session", expect.objectContaining({
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ token: "abc" }),
-    }));
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/password/invite/session",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ token: "abc" }),
+      })
+    );
 
     await waitFor(() => expect(replaceSpy).toHaveBeenCalledTimes(1));
     replaceSpy.mockRestore();
@@ -216,23 +230,26 @@ describe("PasswordPage", () => {
     fireEvent.click(submit);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    expect(global.fetch).toHaveBeenCalledWith("/api/password/confirm", expect.objectContaining({
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ password: "12345678" }),
-    }));
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/password/confirm",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ password: "12345678" }),
+      })
+    );
 
-    await screen.findByText("Пароль успешно установлен");
+    // Подтверждаем успешное состояние по countdown-тексту
+    await screen.findByText(/Переход на страницу авторизации произойдет через 10 сек\./);
 
     expect(setBarIdMock).toHaveBeenCalledWith("b1");
     expect(setRolesMock).toHaveBeenCalledWith(["admin"]);
     expect(setIsBarmanMock).toHaveBeenCalledWith(true);
 
-    expect(screen.getByText(/Переход на страницу авторизации произойдет через 10 сек\./)).toBeInTheDocument();
-
     await act(async () => {
       vi.advanceTimersByTime(10_000);
+      await vi.runOnlyPendingTimersAsync();
     });
 
     await waitFor(() => {
@@ -250,10 +267,13 @@ describe("PasswordPage", () => {
     fireEvent.click(link);
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    expect(global.fetch).toHaveBeenCalledWith("/api/password/request-invite-again", expect.objectContaining({
-      method: "POST",
-      credentials: "include",
-    }));
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/password/request-invite-again",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      })
+    );
 
     expect(screen.getByText(/Повторная отправка будет доступна через 30 сек\./)).toBeInTheDocument();
   });

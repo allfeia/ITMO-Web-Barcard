@@ -24,7 +24,6 @@ vi.mock("../../src/icons/heartIcon.js", () => ({
 vi.mock("../../src/authContext/useAuth.js", () => ({
     useAuth: () => ({
         isBarman: true,
-        token: "fake-jwt-token",
         savedCocktailsId: mockSavedIds,
         setSavedCocktailsId: mockSetSavedIds,
     }),
@@ -106,7 +105,7 @@ describe("CardsGrid", () => {
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith("/api/favourites/add/1", {
                 method: "PATCH",
-                headers: { Authorization: "Bearer fake-jwt-token" },
+                credentials: "include",
             });
         });
 
@@ -126,7 +125,7 @@ describe("CardsGrid", () => {
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith("/api/favourites/remove/2", {
                 method: "DELETE",
-                headers: { Authorization: "Bearer fake-jwt-token" },
+                credentials: "include",
             });
         });
 

@@ -35,7 +35,7 @@ Sentry.init({
 if (import.meta.env.MODE === 'development') {
     const { worker } = await import('./mocks/browser.js');
     await worker.start({
-        onUnhandledRequest: "warn",
+        onUnhandledRequest: "bypass",
     });
 }
 

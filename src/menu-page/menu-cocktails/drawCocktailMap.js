@@ -5,9 +5,9 @@ import { drawCloverClub } from "./BAR777/clover-club.js";
 import { drawSmashBasil } from "./BAR123/smash-basil.js";
 
 export const drawCocktailMap = {
-  mojito: drawMojito,
+  "mojito": drawMojito,
   "smash-basil": drawSmashBasil,
-  negroni: drawNegroni,
+  "negroni": drawNegroni,
 
   "clover-club": drawCloverClub,
   "hot-toddy": drawHotToddy,

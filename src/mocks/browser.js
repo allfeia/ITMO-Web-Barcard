@@ -4,8 +4,9 @@ import { getCocktails } from "./getCocktails.js";
 import { getCocktailRecipe } from "./getRecipe.js";
 import { meInfo } from "./getBarmenInfo.js";
 import { getFavouritesCocktails } from "./getFavourites.js";
-import { addFavouriteCocktail } from "./addFavoritesCocktail.js";
-import { removeFavouriteCocktail } from "./removeFavouriteCocktail.js";
+import { addFavouriteCocktail } from "./favoritesCocktailActions.js";
+import { removeFavouriteCocktail } from "./favoritesCocktailActions.js";
+import {getRefreshCookie} from "./refresher.js";
 
 export const worker = setupWorker(
   ...signInBarman,
@@ -15,4 +16,5 @@ export const worker = setupWorker(
   ...meInfo,
   ...addFavouriteCocktail,
   ...removeFavouriteCocktail,
+  ...getRefreshCookie,
 );

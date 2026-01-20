@@ -4,6 +4,7 @@ import RecipeCard from "./RecipeCard.jsx";
 import drawHeartIcon from "../icons/heartIcon.js";
 import {useAuth} from "../authContext/useAuth.js";
 import {drawCocktailMap} from "./menu-cocktails/drawCocktailMap.js";
+import {useApiFetch} from "../apiFetch.js";
 
 function CardsGrid({ cocktails }) {
 
@@ -11,8 +12,9 @@ function CardsGrid({ cocktails }) {
     const [open, setOpen] = useState(false);
     const [selectedCocktail, setSelectedCocktail] = useState(null);
     const canvasRefsHeart = useRef({});
+    const apiFetch = useApiFetch();
 
-    const { setSavedCocktailsId, savedCocktailsId, token, isBarman  } = useAuth();
+    const { setSavedCocktailsId, savedCocktailsId, isBarman  } = useAuth();
 
     const openModal = (cocktail) => {
         setSelectedCocktail(cocktail)
@@ -45,9 +47,8 @@ function CardsGrid({ cocktails }) {
 
     const addFavouriteCocktail = (cocktailId) => {
         if (!isBarman) return;
-        fetch(`/api/favourites/add/${cocktailId}`, {
+        apiFetch(`/api/favourites/add/${cocktailId}`, {
             method: "PATCH",
-            headers: { Authorization: `Bearer ${token}` },
         })
             .then(res => res.json())
             .then(data => {
@@ -60,9 +61,8 @@ function CardsGrid({ cocktails }) {
 
     const removeFavouriteCocktail = (cocktailId) => {
         if (!isBarman) return;
-        fetch(`/api/favourites/remove/${cocktailId}`, {
+        apiFetch(`/api/favourites/remove/${cocktailId}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
         })
             .then(res => res.json())
             .then(setSavedCocktailsId(prev => prev.filter(id => id !== cocktailId)))

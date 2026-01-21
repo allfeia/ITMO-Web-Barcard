@@ -5,6 +5,7 @@ import LevelPage from '../../src/level-page/LevelPage';
 import drawOlive from '../../src/level-page/Olive.js';
 
 const mockNavigate = vi.fn();
+const mockDispatch = vi.fn();
 
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
@@ -14,6 +15,16 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
+vi.mock('react-redux', () => ({
+    useDispatch: () => mockDispatch,
+    useSelector: (selector) =>
+        selector({
+            game: {
+                mode: 'easy',
+            },
+        }),
+}));
+
 vi.mock('../../src/level-page/Olive.js', () => ({
     default: vi.fn(),
 }));
@@ -21,6 +32,7 @@ vi.mock('../../src/level-page/Olive.js', () => ({
 describe('LevelPage', () => {
     beforeEach(() => {
         mockNavigate.mockClear();
+        mockDispatch.mockClear();
         vi.mocked(drawOlive).mockClear();
     });
 
@@ -70,16 +82,17 @@ describe('LevelPage', () => {
         expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
 
-    it('должна иметь обработчики клика на кнопках уровней', () => {
+    it('должна переходить на /ingredients при выборе уровня', () => {
         renderLevelPage();
+
         fireEvent.click(screen.getByRole('button', { name: 'Легкий' }));
-        expect(mockNavigate).toHaveBeenCalledWith('/game/easy');
+        expect(mockNavigate).toHaveBeenLastCalledWith('/ingredients');
 
         fireEvent.click(screen.getByRole('button', { name: 'Средний' }));
-        expect(mockNavigate).toHaveBeenCalledWith('/game/medium');
+        expect(mockNavigate).toHaveBeenLastCalledWith('/ingredients');
 
         fireEvent.click(screen.getByRole('button', { name: 'Сложный' }));
-        expect(mockNavigate).toHaveBeenCalledWith('/game/hard');
+        expect(mockNavigate).toHaveBeenLastCalledWith('/ingredients');
     });
 
     it('должна вызывать drawOlive при монтировании с правильными аргументами', () => {

@@ -364,60 +364,42 @@ export const getCocktailRecipe = [
     const steps = cocktailRecipeDatabase.cocktail_recipe_step
       .filter((step) => step.cocktail_id === cocktailId)
       .sort((a, b) => a.step_number - b.step_number);
+
     const ingredients = cocktailRecipeDatabase.cocktail_ingredient.filter(
       (ing) => ing.cocktail_id === cocktailId,
     );
-    const allIngredients = cocktailRecipeDatabase.ingredient;
 
-    const mainIngredients = [];
-    const decorationIngredients = [];
+      const allIngredients = cocktailRecipeDatabase.ingredient;
 
-    ingredients.forEach((ing) => {
-      const ingredientData = allIngredients.find(
-        (i) => i.id === ing.ingredient_id,
-      );
-      if (ingredientData) {
-        const amountStr =
-          ing.amount !== null ? `${ing.amount} ${ing.unit}` : "";
-        const ingredientWithAmount = {
-          ...ingredientData,
-          amount: ing.amount,
-          unit: ing.unit,
-          amountStr: amountStr,
-        };
+      const ingredientsWithAmount = ingredients.map((ing) => {
+          const ingredientData = allIngredients.find((i) => i.id === ing.ingredient_id);
+          if (!ingredientData) return null;
 
-        if (ingredientData.type === "decoration") {
-          decorationIngredients.push(ingredientWithAmount);
-        } else {
-          mainIngredients.push(ingredientWithAmount);
-        }
+          const amountStr = ing.amount !== null ? `${ing.amount} ${ing.unit}` : "";
+
+          return {
+              ...ingredientData,
+              amount: ing.amount,
+              unit: ing.unit,
+              amountStr: amountStr,
+          };
+      }).filter(Boolean);
+
+      const recipeSteps = steps.map((step) => {
+          const ingredientData = allIngredients.find((i) => i.id === step.ingredient_id);
+          return {
+              step_number: step.step_number,
+              action: step.action,
+              ingredient_name: ingredientData ? ingredientData.name : null,
+          }
+      })
+
+      const recipeData = {
+          id: cocktail.id,
+          name: cocktail.name,
+          ingredients: ingredientsWithAmount,
+          steps: recipeSteps,
       }
-    });
-
-    const decoration =
-      decorationIngredients.length > 0
-        ? decorationIngredients.map((d) => d.name).join(", ")
-        : "-";
-
-    const recipeData = {
-      id: cocktail.id,
-      name: cocktail.name,
-      ingredients: mainIngredients,
-      decoration: decoration,
-      steps: steps.map((step) => {
-        const ingredientData = allIngredients.find(
-          (i) => i.id === step.ingredient_id,
-        );
-        return {
-          step_number: step.step_number,
-          action: step.action,
-          ingredient_name: ingredientData
-            ? ingredientData.name
-            : "Неизвестный ингредиент",
-        };
-      }),
-    };
-
-    return HttpResponse.json(recipeData, { status: 200 });
+      return HttpResponse.json(recipeData, { status: 200 });
   }),
 ];

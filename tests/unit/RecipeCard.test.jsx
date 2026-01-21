@@ -5,10 +5,22 @@ import {AuthProvider} from "../../src/authContext/AuthContext.jsx";
 import {vi} from "vitest";
 
 const mockNavigate = vi.fn();
+const mockDispatch = vi.fn();
+
 vi.mock("react-router-dom", async (importOriginal) => {
     const actual = await importOriginal();
     return { ...actual, useNavigate: () => mockNavigate };
 });
+
+vi.mock("react-redux", () => ({
+    useDispatch: () => mockDispatch,
+    useSelector: (selector) =>
+        selector({
+            game: {
+                cocktailId: null,
+            },
+        }),
+}));
 
 global.fetch = vi.fn();
 
@@ -42,7 +54,12 @@ describe("RecipeCard", () => {
         return render(
             <AuthProvider>
                 <MemoryRouter>
-                    <RecipeCard open={true} cocktail={mockCocktail} onClose={() => {}} {...props} />
+                    <RecipeCard
+                        open={true}
+                        cocktail={mockCocktail}
+                        onClose={() => {}}
+                        {...props}
+                    />
                 </MemoryRouter>
             </AuthProvider>
         );
@@ -83,17 +100,6 @@ describe("RecipeCard", () => {
         expect(await screen.findByText(/Содовая/)).toBeInTheDocument();
     });
 
-    test("показывает украшение", async () => {
-        fetch.mockResolvedValueOnce({
-            ok: true,
-            json: () => Promise.resolve(mockRecipeResponse)
-        });
-
-        renderComponent();
-
-        expect(await screen.findByText("Мята")).toBeInTheDocument();
-    });
-
     test("показывает шаги приготовления", async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
@@ -118,10 +124,13 @@ describe("RecipeCard", () => {
 
         renderComponent();
 
-        await screen.findByText("Изучить");
+        const learnButton = await screen.findByRole("button", {
+            name: /изучить/i,
+        });
 
-        fireEvent.click(screen.getByText("Изучить"));
+        fireEvent.click(learnButton);
 
+        expect(mockDispatch).toHaveBeenCalled();
         expect(mockNavigate).toHaveBeenCalledWith("/levelPage");
     });
 });

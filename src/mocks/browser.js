@@ -7,6 +7,7 @@ import { getFavouritesCocktails } from "./getFavourites.js";
 import { addFavouriteCocktail } from "./favoritesCocktailActions.js";
 import { removeFavouriteCocktail } from "./favoritesCocktailActions.js";
 import {getRefreshCookie} from "./refresher.js";
+import {getIngredients} from "./getIngredients.js";
 
 export const worker = setupWorker(
   ...signInBarman,
@@ -17,4 +18,5 @@ export const worker = setupWorker(
   ...addFavouriteCocktail,
   ...removeFavouriteCocktail,
   ...getRefreshCookie,
+  ...getIngredients,
 );

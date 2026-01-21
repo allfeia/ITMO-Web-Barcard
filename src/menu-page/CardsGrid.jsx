@@ -109,7 +109,7 @@ function CardsGrid({ cocktails }) {
             ))}
 
             {selectedCocktail && (
-                <RecipeCard open={open} onClose={closeModal} cocktail={selectedCocktail} />
+                <RecipeCard open={open} onClose={closeModal} cocktail={selectedCocktail} isHint={false}/>
             )}
 
         </div>

@@ -4,9 +4,11 @@ import Button from "@mui/material/Button";
 import drawOlive from "./Olive.js";
 import "./LevelPage.css";
 import WestIcon from '@mui/icons-material/West';
+import {useDispatch, useSelector} from "react-redux";
+import {resetGame, setMode} from "../game/gameSlice.js";
 
 export default function LevelPage() {
-    const navigate = useNavigate();
+    const goTo = useNavigate();
 
     const easyRef = useRef(null);
     const mediumRef = useRef(null);
@@ -18,12 +20,26 @@ export default function LevelPage() {
         drawOlive(hardRef.current, 3);
     }, []);
 
+    const dispatch = useDispatch();
+
+    const selectLevel = (mode) => {
+        dispatch(setMode(mode));
+        goTo("/ingredients");
+    }
+
+    const mode = useSelector(state => state.game.mode);
+    console.log("Текущий режим:", mode);
+
+
     return (
         <div className="page">
             <Button
                 className="back-btn"
                 variant="text"
-                onClick={() => navigate(-1)}
+                onClick={() => {
+                    goTo(-1)
+                    dispatch(resetGame());
+                }}
                 data-testid="back-button"
             >
                 <WestIcon className="learn-arrow" sx={{fontSize: "30px"}}/>
@@ -38,7 +54,7 @@ export default function LevelPage() {
                         variant="outlined"
                         className="level-btn olive-btn"
                         fullWidth
-                        onClick={() => navigate("/game/easy")}
+                        onClick={() => selectLevel("easy")}
                     >
                         Легкий
                         <canvas ref={easyRef} className="olive-canvas" data-testid="olive-canvas"/>
@@ -50,7 +66,7 @@ export default function LevelPage() {
                         variant="outlined"
                         className="level-btn olive-btn"
                         fullWidth
-                        onClick={() => navigate("/game/medium")}
+                        onClick={() => selectLevel("medium")}
                     >
                         Средний
                         <canvas ref={mediumRef} className="olive-canvas" data-testid="olive-canvas"/>
@@ -62,7 +78,7 @@ export default function LevelPage() {
                         variant="outlined"
                         className="level-btn olive-btn"
                         fullWidth
-                        onClick={() => navigate("/game/hard")}
+                        onClick={() => selectLevel("hard")}
                     >
                         Сложный
                         <canvas ref={hardRef} className="olive-canvas" data-testid="olive-canvas"/>

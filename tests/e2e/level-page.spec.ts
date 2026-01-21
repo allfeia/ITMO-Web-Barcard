@@ -32,18 +32,13 @@ test.describe('LevelPage — выбор уровня сложности', () => 
         await expect(page).not.toHaveURL('/levelPage');
     });
 
-    test('клик по уровням ведёт на правильные страницы игры', async ({ page }) => {
+    test('клик по уровням ведёт на страницу выбора ингредиентов', async ({ page }) => {
         const levels = page.locator('.level-block');
 
-        await levels.nth(0).getByRole('button').click();
-        await page.waitForURL('**/game/easy');
-        await page.goto('/levelPage');
-
-        await levels.nth(1).getByRole('button').click();
-        await page.waitForURL('**/game/medium');
-        await page.goto('/levelPage');
-
-        await levels.nth(2).getByRole('button').click();
-        await page.waitForURL('**/game/hard');
+        for (let i = 0; i < 3; i++) {
+            await levels.nth(i).getByRole('button').click();
+            await page.waitForURL('**/ingredients');
+            await page.goBack();
+        }
     });
 });

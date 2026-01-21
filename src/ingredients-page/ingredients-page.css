@@ -1,0 +1,102 @@
+.hint-icon {
+    position: absolute;
+    right: 15px;
+    top: 8px;
+}
+
+.back-btn {
+    font-size: 32px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    color: #333 !important;
+    margin-left: 20px;
+    position: absolute !important;
+    left: 20px;
+    top: 20px;
+    overflow-x: hidden;
+}
+
+.ingredient-title {
+    font-size: 50px;
+    margin-bottom: 30px;
+    margin-top: 64px;
+    color: #333;
+    line-height: 1.2;
+    margin-left: 35px;
+}
+
+.ingredient-search-create-container {
+    margin-left: 35px;
+    margin-right: 35px;
+
+}
+
+.ingredient-search {
+    position: absolute;
+    padding: 0 10px;
+    width: 42%;
+}
+
+.ingredient-search .MuiOutlinedInput-root {
+    height: 45px;
+}
+
+.create-with-prop-btn {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 35px;
+}
+
+.search-create-row {
+    display: flex;
+    gap: 5px;
+    margin: 0 35px;
+}
+
+.ingredient-search,
+.create-btn {
+    flex: 1;
+    height: 45px;
+}
+
+.ingredients-groups {
+    margin: 0 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ingredient-group-title {
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 2px;
+    color: #333;
+}
+
+.ingredient-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ingredient-chip {
+    padding: 6px 12px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.ingredient-chip:hover {
+    background: #eee;
+}
+
+
+.ingredient-chip.active {
+    background: #333;
+    color: #fff;
+}

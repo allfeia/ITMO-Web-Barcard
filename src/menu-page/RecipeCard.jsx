@@ -2,10 +2,14 @@ import {Fade, Modal, Paper, Typography, Box, Button} from "@mui/material";
 import EastIcon from '@mui/icons-material/East';
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {setCocktail} from "../game/gameSlice.js";
 
-function RecipeCard({ open, onClose, cocktail }) {
+function RecipeCard({ open, onClose, cocktail, isHint }) {
     const goTo = useNavigate();
     const [recipeData, setRecipeData] = useState(null);
+
+    const dispatch = useDispatch();
 
     useEffect(() => {
         if (open && cocktail?.id) {
@@ -44,6 +48,9 @@ function RecipeCard({ open, onClose, cocktail }) {
         return `${truncatedName}${dots}${amountPart}`;
     };
 
+    const cocktailId = useSelector(state => state.game.cocktailId);
+    console.log("Выбранный коктейль:", cocktailId);
+
     return (
         <Modal
             className="menu-flipped-card"
@@ -77,11 +84,6 @@ function RecipeCard({ open, onClose, cocktail }) {
                                     ))}
                                 </Box>
 
-                                <Typography variant="h7" className="recipeHeader">Украшение</Typography>
-                                <Typography variant="h8" className="recipe-lists recipe-content">
-                                    {recipeData.decoration}
-                                </Typography>
-
                                 <Typography variant="h7" className="recipeHeader">Рецепт</Typography>
                                 <Box component="ol" className="recipe-steps recipe-content">
                                     {recipeData.steps.map((step, index) => (
@@ -94,15 +96,20 @@ function RecipeCard({ open, onClose, cocktail }) {
                                 </Box>
                             </Box>
 
-                            <button
-                                className="learn"
-                                onClick={() => goTo("/levelPage")}
-                            >
-                                <Typography variant="h6" className="learn-cocktail">
-                                    Изучить
-                                </Typography>
-                                <EastIcon className="learn-arrow" sx={{ fontSize: "30px" }} />
-                            </button>
+                            {!isHint && (
+                                <button
+                                    className="learn"
+                                    onClick={() => {
+                                        dispatch(setCocktail({id: cocktail.id, data: recipeData}));
+                                        goTo("/levelPage")
+                                    }}
+                                >
+                                    <Typography variant="h6" className="learn-cocktail">
+                                        Изучить
+                                    </Typography>
+                                    <EastIcon className="learn-arrow" sx={{ fontSize: "30px" }} />
+                                </button>
+                            )}
                         </>
                     )}
                 </Paper>

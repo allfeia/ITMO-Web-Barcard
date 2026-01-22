@@ -5,7 +5,9 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 import IngredientsPage from '../../src/game-pages/ingredients-page/IngredientsPage';
-import rootReducer from '../../src/game/rootReducer'; // ← твой rootReducer
+import rootReducer from '../../src/game/rootReducer';
+import {ingredientErrors} from "../../src/game-pages/ingredients-page/ingredients_error.js";
+import drawHint from "../../src/game-pages/hint.js"; // ← твой rootReducer
 
 // Мокаем useNavigate
 const mockNavigate = vi.fn();

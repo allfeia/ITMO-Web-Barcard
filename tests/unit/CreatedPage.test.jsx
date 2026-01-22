@@ -5,7 +5,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 import CreatedPage from '../../src/game-pages/created-page/CreatedPage';
-import rootReducer from '../../src/game/rootReducer'; // ← подставь реальный путь к rootReducer
+import rootReducer from '../../src/game/rootReducer';
+import {createdErrors} from "../../src/game-pages/created-page/created_error.js"; // ← подставь реальный путь к rootReducer
 
 // Мокаем useNavigate
 const navigateMock = vi.fn();

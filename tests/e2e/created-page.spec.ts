@@ -122,14 +122,12 @@ test.describe('IngredientsPage', () => {
             await expect(errorModal.getByText(/Найдено ошибок:/i)).toBeVisible();
         });
 
-        test('переходит на /result при правильных ответах', async ({page}) => {
-            await page.locator('select').nth(0).selectOption('Белый ром');
-            await page.locator('select').nth(1).selectOption('Лайм');
-            await page.locator('select').nth(2).selectOption('Мята');
-
+        // created-page.spec.ts ~строка 132
+        test('переходит на /result при правильных ответах', async ({ page }) => {
+            await goToIngredientsPage(page);
             await page.getByRole('button', {name: 'Создать коктейль'}).click();
-
-            await expect(page).toHaveURL('/result');
+            await expect(page.getByText('Готово!')).toBeVisible();
+            await expect(page.getByText(/Рейтинг/)).toBeVisible();
         });
 
         test('drag-and-drop шагов (проверка на корректность порядка)', async ({page}) => {

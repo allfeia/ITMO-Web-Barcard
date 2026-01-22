@@ -17,7 +17,7 @@
     color: #333 !important;
     font-weight: 700 !important;
     line-height: 1.1 !important;
-    font-size: clamp(64px, 13vw, 72px);!important;
+    font-size: clamp(64px, 13vw, 72px) !important;
     margin-bottom: 1vh;
     font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif !important;
     letter-spacing: -0.02em !important;

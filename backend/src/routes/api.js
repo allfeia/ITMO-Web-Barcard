@@ -13,6 +13,7 @@ import {
 } from "../models.js";
 import { Op, fn, col } from "sequelize";
 import bcrypt from "bcryptjs";
+import { sendOrderToChat } from "../../utils/telegramOdersBot.js";
 
 const router = Router();
 
@@ -165,51 +166,53 @@ router.get("/cocktail", async (req, res) => {
 });
 
 router.get("/cocktail/:id/recipe", async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        if (!Number.isFinite(id)) {
-            return res.status(400).json({ error: "Invalid cocktail id" });
-        }
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      return res.status(400).json({ error: "Invalid cocktail id" });
+    }
 
-        const cocktail = await Cocktail.findByPk(id, {
-            include: [
+    const cocktail = await Cocktail.findByPk(id, {
+      attributes: ["id", "name", "draw_file", "bar_id"],
+      include: [
+        {
+          model: CocktailRecipeStep,
+          attributes: ["id", "step_number", "action", "ingredient_id", "ingredient_case"],
+          include: [
+            {
+              model: CocktailIngredient,
+              as: "stepIngredients", 
+              attributes: ["id", "amount", "unit", "step_order"],
+              include: [
                 {
-                    model: CocktailRecipeStep,
-                    as: "CocktailRecipeSteps",
-                    attributes: ["step_number", "action", "ingredient_id"],
-                    include: [
-                        {
-                            model: CocktailIngredient,
-                            as: "stepIngredients",
-                            attributes: ["amount", "unit"],
-                            include: [
-                                {
-                                    model: Ingredient,
-                                    attributes: ["id", "name", "type"],
-                                },
-                            ],
-                        },
-                    ],
+                  model: Ingredient,
+                  attributes: ["id", "name", "type"],
                 },
-            ],
-            order: [[{ model: CocktailRecipeStep, as: "CocktailRecipeSteps" }, "step_number", "ASC"]],
-        });
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
-        if (!cocktail) return res.status(404).json({ error: "Not found" });
+    if (!cocktail) return res.status(404).json({ error: "Not found" });
 
-        const ingredientMap = new Map();
+    const recipeSteps = cocktail.CocktailRecipeSteps || [];
 
-        for (const step of cocktail.CocktailRecipeSteps || []) {
-            for (const ci of step.stepIngredients || []) {
-                const ing = ci.Ingredient;
-                if (!ing) continue;
+    const ingredientMap = new Map();
 
-                const key = ing.id;
-                let amountStr = "";
-                if (ci.amount != null && ci.amount !== "") {
-                    amountStr = String(ci.amount);
-                    if (ci.unit) amountStr += ` ${ci.unit}`;
-                }
+    for (const step of recipeSteps) {
+      for (const ci of step.stepIngredients || []) {
+        const ing = ci.Ingredient;
+        if (!ing) continue;
+
+        const key = ing.id;
+
+        let amountStr = "";
+        if (ci.amount != null && ci.amount !== "") {
+          amountStr = String(ci.amount);
+          if (ci.unit) amountStr += ` ${ci.unit}`;
+        }
 
                 if (!ingredientMap.has(key)) {
                     ingredientMap.set(key, {
@@ -224,37 +227,42 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
             }
         }
 
-        const ingredients = Array.from(ingredientMap.values());
+    const allIngredients = Array.from(ingredientMap.values()).sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
 
-        const steps = (cocktail.CocktailRecipeSteps || [])
-            .map((s) => {
-                let ingredient_name = null;
-                if (s.ingredient_id) {
-                    const ing = ingredients.find(i => i.id === s.ingredient_id);
-                    ingredient_name = ing ? ing.name : null;
-                }
-                return {
-                    step_number: s.step_number,
-                    action: s.action,
-                    ingredient_name,
-                };
-            })
-            .sort((a, b) => a.step_number - b.step_number);
+    const mainIngredients = allIngredients.filter((ing) => ing.type !== "garnish");
+    const garnishIngredients = allIngredients.filter((ing) => ing.type === "garnish");
 
-        res.json({
-            id: cocktail.id,
-            name: cocktail.name,
-            ingredients,
-            steps,
-        });
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Server error" });
+    let decoration = "";
+    if (garnishIngredients.length > 0) {
+      decoration = garnishIngredients
+        .map((ing) => (ing.amountStr ? `${ing.name} (${ing.amountStr})` : ing.name))
+        .join(", ");
     }
-});
 
-const favouritesRequestSchema = z.object({
-  savedCocktailsId: z.array(z.number().int().positive()),
+    const steps = recipeSteps
+      .slice()
+      .sort((a, b) => (a.step_number ?? 0) - (b.step_number ?? 0))
+      .map((s) => ({
+        id: s.id,
+        step_number: s.step_number,
+        action: s.action,
+        ingredient_id: s.ingredient_id,
+        ingredient_case: s.ingredient_case,
+      }));
+
+    return res.json({
+      id: cocktail.id,
+      name: cocktail.name,
+      ingredients: mainIngredients,
+      decoration,
+      steps,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
 router.post("/favourites", authRequired, async (req, res) => {
@@ -342,4 +350,86 @@ router.delete(
   }
 });
 
+const orderSchema = z.object({
+  barId: z.number().int().positive(),
+  cocktailId: z.number().int().positive(),
+  tableNumber: z.union([z.string().min(1), z.number().int().positive()]),
+  quantity: z.number().int().positive().max(100),
+});
+
+const DEFAULT_TELEGRAM_CHAT_ID = process.env.DEFAULT_TELEGRAM_CHAT_ID; 
+
+router.post("/order", async (req, res) => {
+  try {
+    const { barId, cocktailId, tableNumber, quantity } = orderSchema.parse(req.body);
+
+    const bar = await Bar.findByPk(barId, {
+      attributes: ["id", "name", "telegram_chat_id"],
+    });
+    if (!bar) return res.status(404).json({ error: "Бар не найден" });
+
+    const cocktail = await Cocktail.findOne({
+      where: { id: cocktailId, bar_id: barId },
+      attributes: ["id", "name", "bar_id"],
+    });
+    if (!cocktail) {
+      return res.status(404).json({ error: "Коктейль не найден в этом баре" });
+    }
+
+    const msg =
+      `🧾Новый заказ\n` +
+      `Коктейль: ${cocktail.name}\n` +
+      `Столик: ${tableNumber}\n` +
+      `Количество: ${quantity}\n`;
+
+    const chatIdToUse = bar.telegram_chat_id || DEFAULT_TELEGRAM_CHAT_ID;
+
+    await sendOrderToChat({
+      chatId: chatIdToUse,
+      text: msg + (bar.telegram_chat_id ? "" : "\n\n(чат бара не настроен)"),
+    });
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    if (e instanceof z.ZodError) {
+      return res.status(400).json({ error: "Invalid payload", details: e.errors });
+    }
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/ingredients", async (req, res) => {
+  try {
+    const ingredients = await Ingredient.findAll({
+      attributes: ["id", "name", "type", "image"],
+      order: [["name", "ASC"]],
+    });
+
+    return res.json(
+      ingredients.map((i) => ({
+        id: i.id,
+        name: i.name,
+        type: i.type,
+        image: i.image,
+      })),
+    );
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/ingredients", async (req, res) => {
+  try {
+    const ingredients = await Ingredient.findAll({
+      attributes: ["id", "name", "type", "image"],
+      order: [["name", "ASC"]],
+    });
+    return res.json(ingredients);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 export default router;

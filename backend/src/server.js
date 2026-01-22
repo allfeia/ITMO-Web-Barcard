@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 
 import { sequelize } from "./db.js";
 import "./models.js";
+import { getBot } from "../utils/telegramOdersBot.js";
 
 import authRoutes from "./routes/auth.js";
 import apiRoutes from "./routes/api.js";
@@ -60,6 +61,7 @@ const port = process.env.PORT || 4000;
         await sequelize.authenticate();
         console.log("DB connected");
         app.listen(port, () => console.log(`API on http://localhost:${port}`));
+        getBot();
     } catch (e) {
         console.error("DB error", e);
         Sentry.captureException(e);

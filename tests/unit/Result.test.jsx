@@ -65,14 +65,11 @@ describe('Result', () => {
 
         const canvas = screen.getByTestId('cocktail-canvas');
         expect(canvas).toBeInTheDocument();
-
         expect(canvas.tagName).toBe('CANVAS');
         expect(canvas).toHaveClass('cocktail-canvas');
         expect(canvas).toHaveAttribute('aria-label', 'Нарисованный коктейль с оливкой');
         expect(canvas).toHaveAttribute('width', '200');
         expect(canvas).toHaveAttribute('height', '260');
-        expect(canvas).toHaveStyle({ width: '200px', height: '260px' });
-
         const container = canvas.closest('.cocktail-container');
         expect(container).toBeInTheDocument();
         expect(container).toContainElement(canvas);

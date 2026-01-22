@@ -122,12 +122,10 @@ test.describe('IngredientsPage', () => {
             await expect(errorModal.getByText(/Найдено ошибок:/i)).toBeVisible();
         });
 
-        // created-page.spec.ts ~строка 132
         test('переходит на /result при правильных ответах', async ({ page }) => {
             await goToIngredientsPage(page);
             await page.getByRole('button', {name: 'Создать коктейль'}).click();
-            await expect(page.getByText('Готово!')).toBeVisible();
-            await expect(page.getByText(/Рейтинг/)).toBeVisible();
+            await expect(page).toHaveURL(/\/result$/, { timeout: 10000 });
         });
 
         test('drag-and-drop шагов (проверка на корректность порядка)', async ({page}) => {

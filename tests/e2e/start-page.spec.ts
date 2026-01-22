@@ -39,10 +39,9 @@ test.describe("StartPage — E2E тесты", () => {
         await page.goto("/?barId=123&isBarman=false");
         await expect(page.getByText("Barcard")).toBeVisible();
         await expect(page.getByText("Barcard")).toHaveClass("titleStart");
-
         const startButton = page.getByRole("button", { name: "Начать" });
         await expect(startButton).toBeVisible();
-        await expect(startButton).toHaveClass(/start-button/);
+        await expect(startButton).toHaveAttribute('class', /start-button/);
         await expect(startButton).toHaveClass(/MuiButton-contained/);
         const tracks = page.locator(".tracks-rotated .track");
         await expect(tracks).toHaveCount(5);

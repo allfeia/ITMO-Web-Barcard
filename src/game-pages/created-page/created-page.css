@@ -1,0 +1,34 @@
+.recipe-step-card {
+    background: #333;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #EFEEEC;
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+.recipe-step-card select {
+    border: 1px solid #EFEEEC;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    background: #EFEEEC;
+    color: #333;
+}
+
+.created-cocktail-canvas {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.cocktail-drawing.large {
+    width: 280px;
+    height: 360px;
+}

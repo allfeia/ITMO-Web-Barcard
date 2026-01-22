@@ -1,4 +1,4 @@
-import {addHintUsage, addStageMistake, setIngredientAmount} from "../../game/gameSlice.js";
+import {addHintUsage, addStageMistake, setIngredientAmount, setStageStepsCount} from "../../game/gameSlice.js";
 import PageHeader from "../PageHeader.jsx";
 import React, {useRef, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
@@ -32,6 +32,8 @@ function ProportionsPage() {
     const errorChecker = () => {
         const errors = proportionsErrors(ingredientsWithQuantity, cocktailIngredients);
 
+        dispatch(setStageStepsCount({ stage: 'stage2', stepsCount: ingredientsWithQuantity.length }));
+
         if (errors > 0) {
             dispatch(addStageMistake({ stage: 'stage2', count: errors }));
             setErrorCount(errors);
@@ -61,7 +63,7 @@ function ProportionsPage() {
             <Button
                 className="create-btn"
                 variant="text"
-                sx={{ backgroundColor: "#333", color: "#fff", fontSize: "12px", marginLeft: "35px", height: "42px", width: "45%" }}
+                sx={{ backgroundColor: "#333", color: "#EFEEEC", fontSize: "12px", marginLeft: "35px", height: "42px", width: "45%" }}
                 onClick={errorChecker}
             >
                 Перейти к созданию

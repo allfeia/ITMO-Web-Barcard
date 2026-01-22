@@ -25,6 +25,7 @@ import ProportionsPage from "./game-pages/proportions-page/ProportionsPage.jsx";
 
 import * as Sentry from "@sentry/react";
 import CreatedPage from "./game-pages/created-page/CreatedPage.jsx";
+import Result from "./game-pages/Result.jsx";
 
 Sentry.init({
     dsn: "https://ff863d9ec402606b1c0666c164a5ba2f@o4510535321255936.ingest.us.sentry.io/4510535479132160",
@@ -61,6 +62,7 @@ createRoot(document.getElementById('root')).render(
                         <Route path="/ingredients" element={<IngredientsPage />} />
                         <Route path="/proportions" element={<ProportionsPage />} />
                         <Route path="/create" element={<CreatedPage />} />
+                        <Route path="/result" element={<Result />} />
 
                         {/* Супер-админ*/}
                         <Route path="/super/login" element={<SuperLoginPage />} />

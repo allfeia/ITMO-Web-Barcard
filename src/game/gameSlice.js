@@ -3,12 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     cocktailId: null,
     cocktailData: null,
-    mode: 'easy',          // режим игры
-    hintsEnabled: true,    // возможность использовать подсказки
-
+    mode: 'easy',
+    hintsEnabled: true,
     selectedIngredients: {},      // ингредиенты с пропорциями [{ id, name, quantity }]
-    // recipeSteps: [],       // последовательность шагов [{ stepNumber, description, completed }]
-    // score: 0,              // счет игрока
 
     stages: {
         stage1: {
@@ -51,9 +48,6 @@ const gameSlice = createSlice({
         setMode: (state, action) => {
             state.mode = action.payload;
         },
-        toggleHints: (state) => {
-            state.hintsEnabled = !state.hintsEnabled;
-        },
 
         toggleIngredient(state, action) {
             const ingredient = action.payload;
@@ -73,6 +67,11 @@ const gameSlice = createSlice({
             if (state.selectedIngredients[id]) {
                 state.selectedIngredients[id].amount = amount;
             }
+        },
+
+        setStageStepsCount(state, action) {
+            const { stage, stepsCount } = action.payload;
+            state.stages[stage].stepsCount = stepsCount;
         },
 
         addStageMistake(state, action) {
@@ -105,28 +104,6 @@ const gameSlice = createSlice({
                 cocktailData: state.cocktailData
             }
         }
-
-
-        // setRecipeSteps: (state, action) => {
-        //     state.recipeSteps = action.payload;
-        // },
-        // completeStep: (state, action) => {
-        //     const step = state.recipeSteps.find(s => s.stepNumber === action.payload);
-        //     if (step) step.completed = true;
-        // },
-        // resetGame: (state) => {
-        //     state.mode = 'easy';
-        //     state.hintsEnabled = true;
-        //     state.ingredients = [];
-        //     state.recipeSteps = [];
-        //     state.score = 0;
-        // },
-        // addScore: (state, action) => {
-        //     state.score += action.payload;
-        // },
-        // setScore: (state, action) => {
-        //     state.score = action.payload;
-        // },
     },
 });
 
@@ -134,19 +111,12 @@ export const {
     setCocktail,
     setMode,
     toggleIngredient,
-
+    setStageStepsCount,
     addStageMistake,
     addHintUsage,
     resetGame,
     resetLevel,
-    resetStages,
-    toggleIngredientAmount,
     setIngredientAmount,
-    // setRecipeSteps,
-    // completeStep,
-    // resetGame,
-    // addScore,
-    // setScore,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

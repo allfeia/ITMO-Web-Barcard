@@ -9,7 +9,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useIngredients } from "./Ingredients.jsx";
 import {useDispatch} from "react-redux";
 import { useSelector } from 'react-redux';
-import {addHintUsage, addStageMistake, resetLevel, toggleIngredient} from "../../game/gameSlice.js";
+import {addHintUsage, addStageMistake, resetLevel, setStageStepsCount, toggleIngredient} from "../../game/gameSlice.js";
 import RecipeCard from "../../menu-page/RecipeCard.jsx";
 import {ingredientErrors} from './ingredients_error.js';
 import ErrorModal from "../ErrorModal.jsx";
@@ -41,6 +41,8 @@ function IngredientsPage() {
 
     const errorChecker = () => {
         const totalErrors = ingredientErrors(selectedIngredients, cocktailIngredients);
+
+        dispatch(setStageStepsCount({ stage: 'stage1', stepsCount: cocktailIngredients.length }));
 
         if (totalErrors > 0) {
             dispatch(addStageMistake({ stage: 'stage1', count: totalErrors }));
@@ -89,7 +91,7 @@ function IngredientsPage() {
                 <Button
                     className="create-btn"
                     variant="text"
-                    sx={{ backgroundColor: "#333", color: "#fff", fontSize: "12px" }}
+                    sx={{ backgroundColor: "#333", color: "#EFEEEC", fontSize: "12px" }}
                     onClick={errorChecker}
                 >
                     Создать с пропорциями

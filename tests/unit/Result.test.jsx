@@ -94,9 +94,19 @@ describe('Result', () => {
         expect(screen.getByText('Переиграть')).toBeInTheDocument();
         expect(screen.getByText('Бар')).toBeInTheDocument();
 
-        // проверяем, что подписи находятся внутри .icon-label
         expect(screen.getByText('Переиграть')).toHaveClass('icon-label');
         expect(screen.getByText('Бар')).toHaveClass('icon-label');
+    });
+    it('Stack с иконками отображается корректно (две группы кнопок)', () => {
+        renderResult();
+
+        const iconContainers = screen.getAllByText(/Переиграть|Бар/)
+            .map(el => el.closest('.icon-button-container'))
+            .filter(Boolean);
+
+        expect(iconContainers).toHaveLength(2);
+        expect(iconContainers[0]).toBeInTheDocument();
+        expect(iconContainers[1]).toBeInTheDocument();
     });
 
 });

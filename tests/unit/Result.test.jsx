@@ -40,14 +40,25 @@ describe('Result', () => {
         expect(screen.getByText(/Рейтинг:\s*326\s*★/i)).toBeInTheDocument();
     });
 
-    it('показывает переданный рейтинг', () => {
+    it('отображает переданный рейтинг корректно', () => {
         renderResult({ score: 580 });
         expect(screen.getByText(/Рейтинг:\s*580\s*★/i)).toBeInTheDocument();
+
+        renderResult({ score: 0 });
+        expect(screen.getByText(/Рейтинг:\s*0\s*★/i)).toBeInTheDocument();
+
+        renderResult({ score: 1250 });
+        expect(screen.getByText(/Рейтинг:\s*1250\s*★/i)).toBeInTheDocument();
     });
 
-    it('рендерит CocktailCanvas', () => {
+    it('рендерит CocktailCanvas внутри .cocktail-container', () => {
         renderResult();
-        expect(screen.getByTestId('cocktail-canvas')).toBeInTheDocument();
+        const canvas = screen.getByTestId('cocktail-canvas');
+        expect(canvas).toBeInTheDocument();
+
+        const container = canvas.closest('.cocktail-container');
+        expect(container).toBeInTheDocument();
+        expect(container).toContainElement(canvas);
     });
 
     it('кнопка "Переиграть" вызывает navigate на /levelPage', () => {
@@ -77,9 +88,24 @@ describe('Result', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/order');
     });
 
-    it('отображает подписи к иконкам "Переиграть" и "Бар"', () => {
+    it('отображает две иконки с подписями "Переиграть" и "Бар"', () => {
         renderResult();
+
         expect(screen.getByText('Переиграть')).toBeInTheDocument();
         expect(screen.getByText('Бар')).toBeInTheDocument();
+
+        // проверяем, что подписи находятся внутри .icon-label
+        expect(screen.getByText('Переиграть')).toHaveClass('icon-label');
+        expect(screen.getByText('Бар')).toHaveClass('icon-label');
+    });
+    it('Stack с иконками отображается корректно (две группы кнопок)', () => {
+        renderResult();
+
+        const stack = screen.getByTestId('cocktail-canvas').closest('.button-stack')?.parentElement;
+        const iconContainers = screen.getAllByText(/Переиграть|Бар/).map(el => el.closest('.icon-button-container'));
+
+        expect(iconContainers).toHaveLength(2);
+        expect(iconContainers[0]).toBeInTheDocument();
+        expect(iconContainers[1]).toBeInTheDocument();
     });
 });

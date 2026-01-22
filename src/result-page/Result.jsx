@@ -63,19 +63,6 @@ function Result({ score = 326, onHome }) {
                     </IconButton>
                     <Typography className="icon-label">Бар</Typography>
                 </Box>
-
-                <Box className="icon-button-container">
-                    <IconButton
-                        color="inherit"
-                        size="large"
-                        onClick={onHome}
-                        title="домой"
-                        className="control-icon-button"
-                    >
-                        <HomeIcon fontSize="large" />
-                    </IconButton>
-                    <Typography className="icon-label">Домой</Typography>
-                </Box>
             </Stack>
 
             <Button

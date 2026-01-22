@@ -1,0 +1,132 @@
+.result-screen {
+    text-align: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2vh;
+    overflow: hidden;
+    position: relative;
+    background: #EFEEEC;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.titleResult,
+.titleResult.MuiTypography-root {
+    color: #333 !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    font-size: clamp(64px, 13vw, 72px);!important;
+    margin-bottom: 1vh;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif !important;
+    letter-spacing: -0.02em !important;
+}
+
+.subtitle {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1vh;
+    font-size: 1.5rem;
+}
+
+.cocktail-container {
+    position: relative;
+    width: 200px;
+    height: 260px;
+    margin: 2vh 0 4vh;
+    filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.35));
+}
+
+.cocktail-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    image-rendering: crisp-edges;
+}
+
+.button-stack {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-button-container {
+    flex: 0 0 auto;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.control-icon-button {
+    color: #333 !important;
+}
+
+.control-icon-button:hover {
+    background-color: rgba(51, 51, 51, 0.1) !important;
+}
+
+.icon-label {
+    color: #333;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: lowercase;
+    letter-spacing: normal;
+    opacity: 0.7;
+}
+
+.order-button {
+    background-color: #333 !important;
+    color: #EFEEEC !important;
+    width: 334px;
+    height: 80px;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-size: clamp(28px, 4vw, 32px) !important;
+    font-weight: 200;
+    text-transform: none;
+    border-radius: 4px;
+    border: 2px solid #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    margin-top: 2vh;
+}
+
+.order-button:hover {
+    background-color: #111 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.order-button:active {
+    background-color: #000 !important;
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .result-screen {
+        padding: 30px 16px;
+    }
+
+    .cocktail-container {
+        width: 140px;
+        height: 180px;
+    }
+
+    .icon-label {
+        font-size: 10px;
+    }
+
+    .icon-button-container {
+        width: 70px;
+    }
+
+    .order-button {
+        width: 280px;
+        height: 68px;
+        font-size: clamp(22px, 5vw, 26px);
+    }
+}

@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import CreatedPage from '../../src/game-pages/created-page/CreatedPage';
 import rootReducer from '../../src/game/rootReducer';
-import {createdErrors} from "../../src/game-pages/created-page/created_error.js"; // ← подставь реальный путь к rootReducer
+import {createdErrors} from "../../src/game-pages/created-page/created_error.js"; // ← укажи правильный путь к rootReducer
 
 // Мокаем useNavigate
 const navigateMock = vi.fn();
@@ -23,8 +23,8 @@ vi.mock('../../src/game-pages/created-page/created_error.js', () => ({
     createdErrors: vi.fn(),
 }));
 
-// Мокаем внешние компоненты
-vi.mock('../../src/game-pages/PageHeader.jsx', () => ({
+// Мокаем компоненты
+vi.mock('../PageHeader.jsx', () => ({
     default: () => <div data-testid="page-header" />,
 }));
 
@@ -45,7 +45,7 @@ vi.mock('../../src/components/HardModeFailModal', () => ({
     default: () => <div data-testid="hard-modal" />,
 }));
 
-// Мокаем @hello-pangea/dnd (Drag and Drop)
+// Мокаем @hello-pangea/dnd
 vi.mock('@hello-pangea/dnd', () => ({
     DragDropContext: ({ children }) => <div data-testid="drag-context">{children}</div>,
     Droppable: ({ children }) =>
@@ -74,7 +74,6 @@ describe('CreatedPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        // Моковый store с нужным состоянием
         mockStore = configureStore({
             reducer: rootReducer,
             preloadedState: {
@@ -92,7 +91,7 @@ describe('CreatedPage', () => {
                     stages: {
                         stage1: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
                         stage2: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
-                        stage3: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
+                        stage3: { stepsCount: 2, mistakes: 0, hintsUsed: 0, score: 0 }, // ← важно для тестов
                     },
                     gameOver: false,
                     gameOverReason: null,
@@ -117,6 +116,7 @@ describe('CreatedPage', () => {
 
         fireEvent.click(screen.getByText('Создать коктейль'));
 
+        // Проверяем dispatch addStageMistake
         expect(mockStore.getActions()).toContainEqual(
             expect.objectContaining({
                 type: 'game/addStageMistake',
@@ -124,6 +124,7 @@ describe('CreatedPage', () => {
             })
         );
 
+        // Проверяем, что ErrorModal открыт
         expect(screen.getByTestId('error-modal')).toBeInTheDocument();
     });
 

@@ -369,37 +369,44 @@ export const getCocktailRecipe = [
       (ing) => ing.cocktail_id === cocktailId,
     );
 
-      const allIngredients = cocktailRecipeDatabase.ingredient;
+    const allIngredients = cocktailRecipeDatabase.ingredient;
 
-      const ingredientsWithAmount = ingredients.map((ing) => {
-          const ingredientData = allIngredients.find((i) => i.id === ing.ingredient_id);
-          if (!ingredientData) return null;
+    const ingredientsWithAmount = ingredients
+      .map((ing) => {
+        const ingredientData = allIngredients.find(
+          (i) => i.id === ing.ingredient_id,
+        );
+        if (!ingredientData) return null;
 
-          const amountStr = ing.amount !== null ? `${ing.amount} ${ing.unit}` : "";
+        const amountStr =
+          ing.amount !== null ? `${ing.amount} ${ing.unit}` : "";
 
-          return {
-              ...ingredientData,
-              amount: ing.amount,
-              unit: ing.unit,
-              amountStr: amountStr,
-          };
-      }).filter(Boolean);
-
-      const recipeSteps = steps.map((step) => {
-          const ingredientData = allIngredients.find((i) => i.id === step.ingredient_id);
-          return {
-              step_number: step.step_number,
-              action: step.action,
-              ingredient_name: ingredientData ? ingredientData.name : null,
-          }
+        return {
+          ...ingredientData,
+          amount: ing.amount,
+          unit: ing.unit,
+          amountStr: amountStr,
+        };
       })
+      .filter(Boolean);
 
-      const recipeData = {
-          id: cocktail.id,
-          name: cocktail.name,
-          ingredients: ingredientsWithAmount,
-          steps: recipeSteps,
-      }
-      return HttpResponse.json(recipeData, { status: 200 });
+    const recipeSteps = steps.map((step) => {
+      const ingredientData = allIngredients.find(
+        (i) => i.id === step.ingredient_id,
+      );
+      return {
+        step_number: step.step_number,
+        action: step.action,
+        ingredient_name: ingredientData ? ingredientData.name : null,
+      };
+    });
+
+    const recipeData = {
+      id: cocktail.id,
+      name: cocktail.name,
+      ingredients: ingredientsWithAmount,
+      steps: recipeSteps,
+    };
+    return HttpResponse.json(recipeData, { status: 200 });
   }),
 ];

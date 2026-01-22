@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "main": "src/server.js",
-    "scripts": {
+  "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "db:sync": "node src/scripts/sync.js",

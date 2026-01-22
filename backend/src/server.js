@@ -3,6 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import "dotenv/config";
+import * as Sentry from "@sentry/node";
 import cookieParser from "cookie-parser";
 
 import { sequelize } from "./db.js";

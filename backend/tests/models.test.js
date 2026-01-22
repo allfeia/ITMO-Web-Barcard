@@ -64,6 +64,7 @@ describe("models.js", () => {
     expect(UserFavourite).toBeDefined();
     expect(PasswordToken).toBeDefined();
 
+    // связи вызывались (базовые)
     expect(Bar.hasMany).toHaveBeenCalled();
     expect(User.belongsTo).toHaveBeenCalled();
     expect(User.hasMany).toHaveBeenCalled();

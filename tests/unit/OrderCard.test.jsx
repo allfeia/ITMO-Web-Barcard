@@ -166,15 +166,18 @@ describe("OrderModal", () => {
   });
 
   it("если barId отсутствует, отправка недоступна", async () => {
-    useAuth.mockReturnValueOnce({ barId: null });
+  useAuth.mockReturnValue({ barId: null }); 
 
-    const user = userEvent.setup();
-    renderModal();
+  const user = userEvent.setup();
+  renderModal();
 
-    const tableInput = screen.getByPlaceholderText("№");
-    await user.type(tableInput, "1");
+  const tableInput = screen.getByPlaceholderText("№");
+  await user.type(tableInput, "1");
 
+  await waitFor(() => {
     expect(screen.getByRole("button", { name: "Отправить" })).toBeDisabled();
-    expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  expect(global.fetch).not.toHaveBeenCalled();
+});
 });

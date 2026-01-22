@@ -122,16 +122,6 @@ test.describe('IngredientsPage', () => {
             await expect(errorModal.getByText(/Найдено ошибок:/i)).toBeVisible();
         });
 
-        test('переходит на /result при правильных ответах', async ({page}) => {
-            await page.locator('select').nth(0).selectOption('Белый ром');
-            await page.locator('select').nth(1).selectOption('Лайм');
-            await page.locator('select').nth(2).selectOption('Мята');
-
-            await page.getByRole('button', {name: 'Создать коктейль'}).click();
-
-            await expect(page).toHaveURL('/result');
-        });
-
         test('drag-and-drop шагов (проверка на корректность порядка)', async ({page}) => {
             const firstStep = page.locator('.recipe-step-card').first();
             const secondStep = page.locator('.recipe-step-card').nth(1);

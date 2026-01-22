@@ -1,3 +1,5 @@
+import {findIngredientMatch} from './workWithPagegi.js';
+
 function RecipeStepCard({ step, selectedIngredients, userAnswers, setUserAnswers }) {
     const ingredientOptions = Object.values(selectedIngredients);
 
@@ -11,12 +13,13 @@ function RecipeStepCard({ step, selectedIngredients, userAnswers, setUserAnswers
     let beforeText = step.action;
     let afterText = "";
     if (step.ingredient_name) {
-        const regex = new RegExp(step.ingredient_name, "i");
-        const match = step.action.match(regex);
+        const match = findIngredientMatch(step.action, step.ingredient_name);
+
         if (match) {
-            const index = match.index;
-            beforeText = step.action.slice(0, index);
-            afterText = step.action.slice(index + match[0].length);
+            const words = step.action.split(" ");
+
+            beforeText = words.slice(0, match.start).join(" ") + " ";
+            afterText = " " + words.slice(match.end).join(" ");
         }
     }
 

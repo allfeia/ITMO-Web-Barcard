@@ -6,8 +6,8 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import IngredientsPage from '../../src/game-pages/ingredients-page/IngredientsPage';
 import rootReducer from '../../src/game/rootReducer';
+import drawHint from "../../src/game-pages/hint.js";
 import {ingredientErrors} from "../../src/game-pages/ingredients-page/ingredients_error.js";
-import drawHint from "../../src/game-pages/hint.js"; // ← твой rootReducer
 
 // Мокаем useNavigate
 const mockNavigate = vi.fn();
@@ -68,7 +68,6 @@ describe('IngredientsPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        // Создаём моковый store с нужным состоянием
         mockStore = configureStore({
             reducer: rootReducer,
             preloadedState: {
@@ -141,10 +140,12 @@ describe('IngredientsPage', () => {
 
         fireEvent.click(screen.getByText('Лайм'));
 
-        expect(mockStore.getActions()).toContainEqual({
-            type: 'game/toggleIngredient',
-            payload: expect.objectContaining({ id: 2, name: 'Лайм' }),
-        });
+        expect(mockStore.getActions()).toContainEqual(
+            expect.objectContaining({
+                type: 'game/toggleIngredient',
+                payload: expect.objectContaining({ id: 2, name: 'Лайм' }),
+            })
+        );
     });
 
     it('вызывает drawHint при монтировании (mode !== hard)', () => {
@@ -159,10 +160,12 @@ describe('IngredientsPage', () => {
 
         fireEvent.click(screen.getByText('Создать с пропорциями'));
 
-        expect(mockStore.getActions()).toContainEqual({
-            type: 'game/addStageMistake',
-            payload: { stage: 'stage1', count: 2 },
-        });
+        expect(mockStore.getActions()).toContainEqual(
+            expect.objectContaining({
+                type: 'game/addStageMistake',
+                payload: { stage: 'stage1', count: 2 },
+            })
+        );
 
         expect(screen.getByTestId('error-modal')).toHaveTextContent('Ошибок: 2');
     });

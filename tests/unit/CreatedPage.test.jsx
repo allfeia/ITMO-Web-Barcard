@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import CreatedPage from '../../src/game-pages/created-page/CreatedPage';
 import rootReducer from '../../src/game/rootReducer';
-import {createdErrors} from "../../src/game-pages/created-page/created_error.js"; // ← укажи правильный путь к rootReducer
+import {createdErrors} from "../../src/game-pages/created-page/created_error.js"; // ← убедись, что путь правильный
 
 // Мокаем useNavigate
 const navigateMock = vi.fn();
@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
-// Мокаем createdErrors
+// Мокаем createdErrors (функция из created_error.js)
 vi.mock('../../src/game-pages/created-page/created_error.js', () => ({
     createdErrors: vi.fn(),
 }));
@@ -91,7 +91,7 @@ describe('CreatedPage', () => {
                     stages: {
                         stage1: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
                         stage2: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
-                        stage3: { stepsCount: 2, mistakes: 0, hintsUsed: 0, score: 0 }, // ← важно для тестов
+                        stage3: { stepsCount: 2, mistakes: 0, hintsUsed: 0, score: 0 },
                     },
                     gameOver: false,
                     gameOverReason: null,
@@ -116,15 +116,15 @@ describe('CreatedPage', () => {
 
         fireEvent.click(screen.getByText('Создать коктейль'));
 
-        // Проверяем dispatch addStageMistake
-        expect(mockStore.getActions()).toContainEqual(
+        const actions = mockStore.getActions();
+
+        expect(actions).toContainEqual(
             expect.objectContaining({
                 type: 'game/addStageMistake',
                 payload: { stage: 'stage3', count: 3 },
             })
         );
 
-        // Проверяем, что ErrorModal открыт
         expect(screen.getByTestId('error-modal')).toBeInTheDocument();
     });
 

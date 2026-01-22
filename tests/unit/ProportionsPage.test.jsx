@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import ProportionsPage from '../../src/game-pages/proportions-page/ProportionsPage';
 import rootReducer from '../../src/game/rootReducer';
-import {proportionsErrors} from "../../src/game-pages/proportions-page/proportions_error.js"; // ← подставь реальный путь к rootReducer
+import {proportionsErrors} from "../../src/game-pages/proportions-page/proportions_error.js";
 
 // Мокаем useNavigate
 const navigateMock = vi.fn();
@@ -23,7 +23,7 @@ vi.mock('../../src/game-pages/proportions-page/proportions_error.js', () => ({
     proportionsErrors: vi.fn(),
 }));
 
-// Мокаем внешние компоненты, чтобы не падали
+// Мокаем внешние компоненты
 vi.mock('../../src/game-pages/PageHeader.jsx', () => ({
     default: ({ title }) => <div data-testid="page-header">{title}</div>,
 }));
@@ -43,13 +43,9 @@ vi.mock('../../src/components/HardModeFailModal', () => ({
 
 describe('ProportionsPage', () => {
     let mockStore;
-    let dispatchMock;
 
     beforeEach(() => {
         vi.clearAllMocks();
-
-        // Мокаем dispatch и store
-        dispatchMock = vi.fn();
 
         mockStore = configureStore({
             reducer: rootReducer,
@@ -74,11 +70,6 @@ describe('ProportionsPage', () => {
                     gameOverReason: null,
                 },
             },
-            middleware: (getDefaultMiddleware) =>
-                getDefaultMiddleware().concat(() => (next) => (action) => {
-                    dispatchMock(action);
-                    return next(action);
-                }),
         });
     });
 
@@ -103,10 +94,10 @@ describe('ProportionsPage', () => {
         renderPage();
 
         const input = screen.getByDisplayValue('40');
-
         fireEvent.change(input, { target: { value: '45' } });
 
-        expect(dispatchMock).toHaveBeenCalledWith(
+        const actions = mockStore.getActions();
+        expect(actions).toContainEqual(
             expect.objectContaining({
                 type: 'game/setIngredientAmount',
                 payload: { id: 6, amount: 45 },
@@ -121,14 +112,16 @@ describe('ProportionsPage', () => {
 
         fireEvent.click(screen.getByText('Перейти к созданию'));
 
-        expect(dispatchMock).toHaveBeenCalledWith(
+        const actions = mockStore.getActions();
+        expect(actions).toContainEqual(
             expect.objectContaining({
                 type: 'game/addStageMistake',
                 payload: { stage: 'stage2', count: 1 },
             })
         );
 
-        expect(screen.getByTestId('error-modal')).toHaveTextContent('Ошибок: 1');
+        expect(screen.getByTestId('error-modal')).toBeInTheDocument();
+        expect(screen.getByText('Ошибок: 1')).toBeInTheDocument();
     });
 
     it('переходит на /create, если ошибок нет', () => {

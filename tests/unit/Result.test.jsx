@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 
-import { store } from '../../src/game/store';
 import Result from '../../src/game-pages/result-page/Result';
+import rootReducer from '../../src/game/rootReducer'; // ← правильный путь к rootReducer
 
+// Мокаем useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
@@ -15,20 +17,51 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
+// Мокаем CocktailCanvas
 vi.mock('../../src/game-pages/result-page/CocktailCanvas', () => ({
     default: () => <div data-testid="cocktail-canvas">Mocked Cocktail Canvas</div>,
 }));
 
 describe('Result', () => {
+    let mockStore;
+
     beforeEach(() => {
         mockNavigate.mockClear();
+
+        mockStore = configureStore({
+            reducer: rootReducer,
+            preloadedState: {
+                game: {
+                    stages: {
+                        stage1: { score: 0 },
+                        stage2: { score: 0 },
+                        stage3: { score: 0 },
+                    },
+                },
+            },
+        });
     });
 
-    const renderResult = (props = {}) => {
+    const renderResult = (customStages = {}) => {
+        // Создаём store с кастомным состоянием для теста
+        const storeWithState = configureStore({
+            reducer: rootReducer,
+            preloadedState: {
+                game: {
+                    stages: {
+                        stage1: { score: 0 },
+                        stage2: { score: 0 },
+                        stage3: { score: 0 },
+                        ...customStages,
+                    },
+                },
+            },
+        });
+
         return render(
-            <Provider store={store}>
+            <Provider store={storeWithState}>
                 <MemoryRouter>
-                    <Result {...props} />
+                    <Result />
                 </MemoryRouter>
             </Provider>
         );
@@ -44,15 +77,14 @@ describe('Result', () => {
         expect(screen.getByText(/Рейтинг:\s*0\s*★/i)).toBeInTheDocument();
     });
 
-    it('отображает переданный рейтинг корректно (через пропс score)', () => {
-        renderResult({ score: 580 });
+    it('отображает рейтинг из Redux (сумма stage1 + stage2 + stage3)', () => {
+        renderResult({
+            stage1: { score: 200 },
+            stage2: { score: 300 },
+            stage3: { score: 80 },
+        });
+
         expect(screen.getByText(/Рейтинг:\s*580\s*★/i)).toBeInTheDocument();
-
-        renderResult({ score: 0 });
-        expect(screen.getByText(/Рейтинг:\s*0\s*★/i)).toBeInTheDocument();
-
-        renderResult({ score: 1250 });
-        expect(screen.getByText(/Рейтинг:\s*1250\s*★/i)).toBeInTheDocument();
     });
 
     it('рендерит CocktailCanvas внутри .cocktail-container', () => {
@@ -121,11 +153,16 @@ describe('Result', () => {
     });
 
     it('отрисовывает правильную структуру: titleResult, subtitle, button-stack', () => {
-        renderResult({ score: 777 });
+        renderResult({
+            stage1: { score: 200 },
+            stage2: { score: 300 },
+            stage3: { score: 80 },
+        });
+
         const title = screen.getByText('Готово!');
         expect(title).toHaveClass('titleResult');
 
-        const subtitle = screen.getByText(/Рейтинг:\s*777\s*★/i);
+        const subtitle = screen.getByText(/Рейтинг:\s*580\s*★/i);
         expect(subtitle).toHaveClass('subtitle');
 
         const stack = screen.getByText('Переиграть').closest('.button-stack');

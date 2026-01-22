@@ -5,7 +5,7 @@ import drawOlive from "./Olive.js";
 import "./LevelPage.css";
 import WestIcon from '@mui/icons-material/West';
 import {useDispatch, useSelector} from "react-redux";
-import {resetGame, setMode} from "../game/gameSlice.js";
+import {resetGame, setMode} from "../../game/gameSlice.js";
 
 export default function LevelPage() {
     const goTo = useNavigate();

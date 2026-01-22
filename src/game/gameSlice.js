@@ -133,7 +133,6 @@ const gameSlice = createSlice({
 export const {
     setCocktail,
     setMode,
-    toggleHints,
     toggleIngredient,
 
     addStageMistake,
@@ -142,6 +141,7 @@ export const {
     resetLevel,
     resetStages,
     toggleIngredientAmount,
+    setIngredientAmount,
     // setRecipeSteps,
     // completeStep,
     // resetGame,

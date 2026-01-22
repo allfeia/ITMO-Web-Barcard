@@ -21,6 +21,7 @@ vi.mock('../../src/result-page/CocktailCanvas', () => ({
             width="200"
             height="260"
             aria-label="Нарисованный коктейль с оливкой"
+            style={{ width: '200px', height: '260px' }}
         />
     ),
 }));
@@ -61,12 +62,20 @@ describe('Result', () => {
 
     it('рендерит CocktailCanvas внутри .cocktail-container', () => {
         renderResult();
-        const mockedCanvas = screen.getByTestId('cocktail-canvas');
-        expect(mockedCanvas).toBeInTheDocument();
-        expect(mockedCanvas).toHaveTextContent('Mocked Cocktail Canvas');
-        const container = screen.getByText('Mocked Cocktail Canvas').closest('.cocktail-container');
+
+        const canvas = screen.getByTestId('cocktail-canvas');
+        expect(canvas).toBeInTheDocument();
+
+        expect(canvas.tagName).toBe('CANVAS');
+        expect(canvas).toHaveClass('cocktail-canvas');
+        expect(canvas).toHaveAttribute('aria-label', 'Нарисованный коктейль с оливкой');
+        expect(canvas).toHaveAttribute('width', '200');
+        expect(canvas).toHaveAttribute('height', '260');
+        expect(canvas).toHaveStyle({ width: '200px', height: '260px' });
+
+        const container = canvas.closest('.cocktail-container');
         expect(container).toBeInTheDocument();
-        expect(container).toContainElement(mockedCanvas);
+        expect(container).toContainElement(canvas);
     });
 
     it('кнопка "Переиграть" вызывает navigate на /levelPage', () => {

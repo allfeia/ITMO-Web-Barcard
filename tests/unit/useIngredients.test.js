@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useIngredients } from "../../src/ingredients-page/Ingredients";
+import { useIngredients } from "../../src/game-pages/ingredients-page/Ingredients";
 
 const mockIngredients = [
     { id: 1, name: "Белый ром", type: "alcohol" },

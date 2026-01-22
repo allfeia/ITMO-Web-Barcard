@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import LevelPage from '../../src/level-page/LevelPage';
-import drawOlive from '../../src/level-page/Olive.js';
+import LevelPage from '../../src/game-pages/level-page/LevelPage';
+import drawOlive from '../../src/game-pages/level-page/Olive.js';
 
 const mockNavigate = vi.fn();
 const mockDispatch = vi.fn();
@@ -25,7 +25,7 @@ vi.mock('react-redux', () => ({
         }),
 }));
 
-vi.mock('../../src/level-page/Olive.js', () => ({
+vi.mock('../../src/game-pages/level-page/Olive.js', () => ({
     default: vi.fn(),
 }));
 

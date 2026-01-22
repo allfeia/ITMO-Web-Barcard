@@ -1,20 +1,19 @@
 import './ingredients-page.css';
-import '../commonStyles.css';
-import WestIcon from "@mui/icons-material/West";
+import '../../commonStyles.css';
 import Button from "@mui/material/Button";
-import React, {useRef, useEffect, useState} from "react";
+import React, {useRef, useState} from "react";
 import { useNavigate } from "react-router-dom";
-import drawHint from "./hint.js";
 import TextField from "@mui/material/TextField";
 import { InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useIngredients } from "./Ingredients";
+import { useIngredients } from "./Ingredients.jsx";
 import {useDispatch} from "react-redux";
 import { useSelector } from 'react-redux';
-import {addHintUsage, addStageMistake, resetLevel, toggleIngredient} from "../game/gameSlice.js";
-import RecipeCard from "../menu-page/RecipeCard.jsx";
+import {addHintUsage, addStageMistake, resetLevel, toggleIngredient} from "../../game/gameSlice.js";
+import RecipeCard from "../../menu-page/RecipeCard.jsx";
 import {ingredientErrors} from './ingredients_error.js';
 import ErrorModal from "../ErrorModal.jsx";
+import PageHeader from "../PageHeader.jsx";
 
 function IngredientsPage() {
     const goTo = useNavigate();
@@ -40,12 +39,6 @@ function IngredientsPage() {
         groupedIngredients
     } = useIngredients();
 
-    useEffect(() => {
-        if (mode !== "hard" && hintRef.current) {
-            drawHint(hintRef.current);
-        }
-    }, [mode]);
-
     const errorChecker = () => {
         const totalErrors = ingredientErrors(selectedIngredients, cocktailIngredients);
 
@@ -60,28 +53,13 @@ function IngredientsPage() {
 
     return (
         <div className="ingredients-container">
-            <Button
-                className="back-btn"
-                variant="text"
-                onClick={() => {
-                    goTo(-1)
-                    dispatch(resetLevel())
-                }}
-                data-testid="back-button"
-            >
-                <WestIcon className="learn-arrow" sx={{ fontSize: "30px" }} />
-            </Button>
-            {mode !== "hard" && (
-                <canvas
-                    className="hint-icon"
-                    ref={hintRef}
-                    style={{ width: 50, height: 50 }}
-                    onClick={() => {
-                        setIsHintOpen(true)
-                        dispatch(addHintUsage({ stage: 'stage1'}));
-                    }}
-                ></canvas>
-            )}
+            <PageHeader
+                title="Ингредиенты"
+                showHint={mode !== "hard"}
+                hintCanvasRef={hintRef}
+                onBack={() => { goTo(-1); dispatch(resetLevel()); }}
+                onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage1' })); }}
+            />
             {isHintOpen && (
                 <RecipeCard
                     open={isHintOpen}
@@ -90,7 +68,6 @@ function IngredientsPage() {
                     isHint={true}
                 />
             )}
-            <h1 className="ingredient-title">Ингредиенты</h1>
 
             <div className="search-create-row">
                 <TextField

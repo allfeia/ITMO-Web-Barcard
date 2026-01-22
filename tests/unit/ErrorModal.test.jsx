@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ErrorModal from "../../src/ErrorModal";
+import ErrorModal from "../../src/game-pages/ErrorModal.jsx";
 
 describe("ErrorModal", () => {
     it("не рендерится, если open = false", () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import IngredientsPage from "../../src/ingredients-page/IngredientsPage";
+import IngredientsPage from "../../src/game-pages/ingredients-page/IngredientsPage";
 import { MemoryRouter } from "react-router-dom";
 
 const mockNavigate = vi.fn();
@@ -32,7 +32,7 @@ vi.mock("react-redux", () => ({
         }),
 }));
 
-vi.mock("../../src/ingredients-page/Ingredients", () => ({
+vi.mock("../../src/game-pages/ingredients-page/Ingredients", () => ({
     useIngredients: () => ({
         searchValue: "",
         setSearchValue: vi.fn(),
@@ -49,11 +49,11 @@ vi.mock("../../src/ingredients-page/Ingredients", () => ({
     }),
 }));
 
-vi.mock("../../src/ingredients-page/hint.js", () => ({
+vi.mock("../../src/game-pages/hint.js", () => ({
     default: vi.fn(),
 }));
 
-vi.mock("../../src/ingredients-page/ingredients_error.js", () => ({
+vi.mock("../../src/game-pages/ingredients-page/ingredients_error.js", () => ({
     ingredientErrors: vi.fn(),
 }));
 
@@ -61,13 +61,13 @@ vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
     default: () => <div>RecipeCard</div>,
 }));
 
-vi.mock("../../src/ErrorModal.jsx", () => ({
+vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
     default: ({ open, errorCount }) =>
         open ? <div>Ошибок: {errorCount}</div> : null,
 }));
 
-import drawHint from "../../src/ingredients-page/hint.js";
-import { ingredientErrors } from "../../src/ingredients-page/ingredients_error.js";
+import drawHint from "../../src/game-pages/hint.js";
+import { ingredientErrors } from "../../src/game-pages/ingredients-page/ingredients_error.js";
 import {
     addStageMistake,
     resetLevel,

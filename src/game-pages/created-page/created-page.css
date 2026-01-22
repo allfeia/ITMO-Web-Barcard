@@ -11,6 +11,7 @@
     color: #EFEEEC;
     margin-left: 35px;
     margin-right: 35px;
+    width: fit-content;
 }
 
 .recipe-step-card select {
@@ -20,15 +21,4 @@
     outline: none;
     background: #EFEEEC;
     color: #333;
-}
-
-.created-cocktail-canvas {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.cocktail-drawing.large {
-    width: 280px;
-    height: 360px;
 }

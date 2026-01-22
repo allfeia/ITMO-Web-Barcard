@@ -13,7 +13,7 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
-vi.mock('../../src/result-page/CocktailCanvas', () => ({
+vi.mock('../../src/game-pages/result-page/CocktailCanvas', () => ({
     default: () => <div data-testid="cocktail-canvas">Mocked Cocktail Canvas</div>,
 }));
 

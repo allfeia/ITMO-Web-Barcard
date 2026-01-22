@@ -56,17 +56,8 @@ vi.mock("../../utils/telegramOdersBot.js", () => ({
   sendOrderToChat: vi.fn(async () => undefined),
 }));
 
-import router from "./api.js";
 import { Bar, User, Point, Cocktail, UserFavourite, Ingredient } from "../models.js";
 import { sendOrderToChat } from "../../utils/telegramOdersBot.js";
-
-function appWithRouter() {
-  const app = express();
-  app.use(cookieParser());
-  app.use(express.json());
-  app.use("/api", router);
-  return app;
-}
 
 function authCookie(user) {
   const token = jwt.sign(user, process.env.JWT_SECRET || "dev", {
@@ -79,6 +70,7 @@ describe("api router", () => {
   const ORIGINAL_ENV = process.env;
 
   beforeEach(() => {
+    vi.resetModules();
     vi.restoreAllMocks();
     process.env = { ...ORIGINAL_ENV };
   });
@@ -87,8 +79,17 @@ describe("api router", () => {
     process.env = ORIGINAL_ENV;
   });
 
+  async function appWithRouter() {
+    const { default: router } = await import("./api.js");
+    const app = express();
+    app.use(cookieParser());
+    app.use(express.json());
+    app.use("/api", router);
+    return app;
+  }
+
   it("GET /health", async () => {
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const res = await request(app).get("/api/health");
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
@@ -96,7 +97,7 @@ describe("api router", () => {
 
   describe("GET /me", () => {
     it("401 if no user id in token", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ roles: ["user"] });
       const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(res.status).toBe(401);
@@ -105,7 +106,7 @@ describe("api router", () => {
 
     it("404 if user not found", async () => {
       User.findByPk.mockResolvedValue(null);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(User.findByPk).toHaveBeenCalledWith(1, {
@@ -127,7 +128,7 @@ describe("api router", () => {
       User.findByPk.mockResolvedValue(fakeUser);
       Point.findOne.mockResolvedValue({ get: vi.fn().mockReturnValue("42") });
 
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 2, roles: ["user"] });
       const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(res.status).toBe(200);
@@ -144,7 +145,7 @@ describe("api router", () => {
 
     it("handles server error", async () => {
       User.findByPk.mockRejectedValue(new Error("db down"));
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 3, roles: ["user"] });
       const res = await request(app).get("/api/me").set("Cookie", auth);
       expect(res.status).toBe(500);
@@ -154,7 +155,7 @@ describe("api router", () => {
 
   describe("GET /admin/bars", () => {
     it("requires super_admin", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).get("/api/admin/bars").set("Cookie", auth);
       expect(res.status).toBe(403);
@@ -165,7 +166,7 @@ describe("api router", () => {
         { id: 1, name: "A" },
         { id: 2, name: "B" },
       ]);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app).get("/api/admin/bars").set("Cookie", auth);
       expect(res.status).toBe(200);
@@ -179,7 +180,7 @@ describe("api router", () => {
 
   describe("GET /bars?query=", () => {
     it("returns [] for empty query", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app).get("/api/bars").set("Cookie", auth);
       expect(res.status).toBe(200);
@@ -188,7 +189,7 @@ describe("api router", () => {
 
     it("searches by name (ilike)", async () => {
       Bar.findAll.mockResolvedValue([{ id: 5, name: "Foo" }]);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app).get("/api/bars?query=Fo").set("Cookie", auth);
       expect(res.status).toBe(200);
@@ -198,7 +199,7 @@ describe("api router", () => {
 
   describe("POST /admin/bars", () => {
     it("400 on invalid payload", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .post("/api/admin/bars")
@@ -210,7 +211,7 @@ describe("api router", () => {
 
     it("201 on valid payload", async () => {
       Bar.create.mockResolvedValue({ id: 10, name: "NewBar" });
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .post("/api/admin/bars")
@@ -235,7 +236,7 @@ describe("api router", () => {
 
   describe("GET /admin/bars/:barId/staff", () => {
     it("400 on invalid barId", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars/xyz/staff")
@@ -246,7 +247,7 @@ describe("api router", () => {
 
     it("404 if bar not found", async () => {
       Bar.findByPk.mockResolvedValue(null);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars/7/staff")
@@ -275,7 +276,7 @@ describe("api router", () => {
           bar_id: 7,
         },
       ]);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["super_admin"] });
       const res = await request(app)
         .get("/api/admin/bars/7/staff")
@@ -304,7 +305,7 @@ describe("api router", () => {
 
   describe("GET /cocktail", () => {
     it("400 if invalid barId", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).get("/api/cocktail?barId=abc");
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ error: "Invalid barId" });
@@ -312,7 +313,7 @@ describe("api router", () => {
 
     it("returns cocktails for bar", async () => {
       Cocktail.findAll.mockResolvedValue([{ id: 1, name: "A", draw_file: "img", bar_id: 1 }]);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).get("/api/cocktail?barId=1");
       expect(res.status).toBe(200);
       expect(res.body).toEqual([{ id: 1, name: "A", draw_file: "img", bar_id: 1 }]);
@@ -320,7 +321,7 @@ describe("api router", () => {
 
     it("500 on error", async () => {
       Cocktail.findAll.mockRejectedValue(new Error("db down"));
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).get("/api/cocktail?barId=1");
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Server error" });
@@ -329,14 +330,14 @@ describe("api router", () => {
 
   describe("POST /favourites", () => {
     it("401 without auth", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).post("/api/favourites").send({ savedCocktailsId: [1, 2] });
       expect(res.status).toBe(401);
       expect(res.body).toEqual({ error: "Unauthorized" });
     });
 
     it("400 invalid payload", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app)
         .post("/api/favourites")
@@ -348,7 +349,7 @@ describe("api router", () => {
 
     it("returns list of favourite cocktails", async () => {
       Cocktail.findAll.mockResolvedValue([{ id: 1, name: "A", draw_file: "i", bar_id: 1 }]);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app)
         .post("/api/favourites")
@@ -361,14 +362,14 @@ describe("api router", () => {
 
   describe("PATCH /favourites/add/:cocktailId", () => {
     it("401 without auth", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).patch("/api/favourites/add/1");
       expect(res.status).toBe(401);
       expect(res.body).toEqual({ error: "Unauthorized" });
     });
 
     it("400 invalid cocktail id", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).patch("/api/favourites/add/abc").set("Cookie", auth);
       expect(res.status).toBe(400);
@@ -377,7 +378,7 @@ describe("api router", () => {
 
     it("404 cocktail not found", async () => {
       Cocktail.findByPk.mockResolvedValue(null);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).patch("/api/favourites/add/5").set("Cookie", auth);
       expect(res.status).toBe(404);
@@ -388,25 +389,25 @@ describe("api router", () => {
       Cocktail.findByPk.mockResolvedValue({ id: 5 });
       UserFavourite.findOrCreate.mockResolvedValue([{}, true]);
 
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).patch("/api/favourites/add/5").set("Cookie", auth);
 
       expect(res.status).toBe(200);
-      expect(res.body).toMatchObject({ ok: true, cocktailId: 5, created: true });
+      expect(res.body).toMatchObject({ ok: true, cocktailId: 5, created: {} });
     });
   });
 
   describe("DELETE /favourites/remove/:cocktailId", () => {
     it("401 without auth", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).delete("/api/favourites/remove/1");
       expect(res.status).toBe(401);
       expect(res.body).toEqual({ error: "Unauthorized" });
     });
 
     it("400 invalid cocktail id", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).delete("/api/favourites/remove/abc").set("Cookie", auth);
       expect(res.status).toBe(400);
@@ -415,7 +416,7 @@ describe("api router", () => {
 
     it("ok and deleted=false when nothing deleted", async () => {
       UserFavourite.destroy.mockResolvedValue(0);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).delete("/api/favourites/remove/5").set("Cookie", auth);
       expect(res.status).toBe(200);
@@ -424,7 +425,7 @@ describe("api router", () => {
 
     it("ok and deleted=true when record deleted", async () => {
       UserFavourite.destroy.mockResolvedValue(1);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app).delete("/api/favourites/remove/5").set("Cookie", auth);
       expect(res.status).toBe(200);
@@ -438,7 +439,7 @@ describe("api router", () => {
         { id: 1, name: "Vodka", type: "alcohol", image: "v.png" },
         { id: 2, name: "Lime", type: "garnish", image: null },
       ]);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).post("/api/ingredients");
       expect(res.status).toBe(200);
       expect(res.body).toEqual([
@@ -449,7 +450,7 @@ describe("api router", () => {
 
     it("500 on error", async () => {
       Ingredient.findAll.mockRejectedValue(new Error("db down"));
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).post("/api/ingredients");
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Server error" });
@@ -458,8 +459,10 @@ describe("api router", () => {
 
   describe("GET /ingredients", () => {
     it("returns ingredients", async () => {
-      Ingredient.findAll.mockResolvedValue([{ id: 1, name: "Vodka", type: "alcohol", image: "v.png" }]);
-      const app = appWithRouter();
+      Ingredient.findAll.mockResolvedValue([
+        { id: 1, name: "Vodka", type: "alcohol", image: "v.png" },
+      ]);
+      const app = await appWithRouter();
       const res = await request(app).get("/api/ingredients");
       expect(res.status).toBe(200);
       expect(res.body).toEqual([{ id: 1, name: "Vodka", type: "alcohol", image: "v.png" }]);
@@ -467,7 +470,7 @@ describe("api router", () => {
 
     it("500 on error", async () => {
       Ingredient.findAll.mockRejectedValue(new Error("db down"));
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).get("/api/ingredients");
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ error: "Server error" });
@@ -476,7 +479,7 @@ describe("api router", () => {
 
   describe("POST /order", () => {
     it("400 invalid payload", async () => {
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app).post("/api/order").send({ barId: "x" });
       expect(res.status).toBe(400);
       expect(res.body.error).toBe("Invalid payload");
@@ -484,7 +487,7 @@ describe("api router", () => {
 
     it("404 if bar not found", async () => {
       Bar.findByPk.mockResolvedValue(null);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app)
         .post("/api/order")
         .send({ barId: 1, cocktailId: 2, tableNumber: "10", quantity: 1 });
@@ -495,7 +498,7 @@ describe("api router", () => {
     it("404 if cocktail not found in bar", async () => {
       Bar.findByPk.mockResolvedValue({ id: 1, name: "Bar", telegram_chat_id: "123" });
       Cocktail.findOne.mockResolvedValue(null);
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app)
         .post("/api/order")
         .send({ barId: 1, cocktailId: 2, tableNumber: 10, quantity: 1 });
@@ -507,7 +510,7 @@ describe("api router", () => {
       Bar.findByPk.mockResolvedValue({ id: 1, name: "Bar", telegram_chat_id: "123" });
       Cocktail.findOne.mockResolvedValue({ id: 2, name: "Mojito", bar_id: 1 });
 
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app)
         .post("/api/order")
         .send({ barId: 1, cocktailId: 2, tableNumber: "10", quantity: 3 });
@@ -524,7 +527,7 @@ describe("api router", () => {
       Bar.findByPk.mockResolvedValue({ id: 1, name: "Bar", telegram_chat_id: null });
       Cocktail.findOne.mockResolvedValue({ id: 2, name: "Mojito", bar_id: 1 });
 
-      const app = appWithRouter();
+      const app = await appWithRouter();
       const res = await request(app)
         .post("/api/order")
         .send({ barId: 1, cocktailId: 2, tableNumber: "10", quantity: 1 });

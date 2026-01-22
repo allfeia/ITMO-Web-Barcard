@@ -14,7 +14,15 @@ vi.mock('react-router-dom', async () => {
 });
 
 vi.mock('../../src/result-page/CocktailCanvas', () => ({
-    default: () => <div data-testid="cocktail-canvas">Mocked Cocktail Canvas</div>,
+    default: () => (
+        <canvas
+            data-testid="cocktail-canvas"
+            className="cocktail-canvas"
+            width="200"
+            height="260"
+            aria-label="Нарисованный коктейль с оливкой"
+        />
+    ),
 }));
 
 describe('Result', () => {

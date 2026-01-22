@@ -7,7 +7,7 @@ import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
 import './Result.css';
 
-function Result({ score = 326, onHome }) {
+function Result({ score = 326}) {
     const navigate = useNavigate();
     const handleReplay = () => {
         navigate('/levelPage');

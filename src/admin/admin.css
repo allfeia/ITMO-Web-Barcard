@@ -48,7 +48,7 @@
 }
 
 .mode-button:active {
-    box-shadow: 0 0 45px rgb(1, 1, 1);
+    box-shadow: 0 0 45px rgb(1 1 1);
     transform: scale(0.98);
 }
 
@@ -112,7 +112,7 @@
     font-size: 24px;
     border: 1px solid #333;
     border-radius: 4px;
-    color: #ffffff;
+    color: #fff;
     background-color: #333;
     height: 56px;
     text-transform: none;

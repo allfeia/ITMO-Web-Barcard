@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HomeIcon from '@mui/icons-material/Home';
@@ -6,7 +7,17 @@ import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
 import './Result.css';
 
-const Result = ({ score = 326, onRestart, onBar, onHome, onOrder }) => {
+function Result({ score = 326, onHome }) {
+    const navigate = useNavigate();
+    const handleReplay = () => {
+        navigate('/levelPage');
+    };
+    const handleBar = () => {
+        navigate('/menu');
+    };
+    const handleOrder = () => {
+        navigate('/order');
+    };
     return (
         <Box className="result-screen">
             <Typography variant="h4" component="h1" className="titleResult">
@@ -31,7 +42,7 @@ const Result = ({ score = 326, onRestart, onBar, onHome, onOrder }) => {
                     <IconButton
                         color="inherit"
                         size="large"
-                        onClick={onRestart}
+                        onClick={handleReplay}
                         title="переиграть"
                         className="control-icon-button"
                     >
@@ -44,7 +55,7 @@ const Result = ({ score = 326, onRestart, onBar, onHome, onOrder }) => {
                     <IconButton
                         color="inherit"
                         size="large"
-                        onClick={onBar}
+                        onClick={handleBar}
                         title="бар"
                         className="control-icon-button"
                     >
@@ -72,12 +83,12 @@ const Result = ({ score = 326, onRestart, onBar, onHome, onOrder }) => {
                 disableElevation
                 disableRipple
                 className="order-button"
-                onClick={onOrder}
+                onClick={handleOrder}
             >
                 Заказать
             </Button>
         </Box>
     );
-};
+}
 
 export default Result;

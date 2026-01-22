@@ -53,12 +53,12 @@ describe('Result', () => {
 
     it('рендерит CocktailCanvas внутри .cocktail-container', () => {
         renderResult();
-        const canvas = screen.getByTestId('cocktail-canvas');
-        expect(canvas).toBeInTheDocument();
-
-        const container = canvas.closest('.cocktail-container');
+        const mockedCanvas = screen.getByTestId('cocktail-canvas');
+        expect(mockedCanvas).toBeInTheDocument();
+        expect(mockedCanvas).toHaveTextContent('Mocked Cocktail Canvas');
+        const container = screen.getByText('Mocked Cocktail Canvas').closest('.cocktail-container');
         expect(container).toBeInTheDocument();
-        expect(container).toContainElement(canvas);
+        expect(container).toContainElement(mockedCanvas);
     });
 
     it('кнопка "Переиграть" вызывает navigate на /levelPage', () => {

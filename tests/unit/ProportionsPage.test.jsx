@@ -5,7 +5,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
 import ProportionsPage from '../../src/game-pages/proportions-page/ProportionsPage';
-import rootReducer from '../../src/game/rootReducer'; // ← подставь реальный путь к rootReducer
+import rootReducer from '../../src/game/rootReducer';
+import {proportionsErrors} from "../../src/game-pages/proportions-page/proportions_error.js"; // ← подставь реальный путь к rootReducer
 
 // Мокаем useNavigate
 const navigateMock = vi.fn();

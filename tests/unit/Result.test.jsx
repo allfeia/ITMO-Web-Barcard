@@ -1,20 +1,27 @@
+// tests/unit/Result.test.jsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
-import Result from '../../src/game-pages/result-page/Result';
+import Result from '../../src/game-pages/result-page/Result.jsx';
 import gameReducer from '../../src/game/gameSlice';
 
-// Мокаем CocktailCanvas — теперь как canvas, чтобы было ближе к реальности
+// Мок CocktailCanvas — теперь как canvas, чтобы соответствовать реальному DOM
 vi.mock('../../src/game-pages/result-page/CocktailCanvas', () => ({
-    default: () => <canvas data-testid="cocktail-canvas" aria-label="Нарисованный коктейль" />,
+    default: () => (
+        <canvas
+            data-testid="cocktail-canvas"
+            className="cocktail-canvas"
+            aria-label="Нарисованный коктейль"
+        />
+    ),
 }));
 
-// Мокаем useNavigate
+// Мок useNavigate
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async (importOriginal) => {
-    const actual = await importOriginal();
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
     return {
         ...actual,
         useNavigate: () => mockNavigate,
@@ -43,14 +50,13 @@ describe('Result', () => {
         });
     });
 
-    // остальные тесты без изменений
     it('отображает заголовок «Готово!»', () => {
         render(
             <Provider store={store}>
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
         expect(screen.getByText('Готово!')).toBeInTheDocument();
@@ -62,13 +68,13 @@ describe('Result', () => {
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
         expect(screen.getByText('Рейтинг: 125 ★')).toBeInTheDocument();
     });
 
-    it('показывает рейтинг 0, если скора нет', () => {
+    it('показывает 0 если нет ни одного скора', () => {
         store = configureStore({
             reducer: { game: gameReducer },
             preloadedState: {
@@ -81,7 +87,7 @@ describe('Result', () => {
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
         expect(screen.getByText('Рейтинг: 0 ★')).toBeInTheDocument();
@@ -93,53 +99,54 @@ describe('Result', () => {
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
         expect(screen.getByTestId('cocktail-canvas')).toBeInTheDocument();
     });
 
-    it('при клике на «Переиграть» перенаправляет на /levelPage', () => {
+    it('при клике на «Переиграть» → navigate на /levelPage', () => {
         render(
             <Provider store={store}>
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
-        const replayButton = screen.getByRole('button', { name: /переиграть/i });
-        fireEvent.click(replayButton);
+        // Более надёжный селектор: по доступному имени (title + aria-label или текст рядом)
+        const replayBtn = screen.getByRole('button', { name: /переиграть/i });
+        fireEvent.click(replayBtn);
 
         expect(mockNavigate).toHaveBeenCalledWith('/levelPage');
     });
 
-    it('при клике на «Бар» перенаправляет на /menu', () => {
+    it('при клике на иконку «Бар» → navigate на /menu', () => {
         render(
             <Provider store={store}>
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
-        const barButton = screen.getByRole('button', { name: /бар/i });
-        fireEvent.click(barButton);
+        const barBtn = screen.getByRole('button', { name: /бар/i });
+        fireEvent.click(barBtn);
 
         expect(mockNavigate).toHaveBeenCalledWith('/menu');
     });
 
-    it('при клике на «Заказать» перенаправляет на /order', () => {
+    it('при клике на кнопку «Заказать» → navigate на /order', () => {
         render(
             <Provider store={store}>
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
-        const orderButton = screen.getByRole('button', { name: /заказать/i });
-        fireEvent.click(orderButton);
+        const orderBtn = screen.getByRole('button', { name: /заказать/i });
+        fireEvent.click(orderBtn);
 
         expect(mockNavigate).toHaveBeenCalledWith('/order');
     });
@@ -150,7 +157,7 @@ describe('Result', () => {
                 <MemoryRouter>
                     <Result />
                 </MemoryRouter>
-            </Provider>,
+            </Provider>
         );
 
         expect(screen.getByText('Переиграть')).toBeInTheDocument();

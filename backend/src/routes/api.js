@@ -265,6 +265,11 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
   }
 });
 
+const favouritesRequestSchema = z.object({
+  savedCocktailsId: z.array(z.number().int().positive()),
+});
+
+
 router.post("/favourites", authRequired, async (req, res) => {
   try {
     const userId = req.user?.id;

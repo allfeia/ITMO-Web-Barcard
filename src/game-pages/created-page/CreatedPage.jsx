@@ -1,15 +1,24 @@
-import {useNavigate} from "react-router-dom";
-import {useRef, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {addHintUsage, addStageMistake, setStageStepsCount} from "../../game/gameSlice.js";
+import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import HardModeFailModal from "../HardModeFailModal";
+import {
+    addHintUsage,
+    addStageMistake,
+    setStageScore,
+    setStageStepsCount,
+    setGameOver,
+    resetGameOver, resetLevel,
+} from "../../game/gameSlice.js";
 import PageHeader from "../PageHeader.jsx";
 import RecipeCard from "../../menu-page/RecipeCard.jsx";
 import Button from "@mui/material/Button";
 import RecipeStepCard from "./RecipeStepCard.jsx";
-import './created-page.css'
-import {createdErrors} from "./created_error.js";
+import './created-page.css';
+import { createdErrors } from "./created_error.js";
 import ErrorModal from "../ErrorModal.jsx";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { calculateStageScore } from "../../game/scoreCalculator.js";
 
 function CreatedPage() {
     const goTo = useNavigate();
@@ -19,17 +28,16 @@ function CreatedPage() {
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [errorCount, setErrorCount] = useState(0);
 
-
     const dispatch = useDispatch();
+
     const mode = useSelector(state => state.game.mode);
     const selectedIngredients = useSelector(state => state.game.selectedIngredients);
-    const cocktail = useSelector(state => state.game.cocktailId)
-
+    const cocktail = useSelector(state => state.game.cocktailId);
     const cocktailIngredients = useSelector(state => state.game.cocktailData?.ingredients || []);
+    const recipeSteps = useSelector(state => state.game.cocktailData?.steps || []);
+    const stage3Data = useSelector(state => state.game.stages.stage3);
+    const gameOver = useSelector(state => state.game.gameOver);
 
-    const recipeSteps = useSelector(
-        state => state.game.cocktailData?.steps || []
-    );
     const [shuffledSteps, setShuffledSteps] = useState(() =>
         [...recipeSteps].sort(() => Math.random() - 0.5)
     );
@@ -39,13 +47,37 @@ function CreatedPage() {
     const errorChecker = () => {
         const totalErrors = createdErrors(shuffledSteps, recipeSteps, cocktailIngredients, userAnswers);
 
-        dispatch(setStageStepsCount({ stage: 'stage3', stepsCount: cocktailIngredients.length+recipeSteps.length }));
+        dispatch(setStageStepsCount({
+            stage: 'stage3',
+            stepsCount: cocktailIngredients.length + recipeSteps.length
+        }));
 
         if (totalErrors > 0) {
-            dispatch(addStageMistake({ stage: 'stage3', count: totalErrors }));
-            setErrorCount(totalErrors);
-            setErrorModalOpen(true);
+            dispatch(addStageMistake({
+                stage: 'stage3',
+                count: totalErrors
+            }));
+
+            // Проверка на превышение в hard-режиме
+            const currentMistakes = stage3Data.mistakes + totalErrors;
+            const steps = stage3Data.stepsCount || (cocktailIngredients.length + recipeSteps.length);
+            const maxAllowed = Math.max(steps - 2, 1);
+
+            if (mode === 'hard' && currentMistakes > maxAllowed) {
+                dispatch(setGameOver({
+                    isOver: true,
+                    reason: 'too_many_mistakes_hard'
+                }));
+            } else {
+                setErrorCount(totalErrors);
+                setErrorModalOpen(true);
+            }
         } else {
+            const stageScore = calculateStageScore('stage3', mode, stage3Data);
+            dispatch(setStageScore({
+                stage: 'stage3',
+                score: stageScore
+            }));
             goTo("/result");
         }
     };
@@ -69,14 +101,16 @@ function CreatedPage() {
                 onBack={() => { goTo(-1) }}
                 onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage3' })); }}
             />
+
             {isHintOpen && (
                 <RecipeCard
                     open={isHintOpen}
                     onClose={() => setIsHintOpen(false)}
-                    cocktail={{id: cocktail}}
+                    cocktail={{ id: cocktail }}
                     isHint={true}
                 />
             )}
+
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="recipeSteps">
                     {(provided) => (
@@ -126,12 +160,28 @@ function CreatedPage() {
             >
                 Создать коктейль
             </Button>
+
             <ErrorModal
                 open={errorModalOpen}
                 onClose={() => setErrorModalOpen(false)}
                 errorCount={errorCount}
             />
+
+            <HardModeFailModal
+                open={gameOver}
+                onClose={() => dispatch(resetGameOver())}
+                onStudyRecipe={() => {
+                    dispatch(resetGameOver());
+                    setIsHintOpen(true);
+                }}
+                onChangeMode={() => {
+                    dispatch(resetGameOver());
+                    dispatch(resetLevel());
+                    goTo('/levelPage');
+                }}
+            />
         </div>
-    )
+    );
 }
+
 export default CreatedPage;

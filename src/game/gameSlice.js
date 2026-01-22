@@ -7,23 +7,29 @@ const initialState = {
     hintsEnabled: true,
     selectedIngredients: {},      // ингредиенты с пропорциями [{ id, name, quantity }]
 
+
     stages: {
         stage1: {
             stepsCount: 0,
             mistakes: 0,
             hintsUsed: 0,
+            score: 0,
         },
         stage2: {
             stepsCount: 0,
             mistakes: 0,
             hintsUsed: 0,
+            score: 0,
         },
         stage3: {
             stepsCount: 0,
             mistakes: 0,
             hintsUsed: 0,
+            score: 0,
         },
     },
+    gameOver: false,
+    gameOverReason: null,
 };
 
 const gameSlice = createSlice({
@@ -43,6 +49,8 @@ const gameSlice = createSlice({
                     stage.hintsUsed = 0;
                     stage.stepsCount = 0;
                 });
+                state.gameOver = false;
+                state.gameOverReason = null;
             }
         },
         setMode: (state, action) => {
@@ -103,8 +111,23 @@ const gameSlice = createSlice({
                 cocktailId: state.cocktailId,
                 cocktailData: state.cocktailData
             }
-        }
+        },
+        setStageScore(state, action) {
+            const { stage, score } = action.payload;
+            state.stages[stage].score = score;
+        },
+        setGameOver(state, action) {
+            const { isOver, reason = null } = action.payload;
+            state.gameOver = isOver;
+            state.gameOverReason = isOver ? reason : null;
+        },
+
+        resetGameOver(state) {
+            state.gameOver = false;
+            state.gameOverReason = null;
+        },
     },
+
 });
 
 export const {
@@ -117,6 +140,9 @@ export const {
     resetGame,
     resetLevel,
     setIngredientAmount,
+    setStageScore,
+    setGameOver,
+    resetGameOver,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

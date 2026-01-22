@@ -1,13 +1,23 @@
-import {addHintUsage, addStageMistake, setIngredientAmount, setStageStepsCount} from "../../game/gameSlice.js";
+import {
+    addHintUsage,
+    addStageMistake,
+    setIngredientAmount,
+    setStageScore,
+    setStageStepsCount,
+    setGameOver,
+    resetGameOver, resetLevel,
+} from "../../game/gameSlice.js";
 import PageHeader from "../PageHeader.jsx";
-import React, {useRef, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {useNavigate} from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import RecipeCard from "../../menu-page/RecipeCard.jsx";
 import Button from "@mui/material/Button";
 import './proportions-page.css';
-import {proportionsErrors} from "./proportions_error.js";
+import { proportionsErrors } from "./proportions_error.js";
 import ErrorModal from "../ErrorModal.jsx";
+import { calculateStageScore } from "../../game/scoreCalculator.js";
+import HardModeFailModal from "../HardModeFailModal";
 
 function ProportionsPage() {
     const goTo = useNavigate();
@@ -17,13 +27,14 @@ function ProportionsPage() {
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [errorCount, setErrorCount] = useState(0);
 
-
     const dispatch = useDispatch();
+
     const mode = useSelector(state => state.game.mode);
     const selectedIngredients = useSelector(state => state.game.selectedIngredients);
-    const cocktail = useSelector(state => state.game.cocktailId)
-
+    const cocktail = useSelector(state => state.game.cocktailId);
     const cocktailIngredients = useSelector(state => state.game.cocktailData?.ingredients || []);
+    const stage2Data = useSelector(state => state.game.stages.stage2);
+    const gameOver = useSelector(state => state.game.gameOver);
 
     const ingredientsWithQuantity = Object.values(selectedIngredients).filter(selected =>
         cocktailIngredients.some(ci => ci.id === selected.id && ci.amount !== null)
@@ -32,13 +43,37 @@ function ProportionsPage() {
     const errorChecker = () => {
         const errors = proportionsErrors(ingredientsWithQuantity, cocktailIngredients);
 
-        dispatch(setStageStepsCount({ stage: 'stage2', stepsCount: ingredientsWithQuantity.length }));
+        dispatch(setStageStepsCount({
+            stage: 'stage2',
+            stepsCount: ingredientsWithQuantity.length
+        }));
 
         if (errors > 0) {
-            dispatch(addStageMistake({ stage: 'stage2', count: errors }));
-            setErrorCount(errors);
-            setErrorModalOpen(true);
+            dispatch(addStageMistake({
+                stage: 'stage2',
+                count: errors
+            }));
+
+            // Проверка на превышение в hard-режиме
+            const currentMistakes = stage2Data.mistakes + errors;
+            const steps = stage2Data.stepsCount || ingredientsWithQuantity.length;
+            const maxAllowed = Math.max(steps - 2, 1);
+
+            if (mode === 'hard' && currentMistakes > maxAllowed) {
+                dispatch(setGameOver({
+                    isOver: true,
+                    reason: 'too_many_mistakes_hard'
+                }));
+            } else {
+                setErrorCount(errors);
+                setErrorModalOpen(true);
+            }
         } else {
+            const stageScore = calculateStageScore('stage2', mode, stage2Data);
+            dispatch(setStageScore({
+                stage: 'stage2',
+                score: stageScore
+            }));
             goTo("/create");
         }
     };
@@ -52,14 +87,16 @@ function ProportionsPage() {
                 onBack={() => { goTo(-1) }}
                 onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage2' })); }}
             />
+
             {isHintOpen && (
                 <RecipeCard
                     open={isHintOpen}
                     onClose={() => setIsHintOpen(false)}
-                    cocktail={{id: cocktail}}
+                    cocktail={{ id: cocktail }}
                     isHint={true}
                 />
             )}
+
             <Button
                 className="create-btn"
                 variant="text"
@@ -68,6 +105,7 @@ function ProportionsPage() {
             >
                 Перейти к созданию
             </Button>
+
             <div className="selected-ingredients-frame">
                 {ingredientsWithQuantity.length === 0 && <p>Нет ингредиентов с заданным количеством</p>}
                 {ingredientsWithQuantity.map(ing => {
@@ -89,13 +127,28 @@ function ProportionsPage() {
                     );
                 })}
             </div>
+
             <ErrorModal
                 open={errorModalOpen}
                 onClose={() => setErrorModalOpen(false)}
                 errorCount={errorCount}
             />
 
+            <HardModeFailModal
+                open={gameOver}
+                onClose={() => dispatch(resetGameOver())}
+                onStudyRecipe={() => {
+                    dispatch(resetGameOver());
+                    setIsHintOpen(true);
+                }}
+                onChangeMode={() => {
+                    dispatch(resetGameOver());
+                    dispatch(resetLevel());
+                    goTo('/levelPage');
+                }}
+            />
         </div>
-    )
+    );
 }
+
 export default ProportionsPage;

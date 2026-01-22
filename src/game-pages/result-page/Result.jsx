@@ -1,13 +1,24 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
 import './Result.css';
 
-function Result({ score = 326}) {
+function Result() {
     const navigate = useNavigate();
+
+    const totalScore = useSelector((state) => {
+        const stages = state.game.stages;
+        return (
+            (stages.stage1?.score || 0) +
+            (stages.stage2?.score || 0) +
+            (stages.stage3?.score || 0)
+        );
+    });
+
     const handleReplay = () => {
         navigate('/levelPage');
     };
@@ -24,7 +35,7 @@ function Result({ score = 326}) {
             </Typography>
 
             <Typography variant="h5" className="subtitle">
-                Рейтинг: {score} ★
+                Рейтинг: {totalScore} ★
             </Typography>
 
             <div className="cocktail-container">

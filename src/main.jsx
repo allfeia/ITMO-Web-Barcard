@@ -22,7 +22,6 @@ import IngredientsPage from "./game-pages/ingredients-page/IngredientsPage.jsx";
 import { persistor, store } from "./game/store";
 import { PersistGate } from "redux-persist/integration/react";
 import ProportionsPage from "./game-pages/proportions-page/ProportionsPage.jsx";
-
 import * as Sentry from "@sentry/react";
 import CreatedPage from "./game-pages/created-page/CreatedPage.jsx";
 import OrderPage from "./game-pages/result-page/Order.jsx";

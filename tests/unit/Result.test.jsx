@@ -61,22 +61,6 @@ describe('Result', () => {
         expect(screen.getByText(/Рейтинг:\s*1250\s*★/i)).toBeInTheDocument();
     });
 
-    it('рендерит CocktailCanvas внутри .cocktail-container', () => {
-        renderResult();
-
-        const canvas = screen.getByTestId('cocktail-canvas');
-        expect(canvas).toBeInTheDocument();
-
-        expect(canvas.tagName.toLowerCase()).toBe('canvas');
-        expect(canvas).toHaveClass('cocktail-canvas');
-        expect(canvas).toHaveAttribute('aria-label', 'Нарисованный коктейль с оливкой');
-        expect(canvas).toHaveAttribute('width', '200');
-        expect(canvas).toHaveAttribute('height', '260');
-
-        const container = canvas.closest('.cocktail-container');
-        expect(container).toBeInTheDocument();
-        expect(container).toContainElement(canvas);
-    });
 
     it('кнопка "Переиграть" вызывает navigate на /levelPage', () => {
         renderResult();

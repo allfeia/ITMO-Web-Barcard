@@ -10,11 +10,14 @@ test.describe('Result page', () => {
         await expect(page.getByText(/Рейтинг/i)).toBeVisible();
         await expect(page.getByText('326 ★')).toBeVisible();
     });
-    test('показывает CocktailCanvas (проверяем, что блок появился)', async ({ page }) => {
-        const canvasContainer = page.locator('.cocktail-container');
-        await expect(canvasContainer).toBeVisible();
-        await expect(canvasContainer.locator('canvas')).toBeVisible();
-        await expect(canvasContainer).toHaveCount(1);
+    test('показывает CocktailCanvas корректно', async ({ page }) => {
+        const container = page.locator('.cocktail-container');
+        await expect(container).toBeVisible();
+        await expect(container).toHaveCount(1);
+        const canvas = container.locator('canvas');
+        await expect(canvas).toBeVisible();
+        await expect(canvas).toHaveAttribute('width');
+        await expect(canvas).toHaveAttribute('height');
     });
 
     test('кнопка "Переиграть" ведёт на /levelPage', async ({ page }) => {
@@ -44,11 +47,14 @@ test.describe('Result page', () => {
         await expect(page).toHaveURL(/order/);
     });
 
-    test('иконки и лейблы отображаются корректно', async ({ page }) => {
-        await expect(page.getByTitle('Переиграть')).toBeVisible();
-        await expect(page.getByTitle('Бар')).toBeVisible();
+    test('отображает иконки Переиграть и Бар + их лейблы', async ({ page }) => {
         await expect(page.getByTitle('переиграть')).toBeVisible();
         await expect(page.getByTitle('бар')).toBeVisible();
+        await expect(page.getByText('Переиграть')).toBeVisible();
+        await expect(page.getByText('Бар')).toBeVisible();
+        await expect(page.getByTitle('переиграть').locator('svg')).toBeVisible();
+        await expect(page.getByTitle('бар').locator('svg')).toBeVisible();
     });
+
 
 });

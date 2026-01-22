@@ -25,8 +25,8 @@ import ProportionsPage from "./game-pages/proportions-page/ProportionsPage.jsx";
 
 import * as Sentry from "@sentry/react";
 import CreatedPage from "./game-pages/created-page/CreatedPage.jsx";
-import OrderPage from "./result-page/Order.jsx";
-import Result from "./game-pages/Result.jsx";
+import OrderPage from "./game-pages/result-page/Order.jsx";
+import Result from "./game-pages/result-page/Result.jsx";
 
 Sentry.init({
     dsn: "https://ff863d9ec402606b1c0666c164a5ba2f@o4510535321255936.ingest.us.sentry.io/4510535479132160",

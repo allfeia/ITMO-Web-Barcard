@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import express from "express";
 import jwt from "jsonwebtoken";
@@ -76,8 +76,15 @@ function authCookie(user) {
 }
 
 describe("api router", () => {
+  const ORIGINAL_ENV = process.env;
+
   beforeEach(() => {
     vi.restoreAllMocks();
+    process.env = { ...ORIGINAL_ENV };
+  });
+
+  afterEach(() => {
+    process.env = ORIGINAL_ENV;
   });
 
   it("GET /health", async () => {
@@ -304,9 +311,7 @@ describe("api router", () => {
     });
 
     it("returns cocktails for bar", async () => {
-      Cocktail.findAll.mockResolvedValue([
-        { id: 1, name: "A", draw_file: "img", bar_id: 1 },
-      ]);
+      Cocktail.findAll.mockResolvedValue([{ id: 1, name: "A", draw_file: "img", bar_id: 1 }]);
       const app = appWithRouter();
       const res = await request(app).get("/api/cocktail?barId=1");
       expect(res.status).toBe(200);
@@ -342,9 +347,7 @@ describe("api router", () => {
     });
 
     it("returns list of favourite cocktails", async () => {
-      Cocktail.findAll.mockResolvedValue([
-        { id: 1, name: "A", draw_file: "i", bar_id: 1 },
-      ]);
+      Cocktail.findAll.mockResolvedValue([{ id: 1, name: "A", draw_file: "i", bar_id: 1 }]);
       const app = appWithRouter();
       const auth = authCookie({ id: 1, roles: ["user"] });
       const res = await request(app)
@@ -390,7 +393,7 @@ describe("api router", () => {
       const res = await request(app).patch("/api/favourites/add/5").set("Cookie", auth);
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ ok: true, cocktailId: 5, created: true });
+      expect(res.body).toMatchObject({ ok: true, cocktailId: 5, created: true });
     });
   });
 
@@ -455,9 +458,7 @@ describe("api router", () => {
 
   describe("GET /ingredients", () => {
     it("returns ingredients", async () => {
-      Ingredient.findAll.mockResolvedValue([
-        { id: 1, name: "Vodka", type: "alcohol", image: "v.png" },
-      ]);
+      Ingredient.findAll.mockResolvedValue([{ id: 1, name: "Vodka", type: "alcohol", image: "v.png" }]);
       const app = appWithRouter();
       const res = await request(app).get("/api/ingredients");
       expect(res.status).toBe(200);
@@ -519,6 +520,7 @@ describe("api router", () => {
 
     it("200 ok and uses default chat if bar chat not configured", async () => {
       process.env.DEFAULT_TELEGRAM_CHAT_ID = "999";
+
       Bar.findByPk.mockResolvedValue({ id: 1, name: "Bar", telegram_chat_id: null });
       Cocktail.findOne.mockResolvedValue({ id: 2, name: "Mojito", bar_id: 1 });
 

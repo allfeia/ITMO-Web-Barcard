@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const OPTS = Symbol.for("opts");
+
 describe("models.js", () => {
   beforeEach(() => {
     vi.resetModules();
-    const defineSymbol = Symbol("define");
 
     const mockInit = vi.fn(function (_attrs, options) {
       this[OPTS] = options;
@@ -63,7 +64,6 @@ describe("models.js", () => {
     expect(UserFavourite).toBeDefined();
     expect(PasswordToken).toBeDefined();
 
-    // связи вызывались (базовые)
     expect(Bar.hasMany).toHaveBeenCalled();
     expect(User.belongsTo).toHaveBeenCalled();
     expect(User.hasMany).toHaveBeenCalled();

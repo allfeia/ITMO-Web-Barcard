@@ -55,6 +55,16 @@ test.describe('Result page', () => {
         await expect(page.getByTitle('переиграть').locator('svg')).toBeVisible();
         await expect(page.getByTitle('бар').locator('svg')).toBeVisible();
     });
+    test('кнопки иконок получают фокус и hover состояние', async ({ page }) => {
+        const replayBtn = page.getByTitle('переиграть');
+        const barBtn = page.getByTitle('бар');
+        await replayBtn.focus();
+        await expect(replayBtn).toBeFocused();
+        await replayBtn.hover();
+        await expect(replayBtn).toHaveCSS('cursor', 'pointer');
+        await barBtn.hover();
+        await expect(barBtn).toHaveCSS('cursor', 'pointer');
+    });
 
 
 });

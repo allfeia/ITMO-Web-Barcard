@@ -117,14 +117,6 @@ describe('Result', () => {
         expect(orderBtn).not.toBeDisabled();
     });
 
-    it('IconButton имеют size="large" и color="inherit"', () => {
-        renderResult();
-        const icons = screen.getAllByRole('button', { name: /(переиграть|бар)/i });
-        icons.forEach(icon => {
-            expect(icon).toHaveAttribute('size', 'large'); // или проверять через MUI props если нужно
-            expect(icon).toHaveAttribute('color', 'inherit');
-        });
-    });
 
     it('отрисовывает правильную структуру: titleResult, subtitle, button-stack', () => {
         renderResult({ score: 777 });

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "main": "src/server.js",
-  "scripts": {
+    "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "db:sync": "node src/scripts/sync.js",
@@ -14,21 +14,22 @@
   },
   "dependencies": {
     "@sentry/node": "^10.30.0",
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^5.1.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mailer": "^0.6.6",
     "nodemailer": "^7.0.12",
     "pg": "^8.11.5",
     "pg-hstore": "^2.3.4",
     "qrcode": "^1.5.3",
     "sequelize": "^6.37.3",
+    "telegraf": "^4.16.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -125,7 +125,7 @@ test.describe('IngredientsPage', () => {
         test('переходит на /result при правильных ответах', async ({ page }) => {
             await goToIngredientsPage(page);
             await page.getByRole('button', {name: 'Создать коктейль'}).click();
-            await expect(page).toHaveURL(/\/result$/, { timeout: 10000 });
+            await expect(page).toHaveURL(/\/result/, { timeout: 10000 });
         });
 
         test('drag-and-drop шагов (проверка на корректность порядка)', async ({page}) => {

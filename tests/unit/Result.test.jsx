@@ -1,73 +1,84 @@
-import Result from '../../src/result-page/Result';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-const mockedNavigate = vi.fn();
+
+import Result from '../../src/result-page/Result';
+const mockNavigate = vi.fn();
 
 vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+    const actual = await vi.importActual('react-router-dom');
     return {
         ...actual,
-        useNavigate: () => mockedNavigate,
+        useNavigate: () => mockNavigate,
     };
 });
 
-vi.mock('./CocktailCanvas', () => ({
-    default: () => <div data-testid="cocktail-canvas">Mocked Canvas</div>,
+vi.mock('../../src/result-page/CocktailCanvas', () => ({
+    default: () => <div data-testid="cocktail-canvas">Mocked Cocktail Canvas</div>,
 }));
 
 describe('Result', () => {
     beforeEach(() => {
-        mockedNavigate.mockClear();
+        mockNavigate.mockClear();
     });
 
-    it('отображает заголовок "Готово!"', () => {
-        render(
+    const renderResult = (props = {}) => {
+        return render(
             <MemoryRouter>
-                <Result />
+                <Result {...props} />
             </MemoryRouter>
         );
+    };
+
+    it('отображает заголовок "Готово!"', () => {
+        renderResult();
         expect(screen.getByText('Готово!')).toBeInTheDocument();
     });
 
     it('показывает рейтинг по умолчанию 326', () => {
-        render(<MemoryRouter><Result /></MemoryRouter>);
-        expect(screen.getByText(/Рейтинг: 326 ★/i)).toBeInTheDocument();
+        renderResult();
+        expect(screen.getByText(/Рейтинг:\s*326\s*★/i)).toBeInTheDocument();
     });
 
     it('показывает переданный рейтинг', () => {
-        render(<MemoryRouter><Result score={580} /></MemoryRouter>);
-        expect(screen.getByText(/Рейтинг: 580 ★/i)).toBeInTheDocument();
+        renderResult({ score: 580 });
+        expect(screen.getByText(/Рейтинг:\s*580\s*★/i)).toBeInTheDocument();
     });
 
     it('рендерит CocktailCanvas', () => {
-        render(<MemoryRouter><Result /></MemoryRouter>);
+        renderResult();
         expect(screen.getByTestId('cocktail-canvas')).toBeInTheDocument();
     });
 
     it('кнопка "Переиграть" вызывает navigate на /levelPage', () => {
-        render(<MemoryRouter><Result /></MemoryRouter>);
+        renderResult();
 
-        fireEvent.click(screen.getByTitle(/переиграть/i));
-        expect(mockedNavigate).toHaveBeenCalledWith('/levelPage');
+        const replayButton = screen.getByRole('button', { name: /переиграть/i });
+        fireEvent.click(replayButton);
+
+        expect(mockNavigate).toHaveBeenCalledWith('/levelPage');
     });
 
     it('кнопка "Бар" вызывает navigate на /menu', () => {
-        render(<MemoryRouter><Result /></MemoryRouter>);
+        renderResult();
 
-        fireEvent.click(screen.getByTitle(/бар/i));
-        expect(mockedNavigate).toHaveBeenCalledWith('/menu');
+        const barButton = screen.getByRole('button', { name: /бар/i });
+        fireEvent.click(barButton);
+
+        expect(mockNavigate).toHaveBeenCalledWith('/menu');
     });
 
     it('кнопка "Заказать" вызывает navigate на /order', () => {
-        render(<MemoryRouter><Result /></MemoryRouter>);
+        renderResult();
 
-        fireEvent.click(screen.getByRole('button', { name: /заказать/i }));
-        expect(mockedNavigate).toHaveBeenCalledWith('/order');
+        const orderButton = screen.getByRole('button', { name: /заказать/i });
+        fireEvent.click(orderButton);
+
+        expect(mockNavigate).toHaveBeenCalledWith('/order');
     });
 
-    it('иконки и подписи к ним присутствуют', () => {
-        render(<MemoryRouter><Result /></MemoryRouter>);
+    it('отображает подписи к иконкам "Переиграть" и "Бар"', () => {
+        renderResult();
         expect(screen.getByText('Переиграть')).toBeInTheDocument();
         expect(screen.getByText('Бар')).toBeInTheDocument();
     });

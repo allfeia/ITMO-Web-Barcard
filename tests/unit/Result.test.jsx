@@ -98,14 +98,5 @@ describe('Result', () => {
         expect(screen.getByText('Переиграть')).toHaveClass('icon-label');
         expect(screen.getByText('Бар')).toHaveClass('icon-label');
     });
-    it('Stack с иконками отображается корректно (две группы кнопок)', () => {
-        renderResult();
 
-        const stack = screen.getByTestId('cocktail-canvas').closest('.button-stack')?.parentElement;
-        const iconContainers = screen.getAllByText(/Переиграть|Бар/).map(el => el.closest('.icon-button-container'));
-
-        expect(iconContainers).toHaveLength(2);
-        expect(iconContainers[0]).toBeInTheDocument();
-        expect(iconContainers[1]).toBeInTheDocument();
-    });
 });

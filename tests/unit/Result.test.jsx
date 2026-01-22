@@ -108,5 +108,43 @@ describe('Result', () => {
         expect(iconContainers[0]).toBeInTheDocument();
         expect(iconContainers[1]).toBeInTheDocument();
     });
+    it('рендерит кнопку "Заказать" с правильными пропсами MUI', () => {
+        renderResult();
+        const orderBtn = screen.getByRole('button', { name: /заказать/i });
+
+        expect(orderBtn).toHaveClass('order-button');
+        expect(orderBtn).toHaveAttribute('type', 'button'); // default для Button
+        expect(orderBtn).not.toBeDisabled();
+    });
+
+    it('IconButton имеют size="large" и color="inherit"', () => {
+        renderResult();
+        const icons = screen.getAllByRole('button', { name: /(переиграть|бар)/i });
+        icons.forEach(icon => {
+            expect(icon).toHaveAttribute('size', 'large'); // или проверять через MUI props если нужно
+            expect(icon).toHaveAttribute('color', 'inherit');
+        });
+    });
+
+    it('отрисовывает правильную структуру: titleResult, subtitle, button-stack', () => {
+        renderResult({ score: 777 });
+        const title = screen.getByText('Готово!');
+        expect(title).toHaveClass('titleResult');
+        const subtitle = screen.getByText(/Рейтинг:\s*777\s*★/i);
+        expect(subtitle).toHaveClass('subtitle');
+        const stack = screen.getByText('Переиграть').closest('.button-stack');
+        expect(stack).toBeInTheDocument();
+        expect(stack).toHaveClass('button-stack');
+    });
+
+    it('handle-функции вызывают navigate с правильными путями (альтернативная проверка)', () => {
+        renderResult();
+        fireEvent.click(screen.getByTitle('переиграть'));
+        expect(mockNavigate).toHaveBeenNthCalledWith(1, '/levelPage');
+        fireEvent.click(screen.getByTitle('бар'));
+        expect(mockNavigate).toHaveBeenNthCalledWith(2, '/menu');
+        fireEvent.click(screen.getByRole('button', { name: /заказать/i }));
+        expect(mockNavigate).toHaveBeenNthCalledWith(3, '/order');
+    });
 
 });

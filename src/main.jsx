@@ -1,6 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import {Provider} from "react-redux";
+import { Provider } from "react-redux";
 import ProtectedRoute from "./ProtectedRoute.jsx"
 import { createRoot } from 'react-dom/client'
 import StartPage from './start-page/StartPage.jsx'
@@ -19,14 +19,14 @@ import LevelPage from "./game-pages/level-page/LevelPage.jsx";
 import FavouritesPage from "./favourites-page/FavouritesPage.jsx";
 import PasswordPage from "./password-page/PasswordPage.jsx";
 import IngredientsPage from "./game-pages/ingredients-page/IngredientsPage.jsx";
-import {persistor, store} from "./game/store";
-import {PersistGate} from "redux-persist/integration/react";
+import { persistor, store } from "./game/store";
+import { PersistGate } from "redux-persist/integration/react";
 import ProportionsPage from "./game-pages/proportions-page/ProportionsPage.jsx";
 
 import * as Sentry from "@sentry/react";
 import CreatedPage from "./game-pages/created-page/CreatedPage.jsx";
-import Result from "./result-page/Result.jsx";
 import OrderPage from "./result-page/Order.jsx";
+import Result from "./game-pages/Result.jsx";
 
 Sentry.init({
     dsn: "https://ff863d9ec402606b1c0666c164a5ba2f@o4510535321255936.ingest.us.sentry.io/4510535479132160",
@@ -108,7 +108,7 @@ createRoot(document.getElementById('root')).render(
                         <Route
                             path="/administration"
                             element={
-                                <ProtectedRoute allow={['super_admin','bar_admin']}>
+                                <ProtectedRoute allow={['super_admin', 'bar_admin']}>
                                     <AdminPage />
                                 </ProtectedRoute>
                             }

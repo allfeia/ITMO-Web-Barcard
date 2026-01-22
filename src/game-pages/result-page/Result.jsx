@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import HomeIcon from '@mui/icons-material/Home';
 import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
 import './Result.css';

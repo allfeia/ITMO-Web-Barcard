@@ -1,7 +1,7 @@
 .selected-ingredients-frame {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
     margin-left: 35px;
     margin-right: 35px;
     margin-top: 20px;
@@ -20,16 +20,26 @@
 .ingredient-name {
     font-weight: 400;
     font-size: 20px;
-    min-width: 120px;
 }
 
 .ingredient-input {
-    width: 120px;
+    width: 60px;
     height: 42px;
     border: none;
     font-size: 20px;
     background-color: #EFEEEC;
     outline: none;
+    text-align: center;
+}
+
+.ingredient-input::-webkit-outer-spin-button,
+.ingredient-input::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+.ingredient-input[type="number"] {
+    appearance: textfield;
 }
 
 .ingredient-unit {

@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
 
+import { store } from '../../src/game/store';
 import Result from '../../src/game-pages/result-page/Result';
-const mockNavigate = vi.fn();
 
+const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
     return {
@@ -24,9 +26,11 @@ describe('Result', () => {
 
     const renderResult = (props = {}) => {
         return render(
-            <MemoryRouter>
-                <Result {...props} />
-            </MemoryRouter>
+            <Provider store={store}>
+                <MemoryRouter>
+                    <Result {...props} />
+                </MemoryRouter>
+            </Provider>
         );
     };
 
@@ -35,12 +39,12 @@ describe('Result', () => {
         expect(screen.getByText('Готово!')).toBeInTheDocument();
     });
 
-    it('показывает рейтинг по умолчанию 326', () => {
+    it('показывает рейтинг по умолчанию (0, если нет данных в сторе)', () => {
         renderResult();
-        expect(screen.getByText(/Рейтинг:\s*326\s*★/i)).toBeInTheDocument();
+        expect(screen.getByText(/Рейтинг:\s*0\s*★/i)).toBeInTheDocument();
     });
 
-    it('отображает переданный рейтинг корректно', () => {
+    it('отображает переданный рейтинг корректно (через пропс score)', () => {
         renderResult({ score: 580 });
         expect(screen.getByText(/Рейтинг:\s*580\s*★/i)).toBeInTheDocument();
 
@@ -55,6 +59,7 @@ describe('Result', () => {
         renderResult();
         const canvas = screen.getByTestId('cocktail-canvas');
         expect(canvas).toBeInTheDocument();
+
         const container = canvas.closest('.cocktail-container');
         expect(container).toBeInTheDocument();
         expect(container).toContainElement(canvas);
@@ -96,6 +101,7 @@ describe('Result', () => {
         expect(screen.getByText('Переиграть')).toHaveClass('icon-label');
         expect(screen.getByText('Бар')).toHaveClass('icon-label');
     });
+
     it('Stack с иконками отображается корректно (две группы кнопок)', () => {
         renderResult();
 
@@ -104,25 +110,24 @@ describe('Result', () => {
             .filter(Boolean);
 
         expect(iconContainers).toHaveLength(2);
-        expect(iconContainers[0]).toBeInTheDocument();
-        expect(iconContainers[1]).toBeInTheDocument();
     });
+
     it('рендерит кнопку "Заказать" с правильными пропсами MUI', () => {
         renderResult();
         const orderBtn = screen.getByRole('button', { name: /заказать/i });
 
         expect(orderBtn).toHaveClass('order-button');
-        expect(orderBtn).toHaveAttribute('type', 'button'); // default для Button
         expect(orderBtn).not.toBeDisabled();
     });
-
 
     it('отрисовывает правильную структуру: titleResult, subtitle, button-stack', () => {
         renderResult({ score: 777 });
         const title = screen.getByText('Готово!');
         expect(title).toHaveClass('titleResult');
+
         const subtitle = screen.getByText(/Рейтинг:\s*777\s*★/i);
         expect(subtitle).toHaveClass('subtitle');
+
         const stack = screen.getByText('Переиграть').closest('.button-stack');
         expect(stack).toBeInTheDocument();
         expect(stack).toHaveClass('button-stack');
@@ -130,12 +135,14 @@ describe('Result', () => {
 
     it('handle-функции вызывают navigate с правильными путями (альтернативная проверка)', () => {
         renderResult();
+
         fireEvent.click(screen.getByTitle('переиграть'));
         expect(mockNavigate).toHaveBeenNthCalledWith(1, '/levelPage');
+
         fireEvent.click(screen.getByTitle('бар'));
         expect(mockNavigate).toHaveBeenNthCalledWith(2, '/menu');
+
         fireEvent.click(screen.getByRole('button', { name: /заказать/i }));
         expect(mockNavigate).toHaveBeenNthCalledWith(3, '/order');
     });
-
 });

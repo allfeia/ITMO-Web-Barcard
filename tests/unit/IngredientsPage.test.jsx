@@ -1,155 +1,177 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import IngredientsPage from "../../src/game-pages/ingredients-page/IngredientsPage";
-import { MemoryRouter } from "react-router-dom";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 
+import IngredientsPage from '../../src/game-pages/ingredients-page/IngredientsPage';
+import rootReducer from '../../src/game/rootReducer'; // ← твой rootReducer
+
+// Мокаем useNavigate
 const mockNavigate = vi.fn();
-const mockDispatch = vi.fn();
-
-vi.mock("react-router-dom", async () => {
-    const actual = await vi.importActual("react-router-dom");
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
     return {
         ...actual,
         useNavigate: () => mockNavigate,
     };
 });
 
-vi.mock("react-redux", () => ({
-    useDispatch: () => mockDispatch,
-    useSelector: (selector) =>
-        selector({
-            game: {
-                mode: "easy",
-                cocktailId: 1,
-                selectedIngredients: {},
-                cocktailData: {
-                    ingredients: [
-                        { id: 1, name: "Лайм" },
-                        { id: 2, name: "Белый ром" },
-                    ],
-                },
-            },
-        }),
-}));
-
-vi.mock("../../src/game-pages/ingredients-page/Ingredients", () => ({
+// Мокаем useIngredients (возвращает данные для рендера)
+vi.mock('../../src/game-pages/ingredients-page/Ingredients', () => ({
     useIngredients: () => ({
-        searchValue: "",
+        searchValue: '',
         setSearchValue: vi.fn(),
         groupedIngredients: [
             {
-                type: "base",
-                title: "Основа",
+                type: 'alcohol',
+                title: 'Алкогольные',
                 items: [
-                    { id: 1, name: "Лайм" },
-                    { id: 2, name: "Белый ром" },
+                    { id: 1, name: 'Белый ром' },
+                    { id: 2, name: 'Лайм' },
                 ],
             },
         ],
     }),
 }));
 
-vi.mock("../../src/game-pages/hint.js", () => ({
+// Мокаем drawHint
+vi.mock('../../src/game-pages/hint.js', () => ({
     default: vi.fn(),
 }));
 
-vi.mock("../../src/game-pages/ingredients-page/ingredients_error.js", () => ({
+// Мокаем ingredientErrors
+vi.mock('../../src/game-pages/ingredients-page/ingredients_error.js', () => ({
     ingredientErrors: vi.fn(),
 }));
 
-vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
-    default: () => <div>RecipeCard</div>,
+// Мокаем RecipeCard и ErrorModal
+vi.mock('../../src/menu-page/RecipeCard.jsx', () => ({
+    default: () => <div data-testid="recipe-card">RecipeCard</div>,
 }));
 
-vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
+vi.mock('../../src/components/ErrorModal.jsx', () => ({
     default: ({ open, errorCount }) =>
-        open ? <div>Ошибок: {errorCount}</div> : null,
+        open ? <div data-testid="error-modal">Ошибок: {errorCount}</div> : null,
 }));
 
-import drawHint from "../../src/game-pages/hint.js";
-import { ingredientErrors } from "../../src/game-pages/ingredients-page/ingredients_error.js";
-import {
-    addStageMistake,
-    resetLevel,
-    toggleIngredient,
-} from "../../src/game/gameSlice.js";
+// Мокаем HardModeFailModal (чтобы не падал при gameOver)
+vi.mock('../../src/components/HardModeFailModal', () => ({
+    default: () => <div data-testid="hard-modal">Hard Mode Fail Modal</div>,
+}));
 
+describe('IngredientsPage', () => {
+    let mockStore;
 
-const renderPage = () =>
-    render(
-        <MemoryRouter>
-            <IngredientsPage />
-        </MemoryRouter>
-    );
-
-
-describe("IngredientsPage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+
+        // Создаём моковый store с нужным состоянием
+        mockStore = configureStore({
+            reducer: rootReducer,
+            preloadedState: {
+                game: {
+                    mode: 'easy',
+                    cocktailId: 1,
+                    cocktailData: {
+                        ingredients: [
+                            { id: 1, name: 'Белый ром' },
+                            { id: 2, name: 'Лайм' },
+                        ],
+                    },
+                    selectedIngredients: {},
+                    stages: {
+                        stage1: {
+                            stepsCount: 0,
+                            mistakes: 0,
+                            hintsUsed: 0,
+                            score: 0,
+                        },
+                        stage2: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
+                        stage3: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
+                    },
+                    gameOver: false,
+                    gameOverReason: null,
+                },
+            },
+        });
     });
 
-    it("рендерит заголовок страницы", () => {
+    const renderPage = () =>
+        render(
+            <Provider store={mockStore}>
+                <MemoryRouter>
+                    <IngredientsPage />
+                </MemoryRouter>
+            </Provider>
+        );
+
+    it('рендерит заголовок страницы', () => {
         renderPage();
-        expect(screen.getByText("Ингредиенты")).toBeInTheDocument();
+        expect(screen.getByText('Ингредиенты')).toBeInTheDocument();
     });
 
-    it("рендерит кнопку назад", () => {
+    it('рендерит кнопку назад', () => {
         renderPage();
-        expect(screen.getByTestId("back-button")).toBeInTheDocument();
+        expect(screen.getByTestId('back-button')).toBeInTheDocument();
     });
 
-    it("клик по кнопке назад вызывает navigate(-1) и resetLevel", () => {
+    it('клик по кнопке назад вызывает navigate(-1) и resetLevel', () => {
         renderPage();
 
-        fireEvent.click(screen.getByTestId("back-button"));
+        fireEvent.click(screen.getByTestId('back-button'));
 
         expect(mockNavigate).toHaveBeenCalledWith(-1);
-        expect(mockDispatch).toHaveBeenCalledWith(resetLevel());
+        expect(mockStore.getActions()).toContainEqual({
+            type: 'game/resetLevel',
+        });
     });
 
-    it("рисует ингредиенты", () => {
+    it('рисует ингредиенты', () => {
         renderPage();
 
-        expect(screen.getByText("Лайм")).toBeInTheDocument();
-        expect(screen.getByText("Белый ром")).toBeInTheDocument();
+        expect(screen.getByText('Белый ром')).toBeInTheDocument();
+        expect(screen.getByText('Лайм')).toBeInTheDocument();
     });
 
-    it("клик по ингредиенту вызывает toggleIngredient", () => {
+    it('клик по ингредиенту вызывает toggleIngredient', () => {
         renderPage();
 
-        fireEvent.click(screen.getByText("Лайм"));
+        fireEvent.click(screen.getByText('Лайм'));
 
-        expect(mockDispatch).toHaveBeenCalledWith(
-            toggleIngredient({ id: 1, name: "Лайм" })
-        );
+        expect(mockStore.getActions()).toContainEqual({
+            type: 'game/toggleIngredient',
+            payload: expect.objectContaining({ id: 2, name: 'Лайм' }),
+        });
     });
 
-    it("вызывает drawHint при монтировании (mode !== hard)", () => {
+    it('вызывает drawHint при монтировании (mode !== hard)', () => {
         renderPage();
-        expect(drawHint).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(drawHint)).toHaveBeenCalledTimes(1);
     });
 
-    it("если есть ошибки — открывает модалку и dispatch addStageMistake", () => {
-        ingredientErrors.mockReturnValue(2);
-
-        renderPage();
-
-        fireEvent.click(screen.getByText("Создать с пропорциями"));
-
-        expect(mockDispatch).toHaveBeenCalledWith(
-            addStageMistake({ stage: "stage1", count: 2 })
-        );
-
-        expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
-    });
-
-    it("если ошибок нет — переходит на /proportions", () => {
-        ingredientErrors.mockReturnValue(0);
+    it('если есть ошибки — открывает модалку и dispatch addStageMistake', () => {
+        vi.mocked(ingredientErrors).mockReturnValue(2);
 
         renderPage();
 
-        fireEvent.click(screen.getByText("Создать с пропорциями"));
+        fireEvent.click(screen.getByText('Создать с пропорциями'));
 
-        expect(mockNavigate).toHaveBeenCalledWith("/proportions");
+        expect(mockStore.getActions()).toContainEqual({
+            type: 'game/addStageMistake',
+            payload: { stage: 'stage1', count: 2 },
+        });
+
+        expect(screen.getByTestId('error-modal')).toHaveTextContent('Ошибок: 2');
+    });
+
+    it('если ошибок нет — переходит на /proportions', () => {
+        vi.mocked(ingredientErrors).mockReturnValue(0);
+
+        renderPage();
+
+        fireEvent.click(screen.getByText('Создать с пропорциями'));
+
+        expect(mockNavigate).toHaveBeenCalledWith('/proportions');
     });
 });

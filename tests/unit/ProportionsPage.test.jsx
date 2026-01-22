@@ -1,136 +1,304 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-
-import ProportionsPage from '../../src/game-pages/proportions-page/ProportionsPage';
-import rootReducer from '../../src/game/rootReducer';
+import { MemoryRouter } from 'react-router-dom';
+import ProportionsPage from '../../src/game-pages/proportions-page/ProportionsPage.jsx';
+import gameReducer from '../../src/game/gameSlice';
 import {proportionsErrors} from "../../src/game-pages/proportions-page/proportions_error.js";
 
-// Мокаем useNavigate
-const navigateMock = vi.fn();
+// Моки внешних компонентов
+vi.mock('../PageHeader.jsx', () => ({
+    default: ({ title, showHint, onBack, onHintClick }) => (
+        <header data-testid="page-header">
+            {title}
+            {showHint && <button data-testid="hint-btn" onClick={onHintClick}>Подсказка</button>}
+            <button data-testid="back-btn" onClick={onBack}>Назад</button>
+        </header>
+    ),
+}));
+
+vi.mock('../../menu-page/RecipeCard.jsx', () => ({
+    default: ({ open, onClose, isHint }) =>
+        open ? (
+            <div data-testid="hint-recipe-card">
+                Подсказка {isHint ? '(hint)' : ''}
+                <button onClick={onClose}>Закрыть</button>
+            </div>
+        ) : null,
+}));
+
+vi.mock('../ErrorModal.jsx', () => ({
+    default: ({ open, onClose, errorCount }) =>
+        open ? (
+            <div data-testid="error-modal">
+                Ошибок: {errorCount}
+                <button onClick={onClose}>Закрыть</button>
+            </div>
+        ) : null,
+}));
+
+vi.mock('../HardModeFailModal', () => ({
+    default: ({ open, onClose, onStudyRecipe, onChangeMode }) =>
+        open ? (
+            <div data-testid="hard-fail-modal">
+                <button onClick={onClose}>Закрыть</button>
+                <button onClick={onStudyRecipe}>Посмотреть рецепт</button>
+                <button onClick={onChangeMode}>Сменить режим</button>
+            </div>
+        ) : null,
+}));
+
+vi.mock('../../game/scoreCalculator.js', () => ({
+    calculateStageScore: vi.fn(() => 78),
+}));
+
+// Мок функции проверки ошибок
+vi.mock('./proportions_error.js', () => ({
+    proportionsErrors: vi.fn(),
+}));
+
+// Мок navigate
+const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
     return {
         ...actual,
-        useNavigate: () => navigateMock,
+        useNavigate: () => mockNavigate,
     };
 });
 
-// Мокаем proportionsErrors
-vi.mock('../../src/game-pages/proportions-page/proportions_error.js', () => ({
-    proportionsErrors: vi.fn(),
-}));
-
-// Мокаем внешние компоненты
-vi.mock('../../src/game-pages/PageHeader.jsx', () => ({
-    default: ({ title }) => <div data-testid="page-header">{title}</div>,
-}));
-
-vi.mock('../../src/menu-page/RecipeCard.jsx', () => ({
-    default: () => <div data-testid="recipe-card">RecipeCard</div>,
-}));
-
-vi.mock('../../src/components/ErrorModal.jsx', () => ({
-    default: ({ open, errorCount }) =>
-        open ? <div data-testid="error-modal">Ошибок: {errorCount}</div> : null,
-}));
-
-vi.mock('../../src/components/HardModeFailModal', () => ({
-    default: () => <div data-testid="hard-modal">Hard Mode Fail Modal</div>,
-}));
-
 describe('ProportionsPage', () => {
-    let mockStore;
+    let store;
 
     beforeEach(() => {
         vi.clearAllMocks();
 
-        mockStore = configureStore({
-            reducer: rootReducer,
+        store = configureStore({
+            reducer: { game: gameReducer },
             preloadedState: {
                 game: {
-                    mode: 'easy',
-                    cocktailId: 1,
+                    mode: 'normal',
                     selectedIngredients: {
-                        6: { id: 6, name: 'Джин', amount: 40 },
+                        gin: { id: 'gin', name: 'Джин', amount: 50 },
+                        tonic: { id: 'tonic', name: 'Тоник', amount: 150 },
                     },
+                    cocktailId: 'gin-tonic',
                     cocktailData: {
                         ingredients: [
-                            { id: 6, amount: 50, unit: 'ml' },
+                            { id: 'gin', name: 'Джин', amount: 50, unit: 'ml' },
+                            { id: 'tonic', name: 'Тоник', amount: 150, unit: 'ml' },
                         ],
                     },
                     stages: {
-                        stage1: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
-                        stage2: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
-                        stage3: { stepsCount: 0, mistakes: 0, hintsUsed: 0, score: 0 },
+                        stage2: { mistakes: 0, stepsCount: 0 },
                     },
                     gameOver: false,
-                    gameOverReason: null,
                 },
             },
         });
     });
 
-    const renderPage = () =>
+    it('отображает заголовок и кнопку "Перейти к созданию"', () => {
         render(
-            <Provider store={mockStore}>
+            <Provider store={store}>
                 <MemoryRouter>
                     <ProportionsPage />
                 </MemoryRouter>
             </Provider>
         );
 
-    it('рендерит ингредиент с полем ввода и единицей измерения', () => {
-        renderPage();
+        expect(screen.getByText('Пропорции')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /перейти к созданию/i })).toBeInTheDocument();
+    });
+
+    it('показывает ингредиенты с полями ввода и единицами измерения', () => {
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
 
         expect(screen.getByText('Джин')).toBeInTheDocument();
-        expect(screen.getByDisplayValue('40')).toBeInTheDocument();
+        expect(screen.getByText('Тоник')).toBeInTheDocument();
+
+        const ginInput = screen.getByDisplayValue('50');
+        const tonicInput = screen.getByDisplayValue('150');
+
+        expect(ginInput).toBeInTheDocument();
+        expect(tonicInput).toBeInTheDocument();
+
         expect(screen.getByText('ml')).toBeInTheDocument();
+        expect(screen.getAllByText('ml').length).toBe(2);
     });
 
-    it('диспатчит setIngredientAmount при вводе значения', () => {
-        renderPage();
+    it('сообщение "Нет ингредиентов..." когда нет ингредиентов с количеством', () => {
+        store = configureStore({
+            reducer: { game: gameReducer },
+            preloadedState: {
+                game: {
+                    selectedIngredients: {},
+                    cocktailData: { ingredients: [] },
+                    stages: { stage2: {} },
+                    gameOver: false,
+                },
+            },
+        });
 
-        const input = screen.getByDisplayValue('40');
-        fireEvent.change(input, { target: { value: '45' } });
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
 
-        const actions = mockStore.getActions();
-        expect(actions).toContainEqual(
+        expect(screen.getByText('Нет ингредиентов с заданным количеством')).toBeInTheDocument();
+    });
+
+    it('меняет количество → диспатчит setIngredientAmount', () => {
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
+
+        const tonicInput = screen.getByDisplayValue('150');
+        fireEvent.change(tonicInput, { target: { value: '200' } });
+
+        expect(store.getActions()).toContainEqual(
             expect.objectContaining({
                 type: 'game/setIngredientAmount',
-                payload: { id: 6, amount: 45 },
+                payload: { id: 'tonic', amount: 200 },
             })
         );
     });
 
-    it('показывает ErrorModal и диспатчит ошибку, если пропорции неверны', () => {
-        vi.mocked(proportionsErrors).mockReturnValue(1);
-
-        renderPage();
-
-        fireEvent.click(screen.getByText('Перейти к созданию'));
-
-        const actions = mockStore.getActions();
-        expect(actions).toContainEqual(
-            expect.objectContaining({
-                type: 'game/addStageMistake',
-                payload: { stage: 'stage2', count: 1 },
-            })
-        );
-
-        expect(screen.getByTestId('error-modal')).toBeInTheDocument();
-        expect(screen.getByText('Ошибок: 1')).toBeInTheDocument();
-    });
-
-    it('переходит на /create, если ошибок нет', () => {
+    it('при 0 ошибок → переходит на /create и сохраняет score', async () => {
         vi.mocked(proportionsErrors).mockReturnValue(0);
 
-        renderPage();
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
 
-        fireEvent.click(screen.getByText('Перейти к созданию'));
+        fireEvent.click(screen.getByRole('button', { name: /перейти к созданию/i }));
 
-        expect(navigateMock).toHaveBeenCalledWith('/create');
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/create');
+        });
+
+        expect(store.getActions()).toContainEqual(
+            expect.objectContaining({
+                type: 'game/setStageScore',
+                payload: { stage: 'stage2', score: 78 },
+            })
+        );
+    });
+
+    it('в normal mode при ошибках показывает ErrorModal', async () => {
+        vi.mocked(proportionsErrors).mockReturnValue(3);
+
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: /перейти к созданию/i }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId('error-modal')).toBeInTheDocument();
+            expect(screen.getByText(/ошибок: 3/i)).toBeInTheDocument();
+        });
+
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('в hard mode при превышении ошибок открывает HardModeFailModal', async () => {
+        vi.mocked(proportionsErrors).mockReturnValue(2);
+
+        store = configureStore({
+            reducer: { game: gameReducer },
+            preloadedState: {
+                game: {
+                    mode: 'hard',
+                    selectedIngredients: {
+                        gin: { id: 'gin', name: 'Джин', amount: 50 },
+                    },
+                    cocktailData: {
+                        ingredients: [{ id: 'gin', amount: 50, unit: 'ml' }],
+                    },
+                    stages: { stage2: { mistakes: 0, stepsCount: 0 } },
+                    gameOver: false,
+                },
+            },
+        });
+
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: /перейти к созданию/i }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId('hard-fail-modal')).toBeInTheDocument();
+        });
+
+        expect(store.getState().game.gameOver).toBe(true);
+    });
+
+    it('кнопка подсказки открывает RecipeCard (только в normal mode)', () => {
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
+
+        fireEvent.click(screen.getByTestId('hint-btn'));
+
+        expect(screen.getByTestId('hint-recipe-card')).toBeInTheDocument();
+        expect(screen.getByText('(hint)')).toBeInTheDocument();
+
+        expect(store.getActions()).toContainEqual(
+            expect.objectContaining({
+                type: 'game/addHintUsage',
+                payload: { stage: 'stage2' },
+            })
+        );
+    });
+
+    it('в hard mode подсказка не отображается', () => {
+        store = configureStore({
+            reducer: { game: gameReducer },
+            preloadedState: {
+                game: { mode: 'hard', ...store.getState().game },
+            },
+        });
+
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <ProportionsPage />
+                </MemoryRouter>
+            </Provider>
+        );
+
+        expect(screen.queryByTestId('hint-btn')).not.toBeInTheDocument();
     });
 });

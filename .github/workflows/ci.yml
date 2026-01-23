@@ -96,6 +96,7 @@ jobs:
           SMTP_FROM=${{ secrets.SMTP_FROM }}
           APP_PUBLIC_URL=${{ secrets.APP_PUBLIC_URL }}
           INVITE_SECRET=${{ secrets.INVITE_SECRET }}
+          
           G_BOT_TOKEN=${{ secrets.G_BOT_TOKEN }}
           TG_BOT_POLLING=${{ secrets.TG_BOT_POLLING }}
           DEFAULT_TELEGRAM_CHAT_ID=${{ secrets.DEFAULT_TELEGRAM_CHAT_ID }}

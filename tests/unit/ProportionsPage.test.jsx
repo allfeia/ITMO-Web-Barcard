@@ -75,7 +75,7 @@ describe("ProportionsPage", () => {
                 },
                 cocktailData: {
                     ingredients: [
-                        { id: 1, name: "Лайм", unit: "мл" },
+                        { id: 1, name: "Лайм", unit: "мл", amout: 30 },
                     ],
                 },
                 stages: {

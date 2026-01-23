@@ -48,9 +48,6 @@ function IngredientsPage() {
             dispatch(addStageMistake({ stage: 'stage1', count: totalErrors }));
             setErrorCount(totalErrors);
             setErrorModalOpen(true);
-
-            window.ym(106396717,'reachGoal','ingredient_error', {count: totalErrors})
-
         } else {
             goTo("/proportions");
         }

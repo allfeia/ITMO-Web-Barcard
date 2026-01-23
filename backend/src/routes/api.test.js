@@ -541,7 +541,7 @@ describe("api router", () => {
 
   describe("POST /rating/update-score", () => {
   it("401 without auth", async () => {
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const res = await request(app)
       .post("/api/rating/update-score")
       .send({ cocktailId: 1, score: 5 });
@@ -551,7 +551,7 @@ describe("api router", () => {
   });
 
   it("400 invalid payload (zod)", async () => {
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const auth = authCookie({ id: 1, roles: ["user"] });
 
     const res = await request(app)
@@ -567,7 +567,7 @@ describe("api router", () => {
   it("404 if cocktail not found", async () => {
     Cocktail.findByPk.mockResolvedValue(null);
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const auth = authCookie({ id: 10, roles: ["user"] });
 
     const res = await request(app)
@@ -589,7 +589,7 @@ describe("api router", () => {
       points: 9,
     });
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const auth = authCookie({ id: 77, roles: ["user"] });
 
     const res = await request(app)
@@ -626,7 +626,7 @@ describe("api router", () => {
       points: 4,
     });
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const auth = authCookie({ id: 5, roles: ["user"] });
 
     const res = await request(app)
@@ -653,7 +653,7 @@ describe("api router", () => {
   it("500 on server error", async () => {
     Cocktail.findByPk.mockRejectedValue(new Error("db down"));
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const auth = authCookie({ id: 1, roles: ["user"] });
 
     const res = await request(app)
@@ -668,7 +668,7 @@ describe("api router", () => {
 
 describe("GET /bar/:barId/with-rating", () => {
   it("400 invalid bar id", async () => {
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const res = await request(app).get("/api/bar/abc/with-rating");
 
     expect(res.status).toBe(400);
@@ -678,7 +678,7 @@ describe("GET /bar/:barId/with-rating", () => {
   it("404 if bar not found", async () => {
     Bar.findByPk.mockResolvedValue(null);
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const res = await request(app).get("/api/bar/7/with-rating");
 
     expect(Bar.findByPk).toHaveBeenCalledWith(7, { attributes: ["id"] });
@@ -694,7 +694,7 @@ describe("GET /bar/:barId/with-rating", () => {
       { id: 2, login: "bob", get: vi.fn().mockImplementation((k) => (k === "score" ? null : null)) },
     ]);
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const res = await request(app).get("/api/bar/7/with-rating");
 
     expect(User.findAll).toHaveBeenCalledTimes(1);
@@ -711,7 +711,7 @@ describe("GET /bar/:barId/with-rating", () => {
   it("500 on server error", async () => {
     Bar.findByPk.mockRejectedValue(new Error("db down"));
 
-    const app = appWithRouter();
+    const app = await appWithRouter();
     const res = await request(app).get("/api/bar/7/with-rating");
 
     expect(res.status).toBe(500);

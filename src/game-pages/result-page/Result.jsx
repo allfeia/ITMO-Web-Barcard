@@ -8,10 +8,13 @@ import CocktailCanvas from './CocktailCanvas';
 import './Result.css';
 import { useAuth } from "../../authContext/useAuth.js";
 import OrderModal from "../OderCard.jsx";
+import {useApiFetch} from '../../apiFetch.js';
 
 function Result() {
     const navigate = useNavigate();
-    const { isBarman, currentUser } = useAuth();
+    const { isBarman } = useAuth();
+    const apiFetch = useApiFetch();
+
 
     const totalScore = useSelector((state) => {
         const stages = state.game.stages;
@@ -22,7 +25,7 @@ function Result() {
         );
     });
 
-    const cocktailId = useSelector((state) => {state.game.cocktailId})
+    const cocktailId = useSelector((state) => state.game.cocktailId);
 
     const handleReplay = () => navigate('/levelPage');
     const handleBar = () => navigate('/menu');
@@ -33,39 +36,18 @@ function Result() {
     const handleOrderClose = () => setOrderOpen(false);
 
     useEffect(() => {
-        if (!isBarman || !currentUser?.login || totalScore <= 0) return;
+        if (!isBarman || totalScore <= 0) return;
 
-        const sendScoreToServer = async () => {
-            const today = new Date().toLocaleDateString();
-            const scoreSentKey = `scoreSent_${currentUser.id}_${today}`;
+        apiFetch('/api/rating/update-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cocktailId: cocktailId,
+                score: totalScore
+            })
+        }).catch(error => console.log(error));
 
-            if (localStorage.getItem(scoreSentKey)) return;
-
-            try {
-                const response = await fetch('/api/rating/update-score', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        login: currentUser.login,
-                        score: totalScore
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Очки успешно добавлены к рейтингу:', data);
-                    localStorage.setItem(scoreSentKey, 'true');
-                } else {
-                    console.error('Ошибка сервера:', await response.text());
-                }
-            } catch (error) {
-                console.error('Ошибка сети при отправке очков:', error);
-            }
-        };
-
-        sendScoreToServer();
-    }, [totalScore, isBarman, currentUser]);
+    }, []);
 
     return (
         <Box className="result-screen">

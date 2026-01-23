@@ -8,6 +8,12 @@ import Result from "../../src/game-pages/result-page/Result.jsx";
 import gameReducer from "../../src/game/gameSlice";
 vi.mock('../../src/authContext/useAuth');
 
+const mockApiFetch = vi.fn();
+vi.mock('../../src/apiFetch.js', () => ({
+    useApiFetch: () => mockApiFetch,
+}));
+
+
 vi.mock('../../src/game-pages/result-page/CocktailCanvas', () => ({
   default: () => <div data-testid="cocktail-canvas" />,
 }));
@@ -32,11 +38,16 @@ const createTestStore = (initialState = {}) =>
 describe('Result', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    global.fetch = vi.fn();
+
+      mockApiFetch.mockResolvedValue({
+          ok: true,
+          json: async () => ({ success: true }),
+      });
   });
 
   it("отображает 'Готово!' как заголовок", () => {
-    mockedUseAuth.mockReturnValue({ isBarman: false, currentUser: null });
+    mockedUseAuth.mockReturnValue({ isBarman: false });
 
     const store = createTestStore({
       stages: { stage1: { score: 10 }, stage2: {}, stage3: {} },
@@ -54,7 +65,7 @@ describe('Result', () => {
   });
 
   it("отображает 'Ваш результат' и кнопку 'Заказать' для обычного пользователя", () => {
-    mockedUseAuth.mockReturnValue({ isBarman: false, currentUser: null });
+    mockedUseAuth.mockReturnValue({ isBarman: false});
 
     const store = createTestStore({
       stages: { stage1: { score: 40 }, stage2: { score: 30 }, stage3: {} },
@@ -75,7 +86,6 @@ describe('Result', () => {
   it("отображает ссылку 'Рейтинг' и скрывает 'Заказать' для бармена", () => {
     mockedUseAuth.mockReturnValue({
       isBarman: true,
-      currentUser: { login: 'bartender1', id: 777 },
     });
 
     const store = createTestStore({
@@ -110,7 +120,7 @@ describe('Result', () => {
   });
 
   it("кнопка 'Переиграть' ведёт на /levelPage", () => {
-    mockedUseAuth.mockReturnValue({ isBarman: false, currentUser: null });
+    mockedUseAuth.mockReturnValue({ isBarman: false });
     const store = createTestStore({ stages: {} });
 
     render(
@@ -126,7 +136,7 @@ describe('Result', () => {
   });
 
   it("кнопка 'Бар' ведёт на /menu", () => {
-    mockedUseAuth.mockReturnValue({ isBarman: false, currentUser: null });
+    mockedUseAuth.mockReturnValue({ isBarman: false });
     const store = createTestStore({ stages: {} });
 
     render(
@@ -141,42 +151,43 @@ describe('Result', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/menu');
   });
 
-  it('отправляет очки на сервер для бармена при totalScore > 0 и currentUser.login', async () => {
-    mockedUseAuth.mockReturnValue({
-      isBarman: true,
-      currentUser: { id: 555, login: 'superbarman' },
-    });
+    it('отправляет очки на сервер для бармена при totalScore > 0 и currentUser.login', async () => {
+        mockedUseAuth.mockReturnValue({
+            isBarman: true,
+        });
 
-    const store = createTestStore({
-      stages: { stage1: { score: 80 }, stage2: { score: 120 } },
-    });
+        const store = createTestStore({
+            stages: { stage1: { score: 80 }, stage2: { score: 120 } },
+            cocktailId: 5,
+        });
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ success: true }),
-    });
+       mockApiFetch.mockResolvedValue({
+            ok: true,
+            json: async () => ({ success: true }),
+        });
 
-    render(
-        <Provider store={store}>
-          <MemoryRouter>
-            <Result />
-          </MemoryRouter>
-        </Provider>
-    );
+        render(
+            <Provider store={store}>
+                <MemoryRouter>
+                    <Result />
+                </MemoryRouter>
+            </Provider>
+        );
 
-    await vi.waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-          '/api/rating/update-score',
-          expect.objectContaining({
-            method: 'POST',
-            body: JSON.stringify({ login: 'superbarman', score: 200 }),
-          })
-      );
+        expect(mockApiFetch).toHaveBeenCalledWith(
+            '/api/rating/update-score',
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({
+                    cocktailId: 5,
+                    score: 200,
+                }),
+            })
+        );
     });
-  });
 
   it('не отправляет очки, если не бармен', () => {
-    mockedUseAuth.mockReturnValue({ isBarman: false, currentUser: { login: 'user' } });
+    mockedUseAuth.mockReturnValue({ isBarman: false });
     const store = createTestStore({ stages: { stage1: { score: 100 } } });
 
     global.fetch = vi.fn();
@@ -195,13 +206,9 @@ describe('Result', () => {
   it('не отправляет очки повторно в один день', async () => {
     mockedUseAuth.mockReturnValue({
       isBarman: true,
-      currentUser: { id: 100, login: 'repeat' },
     });
 
     const store = createTestStore({ stages: { stage1: { score: 50 } } });
-
-    const today = new Date().toLocaleDateString();
-    localStorage.setItem(`scoreSent_100_${today}`, 'true');
 
     global.fetch = vi.fn();
 

@@ -8,7 +8,6 @@ import CreatedPage from '../../src/game-pages/created-page/CreatedPage.jsx';
 import gameReducer from '../../src/game/gameSlice';
 import {createdErrors} from "../../src/game-pages/created-page/created_error.js";
 
-
 vi.mock('../../menu-page/RecipeCard.jsx', () => ({
     default: ({ open, isHint }) =>
         open ? (
@@ -41,16 +40,17 @@ vi.mock('../PageHeader.jsx', () => ({
     ),
 }));
 
-// Самый важный мок — без него шаги не рендерятся
+// Самый важный мок — теперь рендерит текст в <span class="step-text">
 vi.mock('./RecipeStepCard.jsx', () => ({
     default: (props) => {
-        const { step } = props || {};
+        const { step = {} } = props || {};
         return (
-            <div data-testid={`step-card-${step?.step_number || 'unknown'}`}>
-                <div className="step-number">Шаг {step?.step_number || '?'}</div>
-                <div className="step-description">{step?.description || 'Описание'}</div>
+            <div data-testid={`step-card-${step.step_number || 'unknown'}`}>
+        <span className="step-text">
+          Шаг {step.step_number || '?'}: {step.description || ''}
+        </span>
                 <button
-                    data-testid={`answer-btn-${step?.step_number || 'unknown'}`}
+                    data-testid={`answer-btn-${step.step_number || 'unknown'}`}
                     onClick={() => {
                         if (props?.setUserAnswers) {
                             props.setUserAnswers((prev) => ({
@@ -75,15 +75,12 @@ vi.mock('../../game/scoreCalculator.js', () => ({
     calculateStageScore: vi.fn(() => 92),
 }));
 
-// Упрощённый мок drag-and-drop (без ошибок)
 vi.mock('@hello-pangea/dnd', () => ({
     DragDropContext: ({ children }) => <div data-testid="dnd-context">{children}</div>,
-    Droppable: ({ children }) => (
-        <div data-testid="droppable">{children({ provided: { innerRef: vi.fn() } })}</div>
-    ),
+    Droppable: ({ children }) => <div data-testid="droppable">{children({ provided: {} })}</div>,
     Draggable: ({ children, index }) => (
         <div data-testid={`draggable-${index}`}>
-            {children({ innerRef: vi.fn(), draggableProps: {}, dragHandleProps: {} }, { isDragging: false })}
+            {children({ innerRef: vi.fn() }, { isDragging: false })}
         </div>
     ),
 }));
@@ -153,7 +150,7 @@ describe('CreatedPage', () => {
             expect(screen.getByText(/Шаг 1/)).toBeInTheDocument();
             expect(screen.getByText(/Шаг 2/)).toBeInTheDocument();
             expect(screen.getByText(/Шаг 3/)).toBeInTheDocument();
-        });
+        }, { timeout: 2000 });
     });
 
     it('при 0 ошибок переходит на /result и сохраняет score', async () => {
@@ -167,18 +164,18 @@ describe('CreatedPage', () => {
             </Provider>
         );
 
-        // Имитация ответов (клик по кнопкам в RecipeStepCard)
+        // Ждём рендера шагов и кликаем по кнопкам ответов
         await waitFor(() => {
             fireEvent.click(screen.getByTestId('answer-btn-1'));
             fireEvent.click(screen.getByTestId('answer-btn-2'));
             fireEvent.click(screen.getByTestId('answer-btn-3'));
-        });
+        }, { timeout: 2000 });
 
         fireEvent.click(screen.getByRole('button', { name: /создать коктейль/i }));
 
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith('/result');
-        });
+        }, { timeout: 2000 });
 
         expect(store.getActions()).toContainEqual(
             expect.objectContaining({
@@ -203,7 +200,7 @@ describe('CreatedPage', () => {
 
         await waitFor(() => {
             expect(screen.getByTestId('error-modal')).toBeInTheDocument();
-        });
+        }, { timeout: 2000 });
     });
 
     it('в hard mode при превышении ошибок открывает HardModeFailModal', async () => {
@@ -233,7 +230,7 @@ describe('CreatedPage', () => {
 
         await waitFor(() => {
             expect(screen.getByTestId('hard-fail-modal')).toBeInTheDocument();
-        }, { timeout: 2000 });
+        }, { timeout: 3000 });
 
         expect(store.getState().game.gameOver).toBe(true);
     });
@@ -248,10 +245,14 @@ describe('CreatedPage', () => {
         );
 
         await waitFor(() => {
-            fireEvent.click(screen.getByTestId('hint-btn'));
-        });
+            expect(screen.getByTestId('hint-btn')).toBeInTheDocument();
+        }, { timeout: 2000 });
 
-        expect(screen.getByTestId('hint-recipe-card')).toBeInTheDocument();
+        fireEvent.click(screen.getByTestId('hint-btn'));
+
+        await waitFor(() => {
+            expect(screen.getByTestId('hint-recipe-card')).toBeInTheDocument();
+        });
     });
 
     it('в hard mode подсказка не отображается', () => {

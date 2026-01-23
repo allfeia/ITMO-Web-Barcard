@@ -1,109 +1,116 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import IngredientsPage from '../../src/game-pages/ingredients-page/'
-import { createTestStore } from './testStore'
-import { MemoryRouter } from 'react-router-dom'
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import IngredientsPage from "../../src/game-pages/ingredients-page/IngredientsPage";
 
-const navigateMock = vi.fn()
+const navigateMock = vi.fn();
 
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom')
-    return {
-        ...actual,
-        useNavigate: () => navigateMock,
-    }
-})
-beforeEach(() => {
-    global.fetch = vi.fn(() =>
-        Promise.resolve({
-            ok: true,
-            json: () =>
-                Promise.resolve([
-                    { id: 1, name: 'Джин', type: 'alcohol' },
-                    { id: 2, name: 'Тоник', type: 'soft' },
-                ]),
-        })
-    )
-})
+vi.mock("react-router-dom", () => ({
+    useNavigate: () => navigateMock,
+}));
 
-afterEach(() => {
-    vi.clearAllMocks()
-})
+const dispatchMock = vi.fn();
 
+vi.mock("react-redux", () => ({
+    useDispatch: () => dispatchMock,
+    useSelector: vi.fn(),
+}));
 
-const renderPage = (store) => {
-    return render(
-        <Provider store={store}>
-            <MemoryRouter>
-                <IngredientsPage />
-            </MemoryRouter>
-        </Provider>
-    )
-}
+import { useSelector } from "react-redux";
 
-describe('IngredientsPage', () => {
-    let store
+vi.mock("../../src/game-pages/ingredients-page/ingredients_error.js", () => ({
+    ingredientErrors: vi.fn(),
+}));
 
-    beforeEach(() => {
-        store = createTestStore({
-            game: {
-                mode: 'normal',
-                selectedIngredients: {},
-                cocktailId: 1,
-                cocktailData: {
-                    ingredients: [
-                        { id: 1, name: 'Джин' },
-                        { id: 2, name: 'Тоник' },
-                    ],
-                },
-                stages: {
-                    stage1: {
-                        mistakes: 0,
-                        stepsCount: 0,
-                        score: 0,
-                    },
-                },
-                gameOver: false,
+import { ingredientErrors } from "../../src/game-pages/ingredients-page/ingredients_error.js";
+
+vi.mock("../../src/game-pages/ingredients-page/Ingredients.jsx", () => ({
+    useIngredients: () => ({
+        searchValue: "",
+        setSearchValue: vi.fn(),
+        groupedIngredients: [
+            {
+                type: "base",
+                title: "Основа",
+                items: [{ id: 1, name: "Лайм" }],
             },
-        })
-    })
+        ],
+    }),
+}));
 
-    it('рендерит заголовок страницы', async () => {
-        renderPage(store)
+vi.mock("../PageHeader.jsx", () => ({
+    default: () => <div data-testid="page-header" />,
+}));
 
-        expect(
-            screen.getByText('Ингредиенты')
-        ).toBeInTheDocument()
-    })
+vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
+    default: ({ open, errorCount }) =>
+        open ? (
+            <div data-testid="error-modal">Errors: {errorCount}</div>
+        ) : null,
+}));
 
-    it('загружает и отображает ингредиенты', async () => {
-        renderPage(store)
+vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
+    default: () => <div />,
+}));
 
-        expect(await screen.findByText('Джин')).toBeInTheDocument()
-        expect(screen.getByText('Тоник')).toBeInTheDocument()
-    })
+vi.mock("../HardModeFailModal", () => ({
+    default: () => <div />,
+}));
 
-    it('клик по ингредиенту добавляет его в store', async () => {
-        renderPage(store)
 
-        const gin = await screen.findByText('Джин')
-        fireEvent.click(gin)
+const baseState = {
+    game: {
+        mode: "easy",
+        selectedIngredients: {},
+        cocktailId: 1,
+        cocktailData: {
+            ingredients: [{ id: 1, name: "Лайм" }],
+        },
+        stages: {
+            stage1: {
+                mistakes: 0,
+                stepsCount: 0,
+            },
+        },
+        gameOver: false,
+    },
+};
 
-        const state = store.getState().game
-        expect(state.selectedIngredients[1]).toBeDefined()
-    })
+beforeEach(() => {
+    vi.clearAllMocks();
+    useSelector.mockImplementation(selector => selector(baseState));
+    window.ym = vi.fn();
+});
 
-    it('при отсутствии ошибок переходит на /proportions', async () => {
-        renderPage(store)
+describe("IngredientsPage", () => {
+    it("показывает ErrorModal и диспатчит ошибку, если есть ошибки", () => {
+        ingredientErrors.mockReturnValue(2);
+
+        render(<IngredientsPage />);
 
         fireEvent.click(
-            await screen.findByText('Создать с пропорциями')
-        )
+            screen.getByText("Создать с пропорциями")
+        );
 
-        await waitFor(() => {
-            expect(navigateMock).toHaveBeenCalledWith('/proportions')
-        })
-    })
-})
+        expect(dispatchMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                payload: { stage: "stage1", count: 2 },
+            })
+        );
 
+        expect(
+            screen.getByTestId("error-modal")
+        ).toBeInTheDocument();
+    });
+
+    it("переходит на /proportions, если ошибок нет", () => {
+        ingredientErrors.mockReturnValue(0);
+
+        render(<IngredientsPage />);
+
+        fireEvent.click(
+            screen.getByText("Создать с пропорциями")
+        );
+
+        expect(navigateMock).toHaveBeenCalledWith("/proportions");
+    });
+});

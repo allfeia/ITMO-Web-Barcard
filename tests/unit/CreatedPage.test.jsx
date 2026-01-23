@@ -1,121 +1,164 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import CreatedPage from "../../src/game-pages/created-page/CreatedPage";
 
-import IngredientsPage from '../../src/game-pages/ingredients-page/IngredientsPage.jsx'
-import { createTestStore } from './testStore'
+const mockNavigate = vi.fn();
+const mockDispatch = vi.fn();
 
-const navigateMock = vi.fn()
-
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom')
+vi.mock("react-router-dom", async () => {
+    const actual = await vi.importActual("react-router-dom");
     return {
         ...actual,
-        useNavigate: () => navigateMock,
-    }
-})
+        useNavigate: () => mockNavigate,
+    };
+});
 
-beforeEach(() => {
-    global.fetch = vi.fn(() =>
-        Promise.resolve({
-            ok: true,
-            json: () =>
-                Promise.resolve([
-                    { id: 1, name: 'Джин', type: 'alcohol' },
-                    { id: 2, name: 'Тоник', type: 'soft' },
-                ]),
-        })
-    )
-})
-
-afterEach(() => {
-    vi.clearAllMocks()
-})
-
-
-const renderPage = (store) =>
-    render(
-        <Provider store={store}>
-            <MemoryRouter>
-                <IngredientsPage />
-            </MemoryRouter>
-        </Provider>
-    )
-
-describe('IngredientsPage', () => {
-    let store
-
-    beforeEach(() => {
-        store = createTestStore({
+vi.mock("react-redux", () => ({
+    useDispatch: () => mockDispatch,
+    useSelector: (selector) =>
+        selector({
             game: {
-                mode: 'normal',
-                selectedIngredients: {},
+                mode: "easy",
                 cocktailId: 1,
+                selectedIngredients: {},
                 cocktailData: {
-                    ingredients: [
-                        { id: 1, name: 'Джин' },
-                        { id: 2, name: 'Тоник' },
+                    ingredients: [{ id: 1, name: "Лайм" }],
+                    steps: [
+                        { step_number: 1, text: "Шаг 1" },
+                        { step_number: 2, text: "Шаг 2" },
                     ],
                 },
                 stages: {
-                    stage1: {
+                    stage3: {
                         mistakes: 0,
                         stepsCount: 0,
-                        score: 0,
                     },
                 },
                 gameOver: false,
             },
-        })
-    })
+        }),
+}));
 
-    it('рендерит заголовок страницы', () => {
-        renderPage(store)
+vi.mock("../../src/game-pages/created-page/created_error.js", () => ({
+    createdErrors: vi.fn(),
+}));
 
-        expect(
-            screen.getByText('Ингредиенты')
-        ).toBeInTheDocument()
-    })
+vi.mock("../../src/game/scoreCalculator.js", () => ({
+    calculateStageScore: vi.fn(() => 10),
+}));
 
-    it('загружает и отображает ингредиенты', async () => {
-        renderPage(store)
+vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
+    default: () => <div>RecipeCard</div>,
+}));
 
-        expect(await screen.findByText('Джин')).toBeInTheDocument()
-        expect(screen.getByText('Тоник')).toBeInTheDocument()
-    })
+vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
+    default: ({ open, errorCount }) =>
+        open ? <div>Ошибок: {errorCount}</div> : null,
+}));
 
-    it('клик по ингредиенту добавляет его в store', async () => {
-        renderPage(store)
+vi.mock("../../src/game-pages/HardModeFailModal.jsx", () => ({
+    default: ({ open }) => (open ? <div>HardModeFail</div> : null),
+}));
 
-        const gin = await screen.findByText('Джин')
-        fireEvent.click(gin)
+vi.mock("../../src/game-pages/created-page/RecipeStepCard.jsx", () => ({
+    default: ({ step }) => <div>{step.text}</div>,
+}));
 
-        const state = store.getState().game
-        expect(state.selectedIngredients[1]).toBeDefined()
-        expect(state.selectedIngredients[1].name).toBe('Джин')
-    })
+// DnD мокаем максимально просто
+vi.mock("@hello-pangea/dnd", () => ({
+    DragDropContext: ({ children }) => <div>{children}</div>,
+    Droppable: ({ children }) =>
+        children({
+            droppableProps: {},
+            innerRef: vi.fn(),
+            placeholder: null,
+        }),
+    Draggable: ({ children }) =>
+        children({
+            draggableProps: { style: {} },
+            dragHandleProps: {},
+            innerRef: vi.fn(),
+        }, { isDragging: false }),
+}));
 
-    it('повторный клик по ингредиенту убирает его из store', async () => {
-        renderPage(store)
+import { createdErrors } from "../../src/game-pages/created-page/created_error.js";
+import {
+    addStageMistake,
+    setStageScore,
+    setStageStepsCount,
+} from "../../src/game/gameSlice.js";
 
-        const gin = await screen.findByText('Джин')
-        fireEvent.click(gin)
-        fireEvent.click(gin)
+const renderPage = () =>
+    render(
+        <MemoryRouter>
+            <CreatedPage />
+        </MemoryRouter>
+    );
 
-        const state = store.getState().game
-        expect(state.selectedIngredients[1]).toBeUndefined()
-    })
+describe("CreatedPage", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
-    it('при отсутствии ошибок переходит на /proportions', async () => {
-        renderPage(store)
+    it("рендерит заголовок страницы", () => {
+        renderPage();
+        expect(screen.getByText("Коктейль")).toBeInTheDocument();
+    });
 
-        fireEvent.click(
-            await screen.findByText('Создать с пропорциями')
-        )
+    it("рендерит шаги рецепта", () => {
+        renderPage();
 
-        await waitFor(() => {
-            expect(navigateMock).toHaveBeenCalledWith('/proportions')
-        })
-    })
-})
+        expect(screen.getByText("Шаг 1")).toBeInTheDocument();
+        expect(screen.getByText("Шаг 2")).toBeInTheDocument();
+    });
+
+    it("кнопка назад вызывает navigate(-1)", () => {
+        renderPage();
+
+        fireEvent.click(screen.getByTestId("back-button"));
+
+        expect(mockNavigate).toHaveBeenCalledWith(-1);
+    });
+
+    it("если есть ошибки — диспатчит addStageMistake и показывает модалку", () => {
+        createdErrors.mockReturnValue(2);
+
+        renderPage();
+
+        fireEvent.click(screen.getByText("Создать коктейль"));
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            setStageStepsCount({
+                stage: "stage3",
+                stepsCount: 3,
+            })
+        );
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            addStageMistake({
+                stage: "stage3",
+                count: 2,
+            })
+        );
+
+        expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
+    });
+
+    it("если ошибок нет — считает скор и переходит на /result", () => {
+        createdErrors.mockReturnValue(0);
+
+        renderPage();
+
+        fireEvent.click(screen.getByText("Создать коктейль"));
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            setStageScore({
+                stage: "stage3",
+                score: 10,
+            })
+        );
+
+        expect(mockNavigate).toHaveBeenCalledWith("/result");
+    });
+});

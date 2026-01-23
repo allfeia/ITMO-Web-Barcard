@@ -85,7 +85,11 @@ function ProportionsPage() {
                 showHint={mode !== "hard"}
                 hintCanvasRef={hintRef}
                 onBack={() => { goTo(-1) }}
-                onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage2' })); }}
+                onHintClick={() => {
+                    setIsHintOpen(true);
+                    dispatch(addHintUsage({ stage: 'stage2' }));
+                    window.ym(106396717,'reachGoal','hints2')
+                }}
             />
 
             {isHintOpen && (

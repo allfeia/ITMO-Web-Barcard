@@ -95,7 +95,11 @@ function IngredientsPage() {
                 showHint={mode !== "hard"}
                 hintCanvasRef={hintRef}
                 onBack={() => { goTo(-1); dispatch(resetLevel()); }}
-                onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage1' })); }}
+                onHintClick={() => {
+                    setIsHintOpen(true);
+                    dispatch(addHintUsage({ stage: 'stage1' }));
+                    window.ym(106396717,'reachGoal','hints1')
+                }}
             />
 
             {isHintOpen && (

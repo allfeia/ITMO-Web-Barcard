@@ -6,15 +6,11 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
 import CreatedPage from '../../src/game-pages/created-page/CreatedPage.jsx';
 import gameReducer from '../../src/game/gameSlice';
-import {createdErrors} from "../../src/game-pages/created-page/created_error.js";
+
 
 vi.mock('../../menu-page/RecipeCard.jsx', () => ({
     default: ({ open, isHint }) =>
-        open ? (
-            <div data-testid="hint-recipe-card">
-                Подсказка {isHint ? '(hint)' : ''}
-            </div>
-        ) : null,
+        open ? <div data-testid="hint-recipe-card">Подсказка {isHint ? '(hint)' : ''}</div> : null,
 }));
 
 vi.mock('../ErrorModal.jsx', () => ({
@@ -24,7 +20,7 @@ vi.mock('../ErrorModal.jsx', () => ({
 
 vi.mock('../HardModeFailModal', () => ({
     default: ({ open }) =>
-        open ? <div data-testid="hard-fail-modal">Hard Mode Fail Modal</div> : null,
+        open ? <div data-testid="hard-fail-modal">Hard Mode Fail</div> : null,
 }));
 
 vi.mock('../PageHeader.jsx', () => ({
@@ -40,7 +36,7 @@ vi.mock('../PageHeader.jsx', () => ({
     ),
 }));
 
-// Мок RecipeStepCard — теперь рендерит <span class="step-text">
+// КРИТИЧЕСКИЙ МОК — теперь рендерит <span class="step-text"> как в твоём DOM
 vi.mock('./RecipeStepCard.jsx', () => ({
     default: (props) => {
         const { step = {} } = props || {};
@@ -77,18 +73,9 @@ vi.mock('../../game/scoreCalculator.js', () => ({
 
 vi.mock('@hello-pangea/dnd', () => ({
     DragDropContext: ({ children }) => <div data-testid="dnd-context">{children}</div>,
-    Droppable: ({ children }) => (
-        <div data-testid="droppable">
-            {children({ provided: { innerRef: vi.fn(), droppableProps: {} }, snapshot: {} })}
-        </div>
-    ),
+    Droppable: ({ children }) => <div data-testid="droppable">{children({ provided: {} })}</div>,
     Draggable: ({ children, index }) => (
-        <div data-testid={`draggable-${index}`}>
-            {children(
-                { innerRef: vi.fn(), draggableProps: {}, dragHandleProps: {} },
-                { isDragging: false }
-            )}
-        </div>
+        <div data-testid={`draggable-${index}`}>{children({ innerRef: vi.fn() })}</div>
     ),
 }));
 

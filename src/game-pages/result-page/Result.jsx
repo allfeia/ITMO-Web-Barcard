@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
@@ -6,10 +6,11 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
 import './Result.css';
+import { useAuth } from "../../authContext/useAuth.js";
 
 function Result() {
     const navigate = useNavigate();
-    const isBarman = sessionStorage.getItem("isBarman") === "true";
+    const { isBarman, currentUser } = useAuth();
 
     const totalScore = useSelector((state) => {
         const stages = state.game.stages;
@@ -20,48 +21,42 @@ function Result() {
         );
     });
 
-    const handleReplay = () => {
-        navigate('/levelPage');
-    };
-    const handleBar = () => {
-        navigate('/menu');
-    };
-    const handleOrder = () => {
-        navigate('/order');
-    };
+    const handleReplay = () => navigate('/levelPage');
+    const handleBar = () => navigate('/menu');
+    const handleOrder = () => navigate('/order');
 
     useEffect(() => {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+        if (!isBarman || !currentUser?.login || totalScore <= 0) return;
 
         const sendScoreToServer = async () => {
-            const scoreSent = localStorage.getItem(`scoreSent_${currentUser.id}_${new Date().toLocaleDateString()}`);
-            if (totalScore > 0 && currentUser.login && !scoreSent) {
-                try {
-                    const response = await fetch('/api/rating/update-score', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            login: currentUser.login,
-                            score: totalScore
-                        })
-                    });
+            const today = new Date().toLocaleDateString();
+            const scoreSentKey = `scoreSent_${currentUser.id}_${today}`;
+            const scoreSent = localStorage.getItem(scoreSentKey);
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('Очки успешно обновлены:', data);
-                        localStorage.setItem(`scoreSent_${currentUser.id}_${new Date().toLocaleDateString()}`, 'true');
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
+            if (scoreSent) return;
+
+            try {
+                const response = await fetch('/api/rating/update-score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        login: currentUser.login,
+                        score: totalScore
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Очки успешно обновлены:', data);
+                    localStorage.setItem(scoreSentKey, 'true');
                 }
+            } catch (error) {
+                console.error('Ошибка отправки очков:', error);
             }
         };
-        if (isBarman) {
-            sendScoreToServer();
-        }
-    }, [totalScore, isBarman]);
+
+        sendScoreToServer();
+    }, [totalScore, isBarman, currentUser]);
 
     return (
         <Box className="result-screen">
@@ -81,9 +76,7 @@ function Result() {
                         : {totalScore} ★
                     </>
                 ) : (
-                    <>
-                        Ваш результат: {totalScore} ★
-                    </>
+                    <>Ваш результат: {totalScore} ★</>
                 )}
             </Typography>
 
@@ -91,12 +84,7 @@ function Result() {
                 <CocktailCanvas />
             </div>
 
-            <Stack
-                direction="row"
-                spacing={4}
-                justifyContent="center"
-                className="button-stack"
-            >
+            <Stack direction="row" spacing={4} justifyContent="center" className="button-stack">
                 <Box className="icon-button-container">
                     <IconButton
                         color="inherit"

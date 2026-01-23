@@ -1,13 +1,14 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {useSelector} from "react-redux";
 import {useAuth} from "../../src/authContext/useAuth.js";
 import Result from "../../src/game-pages/result-page/Result.jsx";
-import {useSelector} from "react-redux";
 
-vi.mock("../../authContext/useAuth.js", () => ({
-  useAuth: vi.fn(),
-}));
+vi.mock("../../authContext/useAuth.js", () => {
+  const useAuth = vi.fn(); // ← обязательно vi.fn()
+  return { useAuth };
+});
 
 const navigateMock = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -26,8 +27,10 @@ vi.mock("react-redux", async () => {
   };
 });
 
+
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
+
 
 vi.mock("./CocktailCanvas", () => ({
   default: () => <div data-testid="cocktail-canvas" />,
@@ -37,7 +40,6 @@ describe("Result", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-
     vi.mocked(useAuth).mockReturnValue({
       isBarman: false,
       currentUser: null,
@@ -74,10 +76,7 @@ describe("Result", () => {
 
     render(<Result />);
 
-    const ratingLink = screen.getByRole("link", { name: "Рейтинг" });
-    expect(ratingLink).toBeInTheDocument();
-    expect(ratingLink).toHaveAttribute("href", "/top");
-
+    expect(screen.getByRole("link", { name: "Рейтинг" })).toHaveAttribute("href", "/top");
     expect(screen.getByText(/Рейтинг: 150 ★/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Заказать/i })).not.toBeInTheDocument();
   });
@@ -104,6 +103,7 @@ describe("Result", () => {
           "/api/rating/update-score",
           expect.objectContaining({
             method: "POST",
+            headers: expect.objectContaining({ "Content-Type": "application/json" }),
             body: JSON.stringify({ login: "ivan", score: 200 }),
           })
       );

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {render, screen, fireEvent, waitFor} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ProportionsPage from "../../src/game-pages/proportions-page/ProportionsPage";
+import * as redux from "react-redux";
 
 const mockNavigate = vi.fn();
 const mockDispatch = vi.fn();
@@ -14,32 +15,14 @@ vi.mock("react-router-dom", async () => {
     };
 });
 
-vi.mock("react-redux", () => ({
-    useDispatch: () => mockDispatch,
-    useSelector: (selector) =>
-        selector({
-            game: {
-                mode: "easy",
-                cocktailId: 1,
-                gameOver: false,
-                selectedIngredients: {
-                    1: { id: 1, name: "Лайм", amount: 20 },
-                },
-                cocktailData: {
-                    ingredients: [
-                        { id: 1, name: "Лайм", amount: 20, unit: "мл" },
-                    ],
-                },
-                stages: {
-                    stage2: {
-                        mistakes: 0,
-                        stepsCount: 0,
-                        score: 0,
-                    },
-                },
-            },
-        }),
-}));
+vi.mock("react-redux", async () => {
+    const actual = await vi.importActual("react-redux");
+    return {
+        ...actual,
+        useDispatch: vi.fn(),
+        useSelector: vi.fn(),
+    };
+});
 
 vi.mock("../../src/game-pages/proportions-page/proportions_error.js", () => ({
     proportionsErrors: vi.fn(),
@@ -59,8 +42,7 @@ vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
 }));
 
 vi.mock("../../src/game-pages/HardModeFailModal.jsx", () => ({
-    default: ({ open }) =>
-        open ? <div>HardModeFail</div> : null,
+    default: ({ open }) => (open ? <div>HardModeFail</div> : null),
 }));
 
 import { proportionsErrors } from "../../src/game-pages/proportions-page/proportions_error.js";
@@ -69,7 +51,6 @@ import {
     setStageStepsCount,
     setIngredientAmount,
 } from "../../src/game/gameSlice.js";
-import {useSelector} from "react-redux";
 
 const renderPage = () =>
     render(
@@ -81,6 +62,31 @@ const renderPage = () =>
 describe("ProportionsPage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+
+        redux.useDispatch.mockReturnValue(mockDispatch);
+
+        redux.useSelector.mockReturnValue({
+            game: {
+                mode: "easy",
+                cocktailId: 1,
+                gameOver: false,
+                selectedIngredients: {
+                    1: { id: 1, name: "Лайм", amount: 20 },
+                },
+                cocktailData: {
+                    ingredients: [
+                        { id: 1, name: "Лайм", unit: "мл" },
+                    ],
+                },
+                stages: {
+                    stage2: {
+                        mistakes: 0,
+                        stepsCount: 0,
+                        score: 0,
+                    },
+                },
+            },
+        });
     });
 
     it("рендерит заголовок страницы", () => {
@@ -137,34 +143,8 @@ describe("ProportionsPage", () => {
         expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
     });
 
-    it("при отсутствии ошибок переходит на /create", async () => {
+    it("если ошибок нет — считает score и переходит на /create", async () => {
         proportionsErrors.mockReturnValue(0);
-
-        useSelector.mockImplementation(selector =>
-            selector({
-                game: {
-                    mode: "easy",
-                    selectedIngredients: {
-                        1: { id: 1, name: "Джин", amount: 50 },
-                        2: { id: 2, name: "Тоник", amount: 150 },
-                    },
-                    cocktailData: {
-                        ingredients: [
-                            { id: 1, name: "Джин", unit: "ml" },
-                            { id: 2, name: "Тоник", unit: "ml" },
-                        ],
-                    },
-                    stages: {
-                        stage2: {
-                            mistakes: 0,
-                            stepsCount: 2,
-                            score: 0,
-                        },
-                    },
-                    gameOver: false,
-                },
-            })
-        );
 
         renderPage();
 
@@ -174,6 +154,4 @@ describe("ProportionsPage", () => {
             expect(mockNavigate).toHaveBeenCalledWith("/create");
         });
     });
-
-
 });

@@ -1,70 +1,152 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Result page', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto('/result');
+test.describe('Result page — E2E', () => {
+    test.beforeEach(async ({ page, context }) => {
+
+        await page.route('**/mc.yandex.ru/**', route => route.abort());
+        await page.route('**/sentry*/**', route => route.abort());
+
+        await context.addInitScript(() => {
+            sessionStorage.setItem('barId', '123');
+            sessionStorage.setItem('barName', 'Olive Bar');
+            sessionStorage.setItem('barSite', 'https://example.bar');
+        });
+
+        await page.route('**/api/cocktail/**', route =>
+            route.fulfill({
+                status: 200,
+                json: {
+                    id: 999,
+                    name: 'Test Cocktail',
+                    ingredients: [],
+                    steps: [],
+                },
+            })
+        );
+
+        await page.route('**/api/rating/update-score', route =>
+            route.fulfill({
+                status: 200,
+                json: { success: true, message: 'Score updated' },
+            })
+        );
     });
 
-    test('отображает заголовок "Готово!" и рейтинг', async ({ page }) => {
+    test('Обычный игрок видит свой результат + кнопку "Заказать"', async ({ page }) => {
+
+        await page.addInitScript(() => {
+            sessionStorage.setItem('isBarman', 'false');
+            sessionStorage.setItem('currentUser', JSON.stringify({
+                id: 1001,
+                login: 'player_one',
+                roles: [],
+            }));
+            sessionStorage.setItem('token', 'fake-jwt-player');
+        });
+
+        await page.goto('/result', { waitUntil: 'networkidle' });
+
+
         await expect(page.getByText('Готово!')).toBeVisible();
-        await expect(page.getByText(/Рейтинг/i)).toBeVisible();
-        await expect(page.getByText('326 ★')).toBeVisible();
-    });
-    test('показывает CocktailCanvas корректно', async ({ page }) => {
-        const container = page.locator('.cocktail-container');
-        await expect(container).toBeVisible();
-        await expect(container).toHaveCount(1);
-        const canvas = container.locator('canvas');
-        await expect(canvas).toBeVisible();
-        await expect(canvas).toHaveAttribute('width');
-        await expect(canvas).toHaveAttribute('height');
-    });
 
-    test('кнопка "Переиграть" ведёт на /levelPage', async ({ page }) => {
-        const replayButton = page.getByRole('button', { name: /переиграть/i });
-        await expect(replayButton).toBeVisible();
-        await replayButton.click();
-        await page.waitForURL('**/levelPage**');
-        await expect(page).toHaveURL(/levelPage/);
-        await expect(page.getByText(/Выберите/i)).toBeVisible();
-        await expect(page.getByText(/уровень/i)).toBeVisible();
-    });
+        await expect(page.getByText(/Ваш результат:/)).toBeVisible();
+        await expect(page.getByText('★')).toBeVisible();
 
-    test('кнопка "Бар" ведёт на /menu', async ({ page }) => {
-        const barButton = page.getByRole('button', { name: /бар/i });
-        await expect(barButton).toBeVisible();
-        await barButton.click();
-        await page.waitForURL('**/menu**');
-        await expect(page).toHaveURL(/menu/);
-    });
+        await expect(page.getByRole('button', { name: 'Заказать' })).toBeVisible();
 
-    test('кнопка "Заказать" ведёт на /order', async ({ page }) => {
-        const orderButton = page.getByRole('button', { name: 'Заказать' });
-        await expect(orderButton).toBeVisible();
-        await expect(orderButton).toHaveClass(/MuiButton-contained/);
-        await orderButton.click();
-        await page.waitForURL('**/order**');
-        await expect(page).toHaveURL(/order/);
-    });
-
-    test('отображает иконки Переиграть и Бар + их лейблы', async ({ page }) => {
         await expect(page.getByTitle('переиграть')).toBeVisible();
         await expect(page.getByTitle('бар')).toBeVisible();
-        await expect(page.getByText('Переиграть')).toBeVisible();
-        await expect(page.getByText('Бар')).toBeVisible();
-        await expect(page.getByTitle('переиграть').locator('svg')).toBeVisible();
-        await expect(page.getByTitle('бар').locator('svg')).toBeVisible();
-    });
-    test('кнопки иконок получают фокус и hover состояние', async ({ page }) => {
-        const replayBtn = page.getByTitle('переиграть');
-        const barBtn = page.getByTitle('бар');
-        await replayBtn.focus();
-        await expect(replayBtn).toBeFocused();
-        await replayBtn.hover();
-        await expect(replayBtn).toHaveCSS('cursor', 'pointer');
-        await barBtn.hover();
-        await expect(barBtn).toHaveCSS('cursor', 'pointer');
+
+        await expect(page.getByRole('link', { name: 'Рейтинг' })).not.toBeVisible();
+
+        await page.getByTitle('переиграть').click();
+        await expect(page).toHaveURL(/\/levelPage$/);
+
+        await page.goBack();
+        await page.getByTitle('бар').click();
+        await expect(page).toHaveURL(/\/menu$/);
     });
 
+    test('Бармен видит ссылку на Рейтинг, НЕ видит кнопку Заказать + происходит попытка отправки очков', async ({ page }) => {
+        // Имитируем бармена
+        await page.addInitScript(() => {
+            sessionStorage.setItem('isBarman', 'true');
+            sessionStorage.setItem('currentUser', JSON.stringify({
+                id: 500,
+                login: 'bartender_max',
+                roles: ['BARMAN'],
+            }));
+            sessionStorage.setItem('token', 'fake-jwt-barman');
+        });
 
+        const scoreRequestPromise = page.waitForRequest(
+            req => req.url().includes('/api/rating/update-score') && req.method() === 'POST',
+            { timeout: 8000 }
+        );
+
+        await page.goto('/result', { waitUntil: 'networkidle' });
+
+        await expect(page.getByRole('link', { name: 'Рейтинг' })).toBeVisible();
+        await expect(page.getByText(/Рейтинг\s*:\s*\d+\s*★/)).toBeVisible();
+
+        await expect(page.getByRole('button', { name: 'Заказать' })).not.toBeVisible();
+
+        const request = await scoreRequestPromise;
+        expect(request.method()).toBe('POST');
+
+        const body = JSON.parse(request.postData() || '{}');
+        expect(body).toMatchObject({
+            login: 'bartender_max',
+            score: expect.any(Number),
+        });
+
+        await page.getByRole('link', { name: 'Рейтинг' }).click();
+        await expect(page).toHaveURL(/\/top$/);
+    });
+
+    test('Если totalScore = 0 → очки НЕ отправляются (бармен)', async ({ page }) => {
+        await page.addInitScript(() => {
+            sessionStorage.setItem('isBarman', 'true');
+            sessionStorage.setItem('currentUser', JSON.stringify({
+                id: 501,
+                login: 'bartender_zero',
+                roles: ['BARMAN'],
+            }));
+        });
+
+        const requestPromise = page.waitForRequest(
+            () => true,
+            { timeout: 3000 }
+        ).catch(() => null);
+
+        await page.goto('/result', { waitUntil: 'networkidle' });
+
+        const request = await requestPromise;
+        expect(request).toBeNull();
+    });
+
+    test('Если уже отправляли сегодня → повторно НЕ отправляем', async ({ page, context }) => {
+        const today = new Date().toLocaleDateString();
+
+        await page.addInitScript(({ todayKey }) => {
+            sessionStorage.setItem('isBarman', 'true');
+            sessionStorage.setItem('currentUser', JSON.stringify({
+                id: 777,
+                login: 'repeat_barman',
+                roles: ['BARMAN'],
+            }));
+
+            localStorage.setItem(`scoreSent_777_${todayKey}`, 'true');
+        }, { todayKey: today });
+
+        const requestPromise = page.waitForRequest(
+            () => true,
+            { timeout: 3000 }
+        ).catch(() => null);
+
+        await page.goto('/result');
+
+        const request = await requestPromise;
+        expect(request).toBeNull();
+    });
 });

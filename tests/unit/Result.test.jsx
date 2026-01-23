@@ -7,7 +7,8 @@ import * as authHook from '../../src/authContext/useAuth';
 import Result from "../../src/game-pages/result-page/Result.jsx";
 import gameReducer from "../../src/game/gameSlice";
 vi.mock('../../src/authContext/useAuth');
-vi.mock('./CocktailCanvas', () => ({
+
+vi.mock('../../src/game-pages/result-page/CocktailCanvas', () => ({
   default: () => <div data-testid="cocktail-canvas" />,
 }));
 

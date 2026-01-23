@@ -75,8 +75,7 @@ describe('TopList', () => {
                 <TopList />
             </MemoryRouter>
         );
-
-        await screen.findByText(/Не удалось загрузить рейтинг|Ошибка/i);
+        await screen.findByText(/Network error|ошибк/i);
     });
 
     it('форматирует очки с пробелами каждые 3 цифры', async () => {

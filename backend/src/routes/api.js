@@ -441,4 +441,89 @@ router.get("/ingredients", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+
+const ratingUpdateSchema = z.object({
+  cocktailId: z.number().int(),
+  score: z.number().int(), })
+
+router.post("/rating/update-score", authRequired, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { cocktailId, score } = ratingUpdateSchema.parse(req.body);
+
+    const cocktail = await Cocktail.findByPk(cocktailId, { attributes: ["id"] });
+    if (!cocktail) return res.status(404).json({ error: "Cocktail not found" });
+
+    const lastAttempt = await Point.max("attempt_number", {
+      where: { user_id: userId, cocktail_id: cocktailId },
+    });
+    const nextAttempt =
+      Number.isFinite(lastAttempt) ? Number(lastAttempt) + 1 : 1;
+
+    const row = await Point.create({
+      user_id: userId,
+      cocktail_id: cocktailId,
+      points: score,
+      attempt_number: nextAttempt,
+    });
+
+    return res.status(201).json({
+      ok: true,
+      pointId: row.id,
+      attempt_number: row.attempt_number,
+      points: row.points,
+    });
+  } catch (e) {
+    if (e instanceof z.ZodError) {
+      return res.status(400).json({ error: "Invalid payload", details: e.errors });
+    }
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/bar/:barId/with-rating", async (req, res) => {
+  try {
+    const barId = Number(req.params.barId);
+    if (!Number.isFinite(barId) || barId <= 0) {
+      return res.status(400).json({ error: "Invalid bar id" });
+    }
+
+    const bar = await Bar.findByPk(barId, { attributes: ["id"] });
+    if (!bar) return res.status(404).json({ error: "Бар не найден" });
+
+    const rows = await User.findAll({
+      where: { bar_id: barId },
+      attributes: [
+        "id",
+        "login",
+        [fn("COALESCE", fn("SUM", col("userPoints.points")), 0), "score"],
+      ],
+      include: [
+        {
+          model: Point,
+          as: "userPoints",
+          attributes: [],
+          required: false,
+        },
+      ],
+      group: ["User.id"],
+      order: [[fn("COALESCE", fn("SUM", col("userPoints.points")), 0), "DESC"]],
+    });
+
+    const rating = rows.map((u) => ({
+      id: u.id,
+      login: u.login,
+      score: Number(u.get("score") ?? 0),
+    }));
+
+    return res.json({ rating });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default router;

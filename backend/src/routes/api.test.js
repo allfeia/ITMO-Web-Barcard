@@ -35,7 +35,7 @@ vi.mock("../models.js", () => {
       findOne: vi.fn(),
     },
     User: { findByPk: vi.fn(), findAll: vi.fn() },
-    Point: { findOne: vi.fn() },
+    Point: { findOne: vi.fn(), max: vi.fn(), create: vi.fn() },
     Cocktail: { findAll: vi.fn(), findByPk: vi.fn(), findOne: vi.fn() },
     Ingredient: { findAll: vi.fn() },
     CocktailIngredient: {},
@@ -538,4 +538,184 @@ describe("api router", () => {
       expect(sendOrderToChat.mock.calls[0][0].chatId).toBe("999");
     });
   });
+
+  describe("POST /rating/update-score", () => {
+  it("401 without auth", async () => {
+    const app = appWithRouter();
+    const res = await request(app)
+      .post("/api/rating/update-score")
+      .send({ cocktailId: 1, score: 5 });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "Unauthorized" });
+  });
+
+  it("400 invalid payload (zod)", async () => {
+    const app = appWithRouter();
+    const auth = authCookie({ id: 1, roles: ["user"] });
+
+    const res = await request(app)
+      .post("/api/rating/update-score")
+      .set("Cookie", auth)
+      .send({ cocktailId: "nope", score: 5 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe("Invalid payload");
+    expect(Array.isArray(res.body.details)).toBe(true);
+  });
+
+  it("404 if cocktail not found", async () => {
+    Cocktail.findByPk.mockResolvedValue(null);
+
+    const app = appWithRouter();
+    const auth = authCookie({ id: 10, roles: ["user"] });
+
+    const res = await request(app)
+      .post("/api/rating/update-score")
+      .set("Cookie", auth)
+      .send({ cocktailId: 123, score: 7 });
+
+    expect(Cocktail.findByPk).toHaveBeenCalledWith(123, { attributes: ["id"] });
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "Cocktail not found" });
+  });
+
+  it("201 creates first attempt when no previous attempts", async () => {
+    Cocktail.findByPk.mockResolvedValue({ id: 1 });
+    Point.max.mockResolvedValue(null); 
+    Point.create.mockResolvedValue({
+      id: 555,
+      attempt_number: 1,
+      points: 9,
+    });
+
+    const app = appWithRouter();
+    const auth = authCookie({ id: 77, roles: ["user"] });
+
+    const res = await request(app)
+      .post("/api/rating/update-score")
+      .set("Cookie", auth)
+      .send({ cocktailId: 1, score: 9 });
+
+    expect(Point.max).toHaveBeenCalledWith("attempt_number", {
+      where: { user_id: 77, cocktail_id: 1 },
+    });
+
+    expect(Point.create).toHaveBeenCalledWith({
+      user_id: 77,
+      cocktail_id: 1,
+      points: 9,
+      attempt_number: 1,
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual({
+      ok: true,
+      pointId: 555,
+      attempt_number: 1,
+      points: 9,
+    });
+  });
+
+  it("201 creates next attempt when previous attempt exists", async () => {
+    Cocktail.findByPk.mockResolvedValue({ id: 2 });
+    Point.max.mockResolvedValue(3); 
+    Point.create.mockResolvedValue({
+      id: 999,
+      attempt_number: 4,
+      points: 4,
+    });
+
+    const app = appWithRouter();
+    const auth = authCookie({ id: 5, roles: ["user"] });
+
+    const res = await request(app)
+      .post("/api/rating/update-score")
+      .set("Cookie", auth)
+      .send({ cocktailId: 2, score: 4 });
+
+    expect(Point.create).toHaveBeenCalledWith({
+      user_id: 5,
+      cocktail_id: 2,
+      points: 4,
+      attempt_number: 4,
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual({
+      ok: true,
+      pointId: 999,
+      attempt_number: 4,
+      points: 4,
+    });
+  });
+
+  it("500 on server error", async () => {
+    Cocktail.findByPk.mockRejectedValue(new Error("db down"));
+
+    const app = appWithRouter();
+    const auth = authCookie({ id: 1, roles: ["user"] });
+
+    const res = await request(app)
+      .post("/api/rating/update-score")
+      .set("Cookie", auth)
+      .send({ cocktailId: 1, score: 1 });
+
+    expect(res.status).toBe(500);
+    expect(res.body).toEqual({ error: "Server error" });
+  });
+});
+
+describe("GET /bar/:barId/with-rating", () => {
+  it("400 invalid bar id", async () => {
+    const app = appWithRouter();
+    const res = await request(app).get("/api/bar/abc/with-rating");
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "Invalid bar id" });
+  });
+
+  it("404 if bar not found", async () => {
+    Bar.findByPk.mockResolvedValue(null);
+
+    const app = appWithRouter();
+    const res = await request(app).get("/api/bar/7/with-rating");
+
+    expect(Bar.findByPk).toHaveBeenCalledWith(7, { attributes: ["id"] });
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "Бар не найден" });
+  });
+
+  it("returns rating (maps score to number, null -> 0)", async () => {
+    Bar.findByPk.mockResolvedValue({ id: 7 });
+
+    User.findAll.mockResolvedValue([
+      { id: 1, login: "alice", get: vi.fn().mockImplementation((k) => (k === "score" ? "12" : null)) },
+      { id: 2, login: "bob", get: vi.fn().mockImplementation((k) => (k === "score" ? null : null)) },
+    ]);
+
+    const app = appWithRouter();
+    const res = await request(app).get("/api/bar/7/with-rating");
+
+    expect(User.findAll).toHaveBeenCalledTimes(1);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      rating: [
+        { id: 1, login: "alice", score: 12 },
+        { id: 2, login: "bob", score: 0 },
+      ],
+    });
+  });
+
+  it("500 on server error", async () => {
+    Bar.findByPk.mockRejectedValue(new Error("db down"));
+
+    const app = appWithRouter();
+    const res = await request(app).get("/api/bar/7/with-rating");
+
+    expect(res.status).toBe(500);
+    expect(res.body).toEqual({ error: "Server error" });
+  });
+});
 });

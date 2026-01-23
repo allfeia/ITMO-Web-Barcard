@@ -1,9 +1,8 @@
-
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 
 import {useAuth} from "../../src/authContext/useAuth.js";
-import TopList from "../../src/topList/TopList.jsx";
+import TopList from "../../src/topList/TopList.jsx"; // подставь правильный путь
 
 vi.mock("../authContext/useAuth.js", () => ({
     useAuth: vi.fn(),
@@ -28,7 +27,7 @@ describe("TopList", () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        vi.spyOn({ useAuth }, 'useAuth').mockReturnValue({
+        vi.mocked(useAuth).mockReturnValue({
             barId: 123,
             barName: "Olive Bar",
             barSite: "https://olivebarandkitchen.com",
@@ -75,7 +74,7 @@ describe("TopList", () => {
 
         await waitFor(() => {
             expect(screen.getByText(/Не удалось загрузить рейтинг|Ошибка/i)).toBeInTheDocument();
-            expect(screen.queryByText("Olive Bar")).not.toBeInTheDocument(); // нет fallback из db
+            expect(screen.queryByText("Olive Bar")).not.toBeInTheDocument(); // нет fallback
         });
     });
 
@@ -117,6 +116,14 @@ describe("TopList", () => {
             expect(barLink).toHaveAttribute("href", "https://olivebarandkitchen.com");
             expect(barLink).toHaveAttribute("target", "_blank");
             expect(barLink).toHaveAttribute("rel", "noopener noreferrer");
+
+            // Проверяем, что клик вызывает window.open
+            fireEvent.click(barLink);
+            expect(windowOpenMock).toHaveBeenCalledWith(
+                "https://olivebarandkitchen.com",
+                "_blank",
+                "noopener,noreferrer"
+            );
         });
     });
 
@@ -124,7 +131,7 @@ describe("TopList", () => {
         vi.mocked(useAuth).mockReturnValue({
             barId: 123,
             barName: "Test Bar",
-            barSite: null, // нет сайта
+            barSite: null,
         });
 
         mockFetch.mockResolvedValueOnce({
@@ -136,7 +143,7 @@ describe("TopList", () => {
 
         await waitFor(() => {
             const barText = screen.getByText("Test Bar");
-            expect(barText.tagName).not.toBe("A"); // не ссылка
+            expect(barText.tagName).not.toBe("A"); // это <span>, а не <a>
             expect(barText).toBeInTheDocument();
         });
     });
@@ -153,5 +160,17 @@ describe("TopList", () => {
             expect(screen.getByText("Рейтинг пуст")).toBeInTheDocument();
             expect(screen.getByText("Станьте первым участником!")).toBeInTheDocument();
         });
+    });
+
+    it("показывает ошибку, если barId отсутствует в контексте", () => {
+        vi.mocked(useAuth).mockReturnValue({
+            barId: null,
+            barName: "Test",
+            barSite: null,
+        });
+
+        render(<TopList />);
+
+        expect(screen.getByText("ID бара не найден")).toBeInTheDocument();
     });
 });

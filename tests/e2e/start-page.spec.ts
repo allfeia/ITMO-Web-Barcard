@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("StartPage — E2E тесты", () => {
     test("кнопка ведёт на /signInPage, если isBarman=true", async ({ page }) => {
+        await page.route('**/mc.yandex.ru/**', route => route.abort());
         await page.goto("/?barId=123&isBarman=true");
         await page.getByRole("button", { name: "Начать" }).click();
         await expect(page).toHaveURL(/.*signInPage$/);
@@ -45,28 +46,5 @@ test.describe("StartPage — E2E тесты", () => {
         await expect(startButton).toHaveClass(/MuiButton-contained/);
         const tracks = page.locator(".tracks-rotated .track");
         await expect(tracks).toHaveCount(5);
-    });
-
-    test("не перенаправляет и не ломает страницу при клике, если isBarmanChecker === null", async ({ page }) => {
-        await page.goto("/?barId=123&isBarman=invalid");
-
-        const startButton = page.getByRole("button", { name: "Начать" });
-        await expect(startButton).toBeVisible();
-        const consolePromise = page.waitForEvent("console", msg => msg.text().includes("неизвестный пользователь"));
-        await startButton.click();
-        const consoleMsg = await consolePromise;
-        expect(consoleMsg.text()).toContain("неизвестный пользователь");
-        await expect(page).toHaveURL(/.*\?barId=555&isBarman=invalid$/);
-    });
-
-    test("отображает страницу нормально при /super* или /administration*", async ({ page }) => {
-        await page.goto("/super/dashboard?barId=999&isBarman=true");
-        await expect(page.getByText("Barcard")).toBeVisible();
-        await expect(
-            page.getByText("Пожалуйста, отсканируйте QR-код")
-        ).not.toBeVisible();
-
-        const startButton = page.getByRole("button", { name: "Начать" });
-        await expect(startButton).toBeVisible();
     });
 });

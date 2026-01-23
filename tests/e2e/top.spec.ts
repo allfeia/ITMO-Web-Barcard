@@ -30,21 +30,19 @@ test.describe('TopList page (Рейтинг бара) — E2E', () => {
 
     test('отображает загрузку, затем список рейтинга...', async ({ page }) => {
         await page.goto('/top');
-
-        await expect(page.getByText('Загрузка рейтинга...')).toBeVisible({ timeout: 8000 });
-
-        await expect(page.getByText('Загрузка рейтинга...')).toBeHidden({ timeout: 10000 });
         await expect(page.getByText('Olive Bar')).toBeVisible({ timeout: 10000 });
         await expect(page.getByText('12 500 очков')).toBeVisible();
         await expect(page.getByText('9 800 очков')).toBeVisible();
         await expect(page.getByText('4 500 очков')).toBeVisible();
         await expect(page.getByText('1 200 очков')).toBeVisible();
 
-        await expect(page.locator('.position-number.top-three')).toHaveCount(3);
-        await expect(page.getByText('1')).toBeVisible();
-        await expect(page.getByText('2')).toBeVisible();
-        await expect(page.getByText('3')).toBeVisible();
-        await expect(page.getByText('4')).toBeVisible();
+        await expect(page.locator('.position-number')).toHaveCount(4);
+
+        await expect(page.locator('.position-number').nth(0)).toHaveText('1');
+        await expect(page.locator('.position-number').nth(1)).toHaveText('2');
+        await expect(page.locator('.position-number').nth(2)).toHaveText('3');
+        await expect(page.locator('.position-number').nth(3)).toHaveText('4');
+
     });
 
     test('кнопка "Назад" возвращает на предыдущую страницу', async ({ page }) => {

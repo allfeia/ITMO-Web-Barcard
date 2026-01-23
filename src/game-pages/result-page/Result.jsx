@@ -10,7 +10,7 @@ import { useAuth } from "../../authContext/useAuth.js";
 
 function Result() {
     const navigate = useNavigate();
-    const { isBarman, currentUser } = useAuth(); // ← всё из контекста
+    const { isBarman, currentUser } = useAuth();
 
     const totalScore = useSelector((state) => {
         const stages = state.game.stages;

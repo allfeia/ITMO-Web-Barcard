@@ -101,6 +101,14 @@ const gameSlice = createSlice({
                 state.stages[stage].hintsUsed = 0;
             });
         },
+        resetForNewLevel: (state) => {
+            return {
+                ...initialState,
+                cocktailId: state.cocktailId,       // сохраняем
+                cocktailData: state.cocktailData,   // сохраняем
+                mode: state.mode,                   // можно сохранить текущий режим
+            };
+        },
 
         resetGame() {
             return initialState;
@@ -142,6 +150,7 @@ export const {
     setIngredientAmount,
     setStageScore,
     setGameOver,
+    resetForNewLevel,
     resetGameOver,
 } = gameSlice.actions;
 

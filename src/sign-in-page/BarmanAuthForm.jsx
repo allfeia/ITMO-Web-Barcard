@@ -4,8 +4,8 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import {IconButton, InputAdornment, Typography} from "@mui/material";
-import {useNavigate} from "react-router-dom";
+import { IconButton, InputAdornment, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../authContext/useAuth.js";
 
 export default function BarmanAuthForm() {
@@ -41,7 +41,7 @@ export default function BarmanAuthForm() {
             setPasswordError("Введите пароль");
             hasError = true;
         }
-        if(!barKey.trim()){
+        if (!barKey.trim()) {
             setBarKeyError("Введите ключ бара");
             hasError = true;
         }
@@ -59,16 +59,15 @@ export default function BarmanAuthForm() {
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    barId:Number(barId),
+                    barId: Number(barId),
                     username,
-                    password: password,
-                    barKey: barKey,
-                })
+                    password,
+                    barKey,
+                }),
             });
 
             const data = await response.json();
-            console.log(data);
-
+            console.log("Ответ сервера:", data);
 
             if (!response.ok) {
                 setLoginError(data.error || "Неверные учетные данные");
@@ -76,17 +75,22 @@ export default function BarmanAuthForm() {
             }
 
             if (response.ok) {
+                // Сохраняем данные пользователя и бара в localStorage
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+                localStorage.setItem('currentBar', JSON.stringify({ id: barId, name: data.barName }));
+
+                // Обновляем контекст
                 setRoles(data.user.roles);
                 setBarName(data.barName);
                 setBarSite(data.barSite);
                 setSavedCocktailsId(data.saved_cocktails_id);
+
+                console.log("SUCCESS", data);
+                goTo("/menu");
             }
-
-            console.log("SUCCESS", data);
-            goTo("/menu");
-
         } catch (err) {
             console.log("NETWORK ERROR:", err);
+            setLoginError("Ошибка сети. Попробуйте позже.");
         }
     };
 
@@ -121,12 +125,11 @@ export default function BarmanAuthForm() {
                     endAdornment: (
                         <InputAdornment position="end">
                             <IconButton onClick={() => setShowPass(!showPass)}>
-                                { showPass ? <VisibilityIcon /> : <VisibilityOffIcon /> }
+                                {showPass ? <VisibilityIcon /> : <VisibilityOffIcon />}
                             </IconButton>
                         </InputAdornment>
                     ),
                 }}
-
             />
 
             <TextField
@@ -143,12 +146,13 @@ export default function BarmanAuthForm() {
                     endAdornment: (
                         <InputAdornment position="end">
                             <IconButton onClick={() => setShowKey(!showKey)}>
-                                { showKey ? <VisibilityIcon /> : <VisibilityOffIcon /> }
+                                {showKey ? <VisibilityIcon /> : <VisibilityOffIcon />}
                             </IconButton>
                         </InputAdornment>
                     ),
                 }}
             />
+
             {loginError && !usernameError && !passwordError && !barKeyError && (
                 <Typography color="error" variant="body1">
                     {loginError}

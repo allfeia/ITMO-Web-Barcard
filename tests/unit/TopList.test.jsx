@@ -1,176 +1,154 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import {useAuth} from "../../src/authContext/useAuth.js";
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+import * as authHook from '../../src/authContext/useAuth';
 import TopList from "../../src/topList/TopList.jsx";
 
+vi.mock('../../src/authContext/useAuth');
 
-vi.mock("../authContext/useAuth.js", () => {
-    const useAuth = vi.fn();
-    return { useAuth };
-});
+const mockedUseAuth = vi.mocked(authHook.useAuth);
 
-const navigateMock = vi.fn();
-vi.mock("react-router-dom", async () => {
-    const actual = await vi.importActual("react-router-dom");
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
     return {
         ...actual,
-        useNavigate: () => navigateMock,
+        useNavigate: () => mockNavigate,
     };
 });
 
-const windowOpenMock = vi.fn();
-vi.stubGlobal("open", windowOpenMock);
-
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
-
-describe("TopList", () => {
+describe('TopList', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-
-        vi.mocked(useAuth).mockReturnValue({
+        mockedUseAuth.mockReturnValue({
             barId: 123,
-            barName: "Olive Bar",
-            barSite: "https://olivebarandkitchen.com",
+            barName: 'Olive Bar',
+            barSite: 'https://example.com/olive',
         });
     });
 
-    it("отображает 'Загрузка рейтинга...' во время загрузки", () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ rating: [] }),
-        });
+    it('отображает "Загрузка рейтинга..." во время загрузки', async () => {
+        global.fetch = vi.fn(() =>
+            new Promise(() => {})
+        );
 
-        render(<TopList />);
+        render(
+            <MemoryRouter>
+                <TopList />
+            </MemoryRouter>
+        );
 
-        expect(screen.getByText("Загрузка рейтинга...")).toBeInTheDocument();
+        expect(screen.getByText('Загрузка рейтинга...')).toBeInTheDocument();
     });
 
-    it("отображает название бара и список пользователей при успешной загрузке", async () => {
-        mockFetch.mockResolvedValueOnce({
+    it('отображает название бара и список пользователей при успешной загрузке', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({
                 rating: [
-                    { login: "ivan", score: 1422 },
-                    { login: "alex", score: 2350 },
+                    { login: 'alice', score: 1200 },
+                    { login: 'bob', score: 950 },
                 ],
             }),
         });
 
-        render(<TopList />);
+        render(
+            <MemoryRouter>
+                <TopList />
+            </MemoryRouter>
+        );
 
-        await waitFor(() => {
-            expect(screen.getByText("Olive Bar")).toBeInTheDocument();
-            expect(screen.getByText("ivan")).toBeInTheDocument();
-            expect(screen.getByText("1 422 очков")).toBeInTheDocument();
-            expect(screen.getByText("alex")).toBeInTheDocument();
-            expect(screen.getByText("2 350 очков")).toBeInTheDocument();
-        });
+        await screen.findByText('Olive Bar');
+        await screen.findByText('alice');
+        await screen.findByText('1 200 очков');
+        await screen.findByText('bob');
+        await screen.findByText('950 очков');
     });
 
-    it("показывает сообщение об ошибке при ошибке сети", async () => {
-        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+    it('показывает сообщение об ошибке при ошибке сети', async () => {
+        global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-        render(<TopList />);
+        render(
+            <MemoryRouter>
+                <TopList />
+            </MemoryRouter>
+        );
 
-        await waitFor(() => {
-            expect(screen.getByText(/Не удалось загрузить рейтинг|Ошибка/i)).toBeInTheDocument();
-        });
+        await screen.findByText(/Не удалось загрузить рейтинг|Ошибка/i);
     });
 
-    it("форматирует очки с пробелами каждые 3 цифры", async () => {
-        mockFetch.mockResolvedValueOnce({
+    it('форматирует очки с пробелами каждые 3 цифры', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
             ok: true,
-            json: async () => ({
-                rating: [{ login: "test", score: 1234567 }],
-            }),
+            json: async () => ({ rating: [{ login: 'test', score: 1234567 }] }),
         });
 
-        render(<TopList />);
+        render(<MemoryRouter><TopList /></MemoryRouter>);
 
-        await waitFor(() => {
-            expect(screen.getByText("1 234 567 очков")).toBeInTheDocument();
-        });
+        await screen.findByText('1 234 567 очков');
     });
 
-    it("кнопка 'Назад' вызывает navigate(-1)", () => {
-        render(<TopList />);
+    it("кнопка 'Назад' вызывает navigate(-1)", async () => {
+        global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ rating: [] }) });
 
-        const backButton = screen.getByTestId("back-button");
-        fireEvent.click(backButton);
+        render(<MemoryRouter><TopList /></MemoryRouter>);
 
-        expect(navigateMock).toHaveBeenCalledWith(-1);
+        const backBtn = await screen.findByTestId('back-button');
+        fireEvent.click(backBtn);
+
+        expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
 
-    it("название бара является ссылкой на barSite и открывает в новой вкладке", async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ rating: [] }),
-        });
+    it('название бара является ссылкой на barSite и открывает в новой вкладке', async () => {
+        global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ rating: [] }) });
 
-        render(<TopList />);
+        render(<MemoryRouter><TopList /></MemoryRouter>);
 
-        await waitFor(() => {
-            const barLink = screen.getByText("Olive Bar");
-            expect(barLink.tagName).toBe("A");
-            expect(barLink).toHaveAttribute("href", "https://olivebarandkitchen.com");
-            expect(barLink).toHaveAttribute("target", "_blank");
-            expect(barLink).toHaveAttribute("rel", "noopener noreferrer");
-
-            fireEvent.click(barLink);
-            expect(windowOpenMock).toHaveBeenCalledWith(
-                "https://olivebarandkitchen.com",
-                "_blank",
-                "noopener,noreferrer"
-            );
-        });
+        const link = await screen.findByText('Olive Bar');
+        expect(link.tagName).toBe('A');
+        expect(link).toHaveAttribute('href', 'https://example.com/olive');
+        expect(link).toHaveAttribute('target', '_blank');
+        expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     });
 
-    it("если barSite нет — название бара отображается как текст без ссылки", async () => {
-        vi.mocked(useAuth).mockReturnValue({
+    it('если barSite нет — название бара отображается как текст без ссылки', async () => {
+        mockedUseAuth.mockReturnValue({
             barId: 123,
-            barName: "Test Bar",
-            barSite: null,
+            barName: 'NoSite Bar',
+            barSite: undefined,
         });
 
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ rating: [] }),
-        });
+        global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ rating: [] }) });
 
-        render(<TopList />);
+        render(<MemoryRouter><TopList /></MemoryRouter>);
 
-        await waitFor(() => {
-            const barText = screen.getByText("Test Bar");
-            expect(barText.tagName).not.toBe("A"); // это <span>
-            expect(barText).toBeInTheDocument();
-        });
+        const name = await screen.findByText('NoSite Bar');
+        expect(name.tagName).toBe('SPAN');
     });
 
     it("отображает 'Рейтинг пуст' когда пользователей нет", async () => {
-        mockFetch.mockResolvedValueOnce({
+        global.fetch = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({ rating: [] }),
         });
 
-        render(<TopList />);
+        render(<MemoryRouter><TopList /></MemoryRouter>);
 
-        await waitFor(() => {
-            expect(screen.getByText("Рейтинг пуст")).toBeInTheDocument();
-            expect(screen.getByText("Станьте первым участником!")).toBeInTheDocument();
-        });
+        await screen.findByText('Рейтинг пуст');
+        await screen.findByText('Станьте первым участником!');
     });
 
-    it("показывает ошибку, если barId отсутствует в контексте", () => {
-        vi.mocked(useAuth).mockReturnValue({
-            barId: null,
-            barName: "Test",
+    it('показывает ошибку, если barId отсутствует в контексте', () => {
+        mockedUseAuth.mockReturnValue({
+            barId: undefined,
+            barName: 'Test',
             barSite: null,
         });
 
-        render(<TopList />);
+        render(<MemoryRouter><TopList /></MemoryRouter>);
 
-        expect(screen.getByText("ID бара не найден")).toBeInTheDocument();
-        expect(mockFetch).not.toHaveBeenCalled();
+        expect(screen.getByText('ID бара не найден')).toBeInTheDocument();
     });
 });

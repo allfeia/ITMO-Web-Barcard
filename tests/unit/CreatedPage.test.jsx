@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
 import CreatedPage from '../../src/game-pages/created-page/CreatedPage.jsx';
 import gameReducer from '../../src/game/gameSlice';
+import {createdErrors} from "../../src/game-pages/created-page/created_error.js";
 
 
 vi.mock('../../menu-page/RecipeCard.jsx', () => ({

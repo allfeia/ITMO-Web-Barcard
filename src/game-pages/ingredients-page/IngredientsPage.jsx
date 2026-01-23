@@ -49,7 +49,8 @@ function IngredientsPage() {
             setErrorCount(totalErrors);
             setErrorModalOpen(true);
 
-            window.ym && window.ym(106396421,'reachGoal','ingredient_error', {count: totalErrors})
+            window.ym(106396717,'reachGoal','ingredient_error', {count: totalErrors})
+
         } else {
             goTo("/proportions");
         }
@@ -62,7 +63,11 @@ function IngredientsPage() {
                 showHint={mode !== "hard"}
                 hintCanvasRef={hintRef}
                 onBack={() => { goTo(-1); dispatch(resetLevel()); }}
-                onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage1' })); }}
+                onHintClick={() => {
+                    setIsHintOpen(true);
+                    dispatch(addHintUsage({ stage: 'stage1' }));
+                    window.ym(106396717,'reachGoal','hints1')
+                }}
             />
             {isHintOpen && (
                 <RecipeCard

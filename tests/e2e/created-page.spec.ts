@@ -38,6 +38,7 @@ async function goToIngredientsPage(page: Page) {
 
 test.describe('IngredientsPage', () => {
     test.beforeEach(async ({page}) => {
+        await page.route('**/mc.yandex.ru/**', route => route.abort());
         await page.addInitScript(() => {
             sessionStorage.setItem('barId', '123');
             sessionStorage.setItem('isBarman', 'false');

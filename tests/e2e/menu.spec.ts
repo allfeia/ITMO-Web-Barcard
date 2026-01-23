@@ -2,6 +2,7 @@ import {expect, test} from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
 
+    await page.route('**/mc.yandex.ru/**', route => route.abort());
     await page.addInitScript(() => {
         sessionStorage.setItem("barId", "123");
         sessionStorage.setItem("barSite", "https://olivebarandkitchen.com");

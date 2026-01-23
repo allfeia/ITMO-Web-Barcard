@@ -38,6 +38,7 @@ import { addStageMistake, setIngredientAmount} from "../../src/game/gameSlice.js
 describe("ProportionsPage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        window.ym = vi.fn();
 
         useSelector.mockImplementation((selector) =>
             selector({

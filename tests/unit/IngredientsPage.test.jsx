@@ -86,6 +86,7 @@ const renderPage = () =>
 describe("IngredientsPage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        window.ym = vi.fn();
     });
 
     it("рендерит заголовок страницы", () => {

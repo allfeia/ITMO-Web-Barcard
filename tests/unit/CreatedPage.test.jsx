@@ -80,6 +80,7 @@ const baseState = {
 beforeEach(() => {
     vi.clearAllMocks();
     useSelector.mockImplementation(selector => selector(baseState));
+    window.ym = vi.fn();
 });
 
 describe("CreatedPage", () => {

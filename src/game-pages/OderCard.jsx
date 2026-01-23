@@ -22,7 +22,7 @@ function clampInt(n, min, max) {
   return Math.min(max, Math.max(min, Math.trunc(x)));
 }
 
-function OrderModal({ open, onClose, cocktailId = 2 }) {
+function OrderModal({ open, onClose }) {
   const { barId } = useAuth();
 
   const [tableNumber, setTableNumber] = useState("");

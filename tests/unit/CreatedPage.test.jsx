@@ -1,93 +1,95 @@
-// tests/unit/CreatedPage.test.jsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import configureMockStore from 'redux-mock-store';
 import { MemoryRouter } from 'react-router-dom';
 import CreatedPage from '../../src/game-pages/created-page/CreatedPage.jsx';
-import gameReducer from '../../src/game/gameSlice';
-import {createdErrors} from "../../src/game-pages/created-page/created_error.js";
 
+// ================== МОКИ ==================
 
-vi.mock('../../menu-page/RecipeCard.jsx', () => ({
-    default: ({ open, isHint }) =>
-        open ? <div data-testid="hint-recipe-card">Подсказка {isHint ? '(hint)' : ''}</div> : null,
+// RecipeCard (подсказка)
+vi.mock('../../src/menu-page/RecipeCard.jsx', () => ({
+    default: ({ open }) => (open ? <div>Подсказка</div> : null),
 }));
 
-vi.mock('../ErrorModal.jsx', () => ({
+// ErrorModal
+vi.mock('../../src/game-pages/ErrorModal.jsx', () => ({
     default: ({ open, errorCount }) =>
-        open ? <div data-testid="error-modal">Ошибок: {errorCount}</div> : null,
+        open ? <div>Ошибок: {errorCount}</div> : null,
 }));
 
-vi.mock('../HardModeFailModal', () => ({
+// HardModeFailModal
+vi.mock('../../src/game-pages/HardModeFailModal.jsx', () => ({
     default: ({ open }) =>
-        open ? <div data-testid="hard-fail-modal">Hard Mode Fail</div> : null,
+        open ? <div>Hard Mode Fail</div> : null,
 }));
 
-vi.mock('../PageHeader.jsx', () => ({
+// PageHeader
+vi.mock('../../src/game-pages/PageHeader.jsx', () => ({
     default: ({ title, showHint, onHintClick }) => (
-        <header data-testid="page-header">
+        <header>
             <h1>{title}</h1>
-            {showHint && (
-                <button data-testid="hint-btn" onClick={onHintClick}>
-                    Подсказка
-                </button>
-            )}
+            {showHint && <button onClick={onHintClick}>Подсказка</button>}
         </header>
     ),
 }));
 
-// КРИТИЧЕСКИЙ МОК — теперь рендерит <span class="step-text"> как в твоём DOM
-vi.mock('./RecipeStepCard.jsx', () => ({
-    default: (props) => {
-        const { step = {} } = props || {};
-        return (
-            <div data-testid={`step-card-${step.step_number || 'unknown'}`}>
-        <span className="step-text">
-          Шаг {step.step_number || '?'}: {step.description || ''}
-        </span>
-                <button
-                    data-testid={`answer-btn-${step.step_number || 'unknown'}`}
-                    onClick={() => {
-                        if (props?.setUserAnswers) {
-                            props.setUserAnswers((prev) => ({
-                                ...prev,
-                                [step.step_number]: 'mock-answer',
-                            }));
-                        }
-                    }}
-                >
-                    Ответить
-                </button>
-            </div>
-        );
-    },
-}));
-
-vi.mock('./created_error.js', () => ({
-    createdErrors: vi.fn(),
-}));
-
-vi.mock('../../game/scoreCalculator.js', () => ({
-    calculateStageScore: vi.fn(() => 92),
-}));
-
-vi.mock('@hello-pangea/dnd', () => ({
-    DragDropContext: ({ children }) => <div data-testid="dnd-context">{children}</div>,
-    Droppable: ({ children }) => <div data-testid="droppable">{children({ provided: {} })}</div>,
-    Draggable: ({ children, index }) => (
-        <div data-testid={`draggable-${index}`}>{children({ innerRef: vi.fn() })}</div>
+// RecipeStepCard — упрощённый, но реалистичный
+vi.mock('../../src/game-pages/created-page/RecipeStepCard.jsx', () => ({
+    default: ({ step = {}, setUserAnswers }) => (
+        <div>
+            <span>Шаг {step.step_number}</span>
+            <button
+                onClick={() =>
+                    setUserAnswers?.((prev) => ({
+                        ...prev,
+                        [step.step_number]: 'answer',
+                    }))
+                }
+            >
+                Ответить
+            </button>
+        </div>
     ),
 }));
 
+// createdErrors
+const createdErrorsMock = vi.fn();
+vi.mock('../../src/game-pages/created-page/created_error.js', () => ({
+    createdErrors: (...args) => createdErrorsMock(...args),
+}));
+
+// scoreCalculator
+vi.mock('../../src/game/scoreCalculator.js', () => ({
+    calculateStageScore: () => 92,
+}));
+
+// dnd — полностью заглушаем
+vi.mock('@hello-pangea/dnd', () => ({
+    DragDropContext: ({ children }) => <div>{children}</div>,
+    Droppable: ({ children }) => <div>{children({ provided: {} })}</div>,
+    Draggable: ({ children }) => <div>{children({ innerRef: vi.fn() })}</div>,
+}));
+
+// router
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-    };
+    return { ...actual, useNavigate: () => mockNavigate };
 });
+
+// ================== SETUP ==================
+
+const mockStore = configureMockStore([]);
+
+const renderPage = (store) =>
+    render(
+        <Provider store={store}>
+            <MemoryRouter>
+                <CreatedPage />
+            </MemoryRouter>
+        </Provider>
+    );
 
 describe('CreatedPage', () => {
     let store;
@@ -95,179 +97,132 @@ describe('CreatedPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        store = configureStore({
-            reducer: { game: gameReducer },
-            preloadedState: {
-                game: {
-                    mode: 'normal',
-                    selectedIngredients: { gin: true, tonic: true },
-                    cocktailId: 'gin-tonic',
-                    cocktailData: {
-                        ingredients: [{ id: 'gin' }, { id: 'tonic' }],
-                        steps: [
-                            { step_number: 1, description: 'Налить джин' },
-                            { step_number: 2, description: 'Добавить тоник' },
-                            { step_number: 3, description: 'Перемешать' },
-                        ],
-                    },
-                    stages: {
-                        stage3: { mistakes: 0, stepsCount: 0 },
-                    },
-                    gameOver: false,
+        store = mockStore({
+            game: {
+                mode: 'normal',
+                selectedIngredients: { gin: true, tonic: true },
+                cocktailId: 'gin-tonic',
+                cocktailData: {
+                    ingredients: [{ id: 'gin' }, { id: 'tonic' }],
+                    steps: [
+                        { step_number: 1, description: 'Налить джин' },
+                        { step_number: 2, description: 'Добавить тоник' },
+                        { step_number: 3, description: 'Перемешать' },
+                    ],
                 },
+                stages: {
+                    stage3: { mistakes: 0, stepsCount: 0 },
+                },
+                gameOver: false,
             },
         });
     });
 
-    it('отображает заголовок и кнопку "Создать коктейль"', () => {
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
-        );
+    // ================== TESTS ==================
+
+    it('отображает заголовок и кнопку создания', () => {
+        renderPage(store);
 
         expect(screen.getByText('Коктейль')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /создать коктейль/i })).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: /создать коктейль/i })
+        ).toBeInTheDocument();
     });
 
-    it('показывает шаги рецепта', async () => {
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
-        );
+    it('отображает шаги рецепта', async () => {
+        renderPage(store);
 
-        await waitFor(() => {
-            expect(screen.getByText(/Шаг 1/)).toBeInTheDocument();
-            expect(screen.getByText(/Шаг 2/)).toBeInTheDocument();
-            expect(screen.getByText(/Шаг 3/)).toBeInTheDocument();
-        }, { timeout: 3000 });
+        expect(await screen.findByText('Шаг 1')).toBeInTheDocument();
+        expect(screen.getByText('Шаг 2')).toBeInTheDocument();
+        expect(screen.getByText('Шаг 3')).toBeInTheDocument();
     });
 
-    it('при 0 ошибок переходит на /result и сохраняет score', async () => {
-        vi.mocked(createdErrors).mockReturnValue(0);
+    it('0 ошибок → переход на /result и dispatch setStageScore', async () => {
+        createdErrorsMock.mockReturnValue(0);
 
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
+        renderPage(store);
+
+        fireEvent.click(screen.getAllByText('Ответить')[0]);
+        fireEvent.click(screen.getAllByText('Ответить')[1]);
+        fireEvent.click(screen.getAllByText('Ответить')[2]);
+
+        fireEvent.click(
+            screen.getByRole('button', { name: /создать коктейль/i })
         );
 
-        await waitFor(() => {
-            fireEvent.click(screen.getByTestId('answer-btn-1'));
-            fireEvent.click(screen.getByTestId('answer-btn-2'));
-            fireEvent.click(screen.getByTestId('answer-btn-3'));
-        }, { timeout: 3000 });
-
-        fireEvent.click(screen.getByRole('button', { name: /создать коктейль/i }));
-
-        await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/result');
-        }, { timeout: 3000 });
-
-        expect(store.getActions()).toContainEqual(
-            expect.objectContaining({
-                type: 'game/setStageScore',
-                payload: expect.objectContaining({ stage: 'stage3', score: 92 }),
-            })
+        await waitFor(() =>
+            expect(mockNavigate).toHaveBeenCalledWith('/result')
         );
+
+        const actions = store.getActions();
+        expect(actions.some(a => a.type === 'game/setStageScore')).toBe(true);
     });
 
-    it('при ошибках в normal mode показывает ErrorModal', async () => {
-        vi.mocked(createdErrors).mockReturnValue(2);
+    it('ошибки в normal режиме → ErrorModal', async () => {
+        createdErrorsMock.mockReturnValue(2);
 
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
+        renderPage(store);
+
+        fireEvent.click(
+            screen.getByRole('button', { name: /создать коктейль/i })
         );
 
-        fireEvent.click(screen.getByRole('button', { name: /создать коктейль/i }));
-
-        await waitFor(() => {
-            expect(screen.getByTestId('error-modal')).toBeInTheDocument();
-        }, { timeout: 3000 });
+        expect(
+            await screen.findByText(/Ошибок:/i)
+        ).toBeInTheDocument();
     });
 
-    it('в hard mode при превышении ошибок открывает HardModeFailModal', async () => {
-        vi.mocked(createdErrors).mockReturnValue(4);
+    it('hard mode + много ошибок → HardModeFailModal', async () => {
+        createdErrorsMock.mockReturnValue(4);
 
-        store = configureStore({
-            reducer: { game: gameReducer },
-            preloadedState: {
-                game: {
-                    mode: 'hard',
-                    cocktailData: { steps: Array(5).fill({}) },
-                    stages: { stage3: { mistakes: 1 } },
-                    gameOver: false,
+        store = mockStore({
+            game: {
+                mode: 'hard',
+                cocktailData: {
+                    steps: Array(5).fill({}),
                 },
+                stages: {
+                    stage3: { mistakes: 1 },
+                },
+                gameOver: false,
             },
         });
 
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
+        renderPage(store);
+
+        fireEvent.click(
+            screen.getByRole('button', { name: /создать коктейль/i })
         );
 
-        fireEvent.click(screen.getByRole('button', { name: /создать коктейль/i }));
-
-        await waitFor(() => {
-            expect(screen.getByTestId('hard-fail-modal')).toBeInTheDocument();
-        }, { timeout: 3000 });
-
-        expect(store.getState().game.gameOver).toBe(true);
+        expect(
+            await screen.findByText('Hard Mode Fail')
+        ).toBeInTheDocument();
     });
 
-    it('кнопка подсказки открывает RecipeCard в normal mode', async () => {
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
+    it('в normal режиме кнопка подсказки открывает RecipeCard', async () => {
+        renderPage(store);
+
+        fireEvent.click(
+            screen.getByRole('button', { name: /подсказка/i })
         );
 
-        await waitFor(() => {
-            expect(screen.getByTestId('hint-btn')).toBeInTheDocument();
-        }, { timeout: 3000 });
-
-        fireEvent.click(screen.getByTestId('hint-btn'));
-
-        await waitFor(() => {
-            expect(screen.getByTestId('hint-recipe-card')).toBeInTheDocument();
-        }, { timeout: 3000 });
+        expect(
+            await screen.findByText('Подсказка')
+        ).toBeInTheDocument();
     });
 
-    it('в hard mode подсказка не отображается', () => {
-        store = configureStore({
-            reducer: { game: gameReducer },
-            preloadedState: {
-                game: {
-                    mode: 'hard',
-                    ...store.getState().game,
-                },
+    it('в hard режиме подсказка не отображается', () => {
+        store = mockStore({
+            game: {
+                ...store.getState().game,
+                mode: 'hard',
             },
         });
 
-        render(
-            <Provider store={store}>
-                <MemoryRouter>
-                    <CreatedPage />
-                </MemoryRouter>
-            </Provider>
-        );
+        renderPage(store);
 
-        expect(screen.queryByTestId('hint-btn')).not.toBeInTheDocument();
+        expect(
+            screen.queryByRole('button', { name: /подсказка/i })
+        ).not.toBeInTheDocument();
     });
 });

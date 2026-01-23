@@ -34,6 +34,7 @@ describe('LevelPage', () => {
         mockNavigate.mockClear();
         mockDispatch.mockClear();
         vi.mocked(drawOlive).mockClear();
+        window.ym = vi.fn();
     });
 
     const renderLevelPage = () => {

@@ -45,6 +45,9 @@ function CreatedPage() {
             dispatch(addStageMistake({ stage: 'stage3', count: totalErrors }));
             setErrorCount(totalErrors);
             setErrorModalOpen(true);
+
+            window.ym(106396717,'reachGoal','create_error', {count: totalErrors});
+
         } else {
             goTo("/result");
         }
@@ -67,7 +70,11 @@ function CreatedPage() {
                 showHint={mode !== "hard"}
                 hintCanvasRef={hintRef}
                 onBack={() => { goTo(-1) }}
-                onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage3' })); }}
+                onHintClick={() => {
+                    setIsHintOpen(true);
+                    dispatch(addHintUsage({ stage: 'stage3' }));
+                    window.ym(106396717,'reachGoal','hints3')
+                }}
             />
             {isHintOpen && (
                 <RecipeCard

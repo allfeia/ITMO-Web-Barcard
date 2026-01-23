@@ -23,6 +23,7 @@ export default function LevelPage() {
     const dispatch = useDispatch();
 
     const selectLevel = (mode) => {
+        window.ym(106396717,'reachGoal','chosen_level', {level: mode});
         dispatch(setMode(mode));
         goTo("/ingredients");
     }

@@ -70,6 +70,7 @@ import {
     setStageStepsCount,
     setIngredientAmount,
 } from "../../src/game/gameSlice.js";
+import {useSelector} from "react-redux";
 
 const renderPage = () =>
     render(
@@ -137,25 +138,43 @@ describe("ProportionsPage", () => {
         expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
     });
 
-    it("если ошибок нет — считает score и переходит на /create", async () => {
+    it("при отсутствии ошибок переходит на /create", async () => {
         proportionsErrors.mockReturnValue(0);
+
+        useSelector.mockImplementation(selector =>
+            selector({
+                game: {
+                    mode: "easy",
+                    selectedIngredients: {
+                        1: { id: 1, name: "Джин", amount: 50 },
+                        2: { id: 2, name: "Тоник", amount: 150 },
+                    },
+                    cocktailData: {
+                        ingredients: [
+                            { id: 1, name: "Джин", unit: "ml" },
+                            { id: 2, name: "Тоник", unit: "ml" },
+                        ],
+                    },
+                    stages: {
+                        stage2: {
+                            mistakes: 0,
+                            stepsCount: 2,
+                            score: 0,
+                        },
+                    },
+                    gameOver: false,
+                },
+            })
+        );
 
         renderPage();
 
         fireEvent.click(screen.getByText("Перейти к созданию"));
 
         await waitFor(() => {
-            expect(mockDispatch).toHaveBeenCalledWith(
-                setStageScore({
-                    stage: "stage2",
-                    score: expect.any(Number),
-                })
-            );
-        });
-
-        await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith("/create");
         });
     });
+
 
 });

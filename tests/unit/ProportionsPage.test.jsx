@@ -19,8 +19,8 @@ vi.mock("react-redux", async () => {
     const actual = await vi.importActual("react-redux");
     return {
         ...actual,
-        useDispatch: vi.fn(),
-        useSelector: vi.fn(),
+        useDispatch: () => mockDispatch,           // ← здесь лучше () => mockDispatch
+        useSelector: vi.fn(),                      // ← пока пустой, реализацию добавим ниже
     };
 });
 
@@ -52,6 +52,32 @@ import {
     setIngredientAmount,
 } from "../../src/game/gameSlice.js";
 
+const mockState = {
+    game: {
+        mode: "easy",
+        cocktailId: 1,
+        gameOver: false,
+        selectedIngredients: {
+            1: { id: 1, name: "Лайм", amount: 20 },
+        },
+        cocktailData: {
+            ingredients: [
+                { id: 1, name: "Лайм", unit: "мл", amount: 30 }, // amount исправлен (было amout → опечатка)
+            ],
+        },
+        stages: {
+            stage2: {
+                mistakes: 0,
+                stepsCount: 0,
+                score: 0,
+            },
+        },
+    },
+};
+
+// ← Самое важное: реализуем useSelector так, чтобы он вызывал переданный селектор
+redux.useSelector.mockImplementation((selector) => selector(mockState));
+
 const renderPage = () =>
     render(
         <MemoryRouter>
@@ -62,31 +88,8 @@ const renderPage = () =>
 describe("ProportionsPage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-
-        redux.useDispatch.mockReturnValue(mockDispatch);
-
-        redux.useSelector.mockReturnValue({
-            game: {
-                mode: "easy",
-                cocktailId: 1,
-                gameOver: false,
-                selectedIngredients: {
-                    1: { id: 1, name: "Лайм", amount: 20 },
-                },
-                cocktailData: {
-                    ingredients: [
-                        { id: 1, name: "Лайм", unit: "мл", amout: 30 },
-                    ],
-                },
-                stages: {
-                    stage2: {
-                        mistakes: 0,
-                        stepsCount: 0,
-                        score: 0,
-                    },
-                },
-            },
-        });
+        // useDispatch уже замокан выше через () => mockDispatch
+        // useSelector уже настроен через mockImplementation выше
     });
 
     it("рендерит заголовок страницы", () => {
@@ -96,9 +99,7 @@ describe("ProportionsPage", () => {
 
     it("рендерит кнопку перехода", () => {
         renderPage();
-        expect(
-            screen.getByText("Перейти к созданию")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Перейти к созданию")).toBeInTheDocument();
     });
 
     it("рисует выбранные ингредиенты с количеством", () => {

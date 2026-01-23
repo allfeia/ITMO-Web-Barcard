@@ -1,108 +1,189 @@
+// Result.test.jsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import Result from "../../src/game-pages/result-page/Result.jsx";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
-vi.mock("../../src/authContext/useAuth.js", () => ({
+import { useSelector } from "react-redux";
+import Result from "../../src/game-pages/result-page/Result.jsx";
+import {useAuth} from "../../src/authContext/useAuth.js";
+
+const navigateMock = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
+
+vi.mock("../../authContext/useAuth.js", () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock("../../src/game-pages/OderCard.jsx", () => ({
-  default: ({ open, onClose, cocktailId }) => (
-    <div data-testid="order-modal">
-      <div data-testid="open">{String(open)}</div>
-      <div data-testid="cocktailId">{String(cocktailId)}</div>
-      <button onClick={onClose}>close</button>
-    </div>
-  ),
-}));
+vi.mock("react-redux", async () => {
+  const actual = await vi.importActual("react-redux");
+  return {
+    ...actual,
+    useSelector: vi.fn(),
+  };
+});
 
-const { useAuth } = await import("../../src/authContext/useAuth.js");
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
+vi.mock("./CocktailCanvas", () => ({
+  default: () => <div data-testid="cocktail-canvas" />,
+}));
 
 describe("Result", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear(); // очищаем флаг scoreSent
+
+    // По умолчанию: не бармен, очков 0
+    vi.mocked(useAuth).mockReturnValue({
+      isBarman: false,
+      currentUser: null,
+    });
+
+    vi.mocked(useSelector).mockImplementation((selector) =>
+        selector({
+          game: {
+            stages: {
+              stage1: { score: 0 },
+              stage2: { score: 0 },
+              stage3: { score: 0 },
+            },
+          },
+        })
+    );
   });
 
-  it("рендерит заголовок", () => {
-    useAuth.mockReturnValue({ roles: [] });
+  it("отображает 'Ваш результат' и кнопку 'Заказать' для обычного пользователя", () => {
+    render(<Result />);
+
+    expect(screen.getByText(/Ваш результат: 0 ★/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Заказать/i })).toBeInTheDocument();
+    expect(screen.queryByText("Рейтинг")).not.toBeInTheDocument();
+  });
+
+  it("отображает ссылку 'Рейтинг' и скрывает 'Заказать' для бармена", () => {
+    vi.mocked(useAuth).mockReturnValue({
+      isBarman: true,
+      currentUser: { login: "ivan" },
+    });
+
+    vi.mocked(useSelector).mockReturnValue(150);
 
     render(<Result />);
 
-    expect(screen.getByRole("heading", { name: /result/i })).toBeInTheDocument();
+    const ratingLink = screen.getByRole("link", { name: "Рейтинг" });
+    expect(ratingLink).toBeInTheDocument();
+    expect(ratingLink).toHaveAttribute("href", "/top");
+
+    expect(screen.getByText(/Рейтинг: 150 ★/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Заказать/i })).not.toBeInTheDocument();
   });
 
-  it("показывает кнопку 'Заказать' для пользователя без ролей staff/bar_admin", () => {
-    useAuth.mockReturnValue({ roles: ["user"] });
+  it("отправляет очки на сервер для бармена при totalScore > 0 и currentUser.login", async () => {
+    const today = new Date().toLocaleDateString();
+
+    vi.mocked(useAuth).mockReturnValue({
+      isBarman: true,
+      currentUser: { id: 42, login: "ivan" },
+    });
+
+    vi.mocked(useSelector).mockReturnValue(200);
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true, newScore: 1622 }),
+    });
 
     render(<Result />);
 
-    expect(
-      screen.getByRole("button", { name: "Заказать" })
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+          "/api/rating/update-score",
+          expect.objectContaining({
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ login: "ivan", score: 200 }),
+          })
+      );
+    });
+
+    expect(localStorage.getItem(`scoreSent_42_${today}`)).toBe("true");
   });
 
-  it("скрывает кнопку 'Заказать' для staff", () => {
-    useAuth.mockReturnValue({ roles: ["staff"] });
+  it("не отправляет очки, если не бармен", () => {
+    vi.mocked(useAuth).mockReturnValue({
+      isBarman: false,
+      currentUser: { login: "guest" },
+    });
+
+    vi.mocked(useSelector).mockReturnValue(300);
 
     render(<Result />);
 
-    expect(
-      screen.queryByRole("button", { name: "Заказать" })
-    ).not.toBeInTheDocument();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("скрывает кнопку 'Заказать' для bar_admin", () => {
-    useAuth.mockReturnValue({ roles: ["bar_admin"] });
+  it("не отправляет очки, если totalScore = 0", () => {
+    vi.mocked(useAuth).mockReturnValue({
+      isBarman: true,
+      currentUser: { login: "ivan" },
+    });
+
+    vi.mocked(useSelector).mockReturnValue(0);
 
     render(<Result />);
 
-    expect(
-      screen.queryByRole("button", { name: "Заказать" })
-    ).not.toBeInTheDocument();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("открывает модалку по клику 'Заказать' и прокидывает cocktailId=2", () => {
-    useAuth.mockReturnValue({ roles: ["user"] });
+  it("не отправляет очки повторно в один день", async () => {
+    const today = new Date().toLocaleDateString();
+    localStorage.setItem(`scoreSent_42_${today}`, "true");
+
+    vi.mocked(useAuth).mockReturnValue({
+      isBarman: true,
+      currentUser: { id: 42, login: "ivan" },
+    });
+
+    vi.mocked(useSelector).mockReturnValue(100);
 
     render(<Result />);
 
-    expect(screen.getByTestId("open")).toHaveTextContent("false");
-    expect(screen.getByTestId("cocktailId")).toHaveTextContent("2");
-
-    fireEvent.click(screen.getByRole("button", { name: "Заказать" }));
-
-    expect(screen.getByTestId("open")).toHaveTextContent("true");
+    await waitFor(() => {
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
   });
 
-  it("закрывает модалку по onClose (кнопка close в мокнутой модалке)", () => {
-    useAuth.mockReturnValue({ roles: ["user"] });
-
+  it("кнопка 'Переиграть' ведёт на /levelPage", () => {
     render(<Result />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Заказать" }));
-    expect(screen.getByTestId("open")).toHaveTextContent("true");
+    fireEvent.click(screen.getByTitle("переиграть"));
 
-    fireEvent.click(screen.getByRole("button", { name: "close" }));
-    expect(screen.getByTestId("open")).toHaveTextContent("false");
+    expect(navigateMock).toHaveBeenCalledWith("/levelPage");
   });
 
-  it("корректно работает, если roles приходит строкой", () => {
-    useAuth.mockReturnValue({ roles: "staff" });
-
+  it("кнопка 'Бар' ведёт на /menu", () => {
     render(<Result />);
 
-    expect(
-      screen.queryByRole("button", { name: "Заказать" })
-    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTitle("бар"));
+
+    expect(navigateMock).toHaveBeenCalledWith("/menu");
   });
 
-  it("корректно работает, если roles = null/undefined", () => {
-    useAuth.mockReturnValue({ roles: null });
-
+  it("рендерит CocktailCanvas", () => {
     render(<Result />);
 
-    expect(
-      screen.getByRole("button", { name: "Заказать" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("cocktail-canvas")).toBeInTheDocument();
+  });
+
+  it("отображает 'Готово!' как заголовок", () => {
+    render(<Result />);
+
+    expect(screen.getByRole("heading", { name: "Готово!" })).toBeInTheDocument();
   });
 });

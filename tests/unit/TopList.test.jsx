@@ -28,7 +28,7 @@ describe("TopList", () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        vi.mocked(useAuth).mockReturnValue({
+        vi.spyOn({ useAuth }, 'useAuth').mockReturnValue({
             barId: 123,
             barName: "Olive Bar",
             barSite: "https://olivebarandkitchen.com",

@@ -27,6 +27,7 @@ import CreatedPage from "./game-pages/created-page/CreatedPage.jsx";
 import Result from "./game-pages/result-page/Result.jsx";
 import TopList from "./topList/TopList.jsx";
 import OderCard from "./game-pages/OderCard.jsx";
+import OrderModal from "./game-pages/OderCard.jsx";
 
 Sentry.init({
     dsn: "https://ff863d9ec402606b1c0666c164a5ba2f@o4510535321255936.ingest.us.sentry.io/4510535479132160",
@@ -64,7 +65,7 @@ createRoot(document.getElementById('root')).render(
                         <Route path="/proportions" element={<ProportionsPage />} />
                         <Route path="/create" element={<CreatedPage />} />
                         <Route path="/result" element={<Result />} />
-                        <Route path="/order" element={<OderCard />} />
+                        <Route path="/order" element={<OrderModal />} />
                         <Route path="/top" element={<TopList />} />
 
 

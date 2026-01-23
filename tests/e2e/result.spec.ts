@@ -23,6 +23,6 @@ test.describe('Result page E2E', () => {
         await expect(orderButton).toBeVisible();
 
         await orderButton.click();
-        await expect(page).toHaveURL('/order');
+        await expect(page.getByRole('heading', { name: 'Заказ' })).toBeVisible();
     });
 });

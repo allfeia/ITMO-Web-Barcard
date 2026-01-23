@@ -65,7 +65,6 @@ createRoot(document.getElementById('root')).render(
                         <Route path="/proportions" element={<ProportionsPage />} />
                         <Route path="/create" element={<CreatedPage />} />
                         <Route path="/result" element={<Result />} />
-                        <Route path="/order" element={<OrderModal />} />
                         <Route path="/top" element={<TopList />} />
 
 

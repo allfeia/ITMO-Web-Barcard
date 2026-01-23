@@ -6,6 +6,10 @@ vi.mock("../../src/authContext/useAuth.js", () => ({
   useAuth: vi.fn(),
 }));
 
+vi.mock("react-redux", () => ({
+  useSelector: vi.fn(),
+}));
+
 vi.mock("../../src/game-pages/OderCard.jsx", () => ({
   default: ({ open, onClose, cocktailId }) => (
     <div data-testid="order-modal">
@@ -17,17 +21,19 @@ vi.mock("../../src/game-pages/OderCard.jsx", () => ({
 }));
 
 const { useAuth } = await import("../../src/authContext/useAuth.js");
+const { useSelector } = await import("react-redux");
 
 describe("Result", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAuth.mockReturnValue({ roles: [] });
+    useSelector.mockImplementation((selectorFn) =>
+      selectorFn({ game: { cocktailId: 2 } })
+    );
   });
 
   it("рендерит заголовок", () => {
-    useAuth.mockReturnValue({ roles: [] });
-
     render(<Result />);
-
     expect(screen.getByRole("heading", { name: /result/i })).toBeInTheDocument();
   });
 
@@ -36,9 +42,7 @@ describe("Result", () => {
 
     render(<Result />);
 
-    expect(
-      screen.getByRole("button", { name: "Заказать" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Заказать" })).toBeInTheDocument();
   });
 
   it("скрывает кнопку 'Заказать' для staff", () => {
@@ -46,9 +50,7 @@ describe("Result", () => {
 
     render(<Result />);
 
-    expect(
-      screen.queryByRole("button", { name: "Заказать" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Заказать" })).not.toBeInTheDocument();
   });
 
   it("скрывает кнопку 'Заказать' для bar_admin", () => {
@@ -56,9 +58,7 @@ describe("Result", () => {
 
     render(<Result />);
 
-    expect(
-      screen.queryByRole("button", { name: "Заказать" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Заказать" })).not.toBeInTheDocument();
   });
 
   it("открывает модалку по клику 'Заказать' и прокидывает cocktailId=2", () => {
@@ -91,9 +91,7 @@ describe("Result", () => {
 
     render(<Result />);
 
-    expect(
-      screen.queryByRole("button", { name: "Заказать" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Заказать" })).not.toBeInTheDocument();
   });
 
   it("корректно работает, если roles = null/undefined", () => {
@@ -101,8 +99,17 @@ describe("Result", () => {
 
     render(<Result />);
 
-    expect(
-      screen.getByRole("button", { name: "Заказать" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Заказать" })).toBeInTheDocument();
+  });
+
+  it("прокидывает в модалку cocktailId из redux (пример: 7)", () => {
+    useAuth.mockReturnValue({ roles: ["user"] });
+    useSelector.mockImplementation((selectorFn) =>
+      selectorFn({ game: { cocktailId: 7 } })
+    );
+
+    render(<Result />);
+
+    expect(screen.getByTestId("cocktailId")).toHaveTextContent("7");
   });
 });

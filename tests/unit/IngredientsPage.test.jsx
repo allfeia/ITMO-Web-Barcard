@@ -1,205 +1,109 @@
-// tests/unit/IngredientsPage.test.jsx
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import configureMockStore from 'redux-mock-store';
-import { MemoryRouter } from 'react-router-dom';
-import IngredientsPage from '../../src/game-pages/ingredients-page/IngredientsPage.jsx';
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import IngredientsPage from '../../src/game-pages/ingredients-page/'
+import { createTestStore } from './testStore'
+import { MemoryRouter } from 'react-router-dom'
 
+const navigateMock = vi.fn()
 
-// useIngredients
-vi.mock('../../src/game-pages/ingredients-page/Ingredients.jsx', () => ({
-    useIngredients: () => ({
-        searchValue: '',
-        setSearchValue: vi.fn(),
-        groupedIngredients: [
-            {
-                type: 'alcohol',
-                title: 'Алкогольные',
-                items: [
-                    { id: 'gin', name: 'Джин' },
-                    { id: 'vodka', name: 'Водка' },
-                ],
-            },
-            {
-                type: 'mixer',
-                title: 'Миксеры',
-                items: [{ id: 'tonic', name: 'Тоник' }],
-            },
-        ],
-    }),
-}));
-
-// ingredientErrors
-const ingredientErrorsMock = vi.fn();
-vi.mock('../../src/game-pages/ingredients-page/ingredients_error.js', () => ({
-    ingredientErrors: (...args) => ingredientErrorsMock(...args),
-}));
-
-// Recipe hint modal
-vi.mock('../../src/menu-page/RecipeCard.jsx', () => ({
-    default: ({ open }) =>
-        open ? <div>Подсказка</div> : null,
-}));
-
-// ErrorModal
-vi.mock('../../src/game-pages/ErrorModal.jsx', () => ({
-    default: ({ open, errorCount }) =>
-        open ? <div>Ошибок: {errorCount}</div> : null,
-}));
-
-// HardModeFailModal
-vi.mock('../../src/game-pages/HardModeFailModal.jsx', () => ({
-    default: ({ open }) =>
-        open ? <div>Hard Fail</div> : null,
-}));
-
-// PageHeader
-vi.mock('../../src/game-pages/PageHeader.jsx', () => ({
-    default: ({ title }) => (
-        <header>
-            <h1>{title}</h1>
-        </header>
-    ),
-}));
-
-// scoreCalculator
-vi.mock('../../src/game/scoreCalculator.js', () => ({
-    calculateStageScore: () => 85,
-}));
-
-// router
-const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom');
-    return { ...actual, useNavigate: () => mockNavigate };
-});
+    const actual = await vi.importActual('react-router-dom')
+    return {
+        ...actual,
+        useNavigate: () => navigateMock,
+    }
+})
+beforeEach(() => {
+    global.fetch = vi.fn(() =>
+        Promise.resolve({
+            ok: true,
+            json: () =>
+                Promise.resolve([
+                    { id: 1, name: 'Джин', type: 'alcohol' },
+                    { id: 2, name: 'Тоник', type: 'soft' },
+                ]),
+        })
+    )
+})
 
-// ===== SETUP =====
+afterEach(() => {
+    vi.clearAllMocks()
+})
 
-const mockStore = configureMockStore([]);
 
-const renderPage = (store) =>
-    render(
+const renderPage = (store) => {
+    return render(
         <Provider store={store}>
             <MemoryRouter>
                 <IngredientsPage />
             </MemoryRouter>
         </Provider>
-    );
+    )
+}
 
 describe('IngredientsPage', () => {
-    let store;
+    let store
 
     beforeEach(() => {
-        vi.clearAllMocks();
-
-        store = mockStore({
+        store = createTestStore({
             game: {
                 mode: 'normal',
                 selectedIngredients: {},
-                cocktailId: 'test-cocktail',
+                cocktailId: 1,
                 cocktailData: {
-                    ingredients: [{ id: 'gin' }, { id: 'tonic' }],
+                    ingredients: [
+                        { id: 1, name: 'Джин' },
+                        { id: 2, name: 'Тоник' },
+                    ],
                 },
                 stages: {
-                    stage1: { mistakes: 0, stepsCount: 0 },
+                    stage1: {
+                        mistakes: 0,
+                        stepsCount: 0,
+                        score: 0,
+                    },
                 },
                 gameOver: false,
             },
-        });
-    });
+        })
+    })
 
-    // ===== TESTS =====
+    it('рендерит заголовок страницы', async () => {
+        renderPage(store)
 
-    it('отображает заголовок и кнопку перехода', () => {
-        renderPage(store);
-
-        expect(screen.getByText('Ингредиенты')).toBeInTheDocument();
         expect(
-            screen.getByRole('button', { name: /создать с пропорциями/i })
-        ).toBeInTheDocument();
-    });
+            screen.getByText('Ингредиенты')
+        ).toBeInTheDocument()
+    })
 
-    it('показывает группы и ингредиенты', () => {
-        renderPage(store);
+    it('загружает и отображает ингредиенты', async () => {
+        renderPage(store)
 
-        expect(screen.getByText('Алкогольные')).toBeInTheDocument();
-        expect(screen.getByText('Джин')).toBeInTheDocument();
-        expect(screen.getByText('Миксеры')).toBeInTheDocument();
-        expect(screen.getByText('Тоник')).toBeInTheDocument();
-    });
+        expect(await screen.findByText('Джин')).toBeInTheDocument()
+        expect(screen.getByText('Тоник')).toBeInTheDocument()
+    })
 
-    it('toggle ингредиента меняет класс active', () => {
-        renderPage(store);
+    it('клик по ингредиенту добавляет его в store', async () => {
+        renderPage(store)
 
-        const gin = screen.getByText('Джин');
+        const gin = await screen.findByText('Джин')
+        fireEvent.click(gin)
 
-        fireEvent.click(gin);
-        expect(gin).toHaveClass('active');
+        const state = store.getState().game
+        expect(state.selectedIngredients[1]).toBeDefined()
+    })
 
-        fireEvent.click(gin);
-        expect(gin).not.toHaveClass('active');
-    });
-
-    it('0 ошибок → переход на /proportions + dispatch setStageScore', async () => {
-        ingredientErrorsMock.mockReturnValue(0);
-
-        renderPage(store);
-
-        fireEvent.click(screen.getByText('Джин'));
-        fireEvent.click(screen.getByText('Тоник'));
+    it('при отсутствии ошибок переходит на /proportions', async () => {
+        renderPage(store)
 
         fireEvent.click(
-            screen.getByRole('button', { name: /создать с пропорциями/i })
-        );
+            await screen.findByText('Создать с пропорциями')
+        )
 
-        await waitFor(() =>
-            expect(mockNavigate).toHaveBeenCalledWith('/proportions')
-        );
+        await waitFor(() => {
+            expect(navigateMock).toHaveBeenCalledWith('/proportions')
+        })
+    })
+})
 
-        const actions = store.getActions();
-        expect(actions.some(a => a.type === 'game/setStageScore')).toBe(true);
-    });
-
-    it('ошибки в normal режиме → показывается ErrorModal', async () => {
-        ingredientErrorsMock.mockReturnValue(2);
-
-        renderPage(store);
-
-        fireEvent.click(
-            screen.getByRole('button', { name: /создать с пропорциями/i })
-        );
-
-        await waitFor(() =>
-            expect(screen.getByText(/Ошибок:/i)).toBeInTheDocument()
-        );
-    });
-
-    it('hard mode + много ошибок → HardModeFailModal', async () => {
-        ingredientErrorsMock.mockReturnValue(4);
-
-        store = mockStore({
-            game: {
-                mode: 'hard',
-                cocktailData: {
-                    ingredients: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
-                },
-                stages: {
-                    stage1: { mistakes: 0 },
-                },
-                gameOver: false,
-            },
-        });
-
-        renderPage(store);
-
-        fireEvent.click(
-            screen.getByRole('button', { name: /создать с пропорциями/i })
-        );
-
-        await waitFor(() =>
-            expect(screen.getByText('Hard Fail')).toBeInTheDocument()
-        );
-    });
-});

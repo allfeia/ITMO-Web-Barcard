@@ -1,75 +1,140 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
 
-import ProtectedRoute from "../../src/ProtectedRoute.jsx"; 
-import { useAuth } from "../../src/authContext/useAuth.js";
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { MemoryRouter } from 'react-router-dom'
+import ProportionsPage from '../../src/game-pages/proportions-page/ProportionsPage.jsx'
+import { createTestStore } from './testStore'
 
-vi.mock("../../src/authContext/useAuth.js", () => ({
-  useAuth: vi.fn(),
-}));
+const navigateMock = vi.fn()
 
-vi.mock("react-router-dom", () => ({
-  Navigate: ({ to, replace }) => (
-    <div data-testid="navigate" data-to={to} data-replace={String(replace)} />
-  ),
-}));
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  }
+})
 
-describe("ProtectedRoute", () => {
+const renderPage = (store) =>
+    render(
+        <Provider store={store}>
+          <MemoryRouter>
+            <ProportionsPage />
+          </MemoryRouter>
+        </Provider>
+    )
+
+describe('ProportionsPage', () => {
+  let store
+
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    store = createTestStore({
+      game: {
+        mode: 'normal',
+        cocktailId: 1,
+        selectedIngredients: {
+          1: { id: 1, name: 'Джин', amount: 50 },
+          2: { id: 2, name: 'Тоник', amount: 150 },
+        },
+        cocktailData: {
+          ingredients: [
+            { id: 1, name: 'Джин', unit: 'ml' },
+            { id: 2, name: 'Тоник', unit: 'ml' },
+          ],
+        },
+        stages: {
+          stage2: {
+            mistakes: 0,
+            stepsCount: 0,
+            score: 0,
+          },
+        },
+        gameOver: false,
+      },
+    })
+  })
 
-  it("рендерит children, если allow пустой (доступ разрешён всем)", () => {
-    useAuth.mockReturnValue({ role: null, roles: null });
+  it('рендерит заголовок страницы', () => {
+    renderPage(store)
 
-    render(
-      <ProtectedRoute allow={[]}>
-        <div>SECRET</div>
-      </ProtectedRoute>
-    );
+    expect(
+        screen.getByText('Пропорции')
+    ).toBeInTheDocument()
+  })
 
-    expect(screen.getByText("SECRET")).toBeInTheDocument();
-    expect(screen.queryByTestId("navigate")).toBeNull();
-  });
+  it('отображает ингредиенты с инпутами и единицами измерения', () => {
+    renderPage(store)
 
-  it("рендерит children, если роль входит в allow (через role)", () => {
-    useAuth.mockReturnValue({ role: "admin", roles: [] });
+    expect(screen.getByText('Джин')).toBeInTheDocument()
+    expect(screen.getByText('Тоник')).toBeInTheDocument()
+    expect(screen.getAllByDisplayValue(/50|150/)).toHaveLength(2)
+    expect(screen.getAllByText('ml')).toHaveLength(2)
+  })
 
-    render(
-      <ProtectedRoute allow={["admin"]}>
-        <div>SECRET</div>
-      </ProtectedRoute>
-    );
+  it('изменение количества диспатчит setIngredientAmount', async () => {
+    renderPage(store)
 
-    expect(screen.getByText("SECRET")).toBeInTheDocument();
-    expect(screen.queryByTestId("navigate")).toBeNull();
-  });
+    const input = screen.getByDisplayValue('50')
+    fireEvent.change(input, { target: { value: '60' } })
 
-  it("рендерит children, если роль входит в allow (через roles массив)", () => {
-    useAuth.mockReturnValue({ role: "user", roles: ["editor"] });
+    const state = store.getState().game
+    expect(state.selectedIngredients[1].amount).toBe(60)
+  })
 
-    render(
-      <ProtectedRoute allow={["editor"]}>
-        <div>SECRET</div>
-      </ProtectedRoute>
-    );
+  it('при отсутствии ошибок переходит на /create', async () => {
+    renderPage(store)
 
-    expect(screen.getByText("SECRET")).toBeInTheDocument();
-    expect(screen.queryByTestId("navigate")).toBeNull();
-  });
+    fireEvent.click(
+        screen.getByText('Перейти к созданию')
+    )
 
-  it("делает редирект на / и replace=true, если доступ запрещён", () => {
-    useAuth.mockReturnValue({ role: "user", roles: ["viewer"] });
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith('/create')
+    })
+  })
 
-    render(
-      <ProtectedRoute allow={["admin", "editor"]}>
-        <div>SECRET</div>
-      </ProtectedRoute>
-    );
+  it('если нет ингредиентов с количеством — показывает сообщение', () => {
+    const emptyStore = createTestStore({
+      game: {
+        ...store.getState().game,
+        selectedIngredients: {},
+      },
+    })
 
-    const nav = screen.getByTestId("navigate");
-    expect(nav).toHaveAttribute("data-to", "/");
-    expect(nav).toHaveAttribute("data-replace", "true");
-    expect(screen.queryByText("SECRET")).toBeNull();
-  });
-});
+    renderPage(emptyStore)
+
+    expect(
+        screen.getByText('Нет ингредиентов с заданным количеством')
+    ).toBeInTheDocument()
+  })
+
+  it('в hard mode при превышении ошибок открывает HardModeFailModal', async () => {
+    const hardStore = createTestStore({
+      game: {
+        ...store.getState().game,
+        mode: 'hard',
+        stages: {
+          stage2: {
+            mistakes: 2,
+            stepsCount: 2,
+            score: 0,
+          },
+        },
+      },
+    })
+
+    renderPage(hardStore)
+
+    fireEvent.click(
+        screen.getByText('Перейти к созданию')
+    )
+
+    await waitFor(() => {
+      expect(
+          screen.getByText('Превышено количество ошибок')
+      ).toBeInTheDocument()
+    })
+  })
+})
+

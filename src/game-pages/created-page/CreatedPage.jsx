@@ -99,7 +99,11 @@ function CreatedPage() {
                 showHint={mode !== "hard"}
                 hintCanvasRef={hintRef}
                 onBack={() => { goTo(-1) }}
-                onHintClick={() => { setIsHintOpen(true); dispatch(addHintUsage({ stage: 'stage3' })); }}
+                onHintClick={() => {
+                    setIsHintOpen(true);
+                    dispatch(addHintUsage({ stage: 'stage3' }));
+                    window.ym(106396717,'reachGoal','hints3')
+                }}
             />
 
             {isHintOpen && (

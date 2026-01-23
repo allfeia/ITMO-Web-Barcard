@@ -97,7 +97,7 @@ describe("FavouritesPage", () => {
             </MemoryRouter>
         );
 
-        const arrow = screen.getByTestId("WestIcon"); // если MUI позволяет, иначе через роль
+        const arrow = screen.getByTestId("WestIcon");
 
         await userEvent.click(arrow);
 

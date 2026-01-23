@@ -26,21 +26,14 @@ export const ratingHandlers = [
     http.post("/api/rating/update-score", async ({ request }) => {
         try {
             const { login, score } = await request.json();
-
             const userIndex = db.users.findIndex(user => user.login === login);
-
             if (userIndex === -1) {
                 return HttpResponse.json({ error: "Пользователь не найден" }, { status: 404 });
             }
 
-            // Важно: преобразуем score в число
-            const addedScore = Number(score);
-            db.users[userIndex].score += addedScore;
-
-            // Сохраняем изменения
+            db.users[userIndex].score = (db.users[userIndex].score || 0) + Number(score);
             persistDb();
-
-            console.log(`Очки обновлены для ${login}: +${addedScore} → ${db.users[userIndex].score}`);
+            console.log(`Очки обновлены для ${login}: +${score} → ${db.users[userIndex].score}`);
 
             return HttpResponse.json({
                 success: true,

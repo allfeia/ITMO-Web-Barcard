@@ -2,13 +2,12 @@
 function persistDb() {
     try {
         localStorage.setItem('mockDb', JSON.stringify(db));
-        console.log("Mок-бд сохранена в localStorage");
+        console.log("Мок-бд сохранена в localStorage");
     } catch (err) {
         console.error("Ошибка сохранения mockDb:", err);
     }
 }
 
-// Загрузка из localStorage при старте
 let loadedDb = null;
 try {
     const saved = localStorage.getItem('mockDb');
@@ -20,7 +19,6 @@ try {
     console.warn("Не удалось загрузить сохранённую mockDb:", err);
 }
 
-// Исходные данные (только если ничего не сохранено)
 const defaultDb = {
     bars: [
         {
@@ -114,8 +112,6 @@ const defaultDb = {
     ],
 };
 
-// Экспортируем либо загруженную, либо дефолтную
 export const db = loadedDb || defaultDb;
 
-// Экспортируем функцию сохранения (чтобы использовать в handlers)
 export { persistDb };

@@ -10,7 +10,7 @@ import { useAuth } from "../../authContext/useAuth.js";
 
 function Result() {
     const navigate = useNavigate();
-    const { isBarman, currentUser } = useAuth();
+    const { isBarman, currentUser } = useAuth(); // ← всё из контекста
 
     const totalScore = useSelector((state) => {
         const stages = state.game.stages;
@@ -31,13 +31,13 @@ function Result() {
         const sendScoreToServer = async () => {
             const today = new Date().toLocaleDateString();
             const scoreSentKey = `scoreSent_${currentUser.id}_${today}`;
-            const scoreSent = localStorage.getItem(scoreSentKey);
 
-            if (scoreSent) return;
+            if (localStorage.getItem(scoreSentKey)) return;
 
             try {
                 const response = await fetch('/api/rating/update-score', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         login: currentUser.login,
@@ -47,11 +47,13 @@ function Result() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Очки успешно обновлены:', data);
+                    console.log('Очки успешно добавлены к рейтингу:', data);
                     localStorage.setItem(scoreSentKey, 'true');
+                } else {
+                    console.error('Ошибка сервера:', await response.text());
                 }
             } catch (error) {
-                console.error('Ошибка отправки очков:', error);
+                console.error('Ошибка сети при отправке очков:', error);
             }
         };
 

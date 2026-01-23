@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-
 import {useAuth} from "../../src/authContext/useAuth.js";
 import TopList from "../../src/topList/TopList.jsx";
 
-vi.mock("../authContext/useAuth.js", () => ({
-    useAuth: vi.fn(),
-}));
+
+vi.mock("../authContext/useAuth.js", () => {
+    const useAuth = vi.fn();
+    return { useAuth };
+});
 
 const navigateMock = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -16,6 +17,7 @@ vi.mock("react-router-dom", async () => {
         useNavigate: () => navigateMock,
     };
 });
+
 const windowOpenMock = vi.fn();
 vi.stubGlobal("open", windowOpenMock);
 
@@ -140,7 +142,7 @@ describe("TopList", () => {
 
         await waitFor(() => {
             const barText = screen.getByText("Test Bar");
-            expect(barText.tagName).not.toBe("A"); // <span>
+            expect(barText.tagName).not.toBe("A"); // это <span>
             expect(barText).toBeInTheDocument();
         });
     });
@@ -169,5 +171,6 @@ describe("TopList", () => {
         render(<TopList />);
 
         expect(screen.getByText("ID бара не найден")).toBeInTheDocument();
+        expect(mockFetch).not.toHaveBeenCalled();
     });
 });

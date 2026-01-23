@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import Result from "../../src/game-pages/result/Result";
+import Result from "../../src/game-pages/result-page/Result";
 
 const navigateMock = vi.fn();
 

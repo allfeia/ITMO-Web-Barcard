@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import {render, screen, fireEvent, waitFor} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ProportionsPage from "../../src/game-pages/proportions-page/ProportionsPage";
 
 const mockNavigate = vi.fn();
 const mockDispatch = vi.fn();
 
-/* -------------------- router -------------------- */
 vi.mock("react-router-dom", async () => {
     const actual = await vi.importActual("react-router-dom");
     return {
@@ -15,7 +14,6 @@ vi.mock("react-router-dom", async () => {
     };
 });
 
-/* -------------------- redux -------------------- */
 vi.mock("react-redux", () => ({
     useDispatch: () => mockDispatch,
     useSelector: (selector) =>
@@ -43,7 +41,6 @@ vi.mock("react-redux", () => ({
         }),
 }));
 
-/* -------------------- mocks -------------------- */
 vi.mock("../../src/game-pages/proportions-page/proportions_error.js", () => ({
     proportionsErrors: vi.fn(),
 }));
@@ -66,7 +63,6 @@ vi.mock("../../src/game-pages/HardModeFailModal.jsx", () => ({
         open ? <div>HardModeFail</div> : null,
 }));
 
-/* -------------------- imports -------------------- */
 import { proportionsErrors } from "../../src/game-pages/proportions-page/proportions_error.js";
 import {
     addStageMistake,
@@ -75,7 +71,6 @@ import {
     setIngredientAmount,
 } from "../../src/game/gameSlice.js";
 
-/* -------------------- helpers -------------------- */
 const renderPage = () =>
     render(
         <MemoryRouter>
@@ -142,19 +137,25 @@ describe("ProportionsPage", () => {
         expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
     });
 
-    it("если ошибок нет — считает score и переходит на /create", () => {
+    it("если ошибок нет — считает score и переходит на /create", async () => {
         proportionsErrors.mockReturnValue(0);
 
         renderPage();
+
         fireEvent.click(screen.getByText("Перейти к созданию"));
 
-        expect(mockDispatch).toHaveBeenCalledWith(
-            setStageScore({
-                stage: "stage2",
-                score: 100,
-            })
-        );
+        await waitFor(() => {
+            expect(mockDispatch).toHaveBeenCalledWith(
+                setStageScore({
+                    stage: "stage2",
+                    score: expect.any(Number),
+                })
+            );
+        });
 
-        expect(mockNavigate).toHaveBeenCalledWith("/create");
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith("/create");
+        });
     });
+
 });

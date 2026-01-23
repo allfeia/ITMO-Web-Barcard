@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const OPTS = Symbol.for("opts");
+
 describe("models.js", () => {
   beforeEach(() => {
     vi.resetModules();
-    const defineSymbol = Symbol("define");
 
     const mockInit = vi.fn(function (_attrs, options) {
-      this[defineSymbol] = options;
+      this[OPTS] = options;
       return this;
     });
 
@@ -21,17 +22,19 @@ describe("models.js", () => {
       {},
       {
         get(_t, prop) {
-          return (...args) => ({ __type: String(prop), args });
+          if (prop === "JSONB") return (...args) => ({ __type: "JSONB", args });
+          if (prop === "ENUM") return (...args) => ({ __type: "ENUM", args });
+          return { __type: String(prop) };
         },
       },
     );
 
-    const sequelize = { defineSymbol, mockInit};
-    vi.doMock("../db.js", () => ({ sequelize }));
+    const sequelize = {};
+
+    vi.doMock("../src/db.js", () => ({ sequelize }));
     vi.doMock("sequelize", () => ({
       DataTypes,
       Model: MockModel,
-      Sequelize: vi.fn(),
     }));
   });
 
@@ -77,9 +80,6 @@ describe("models.js", () => {
     expect(PasswordToken.belongsTo).toHaveBeenCalled();
     expect(PasswordToken.init).toHaveBeenCalled();
 
-    // доп. проверки для новых связей
-
-    // User.belongsTo(Cocktail, { as: "savedCocktail" })
     expect(User.belongsTo).toHaveBeenCalledWith(
       Cocktail,
       expect.objectContaining({
@@ -88,7 +88,6 @@ describe("models.js", () => {
       }),
     );
 
-    // User.hasMany(Point, { as: "userPoints" })
     expect(User.hasMany).toHaveBeenCalledWith(
       Point,
       expect.objectContaining({
@@ -97,7 +96,6 @@ describe("models.js", () => {
       }),
     );
 
-    // Cocktail.hasMany(Point, { as: "cocktailPoints" })
     expect(Cocktail.hasMany).toHaveBeenCalledWith(
       Point,
       expect.objectContaining({
@@ -106,7 +104,6 @@ describe("models.js", () => {
       }),
     );
 
-    // User.belongsToMany(Cocktail, { through: UserFavourite, as: "favouriteCocktails" })
     expect(User.belongsToMany).toHaveBeenCalledWith(
       Cocktail,
       expect.objectContaining({
@@ -117,7 +114,6 @@ describe("models.js", () => {
       }),
     );
 
-    // Cocktail.belongsToMany(User, { through: UserFavourite, as: "usersWhoFavourited" })
     expect(Cocktail.belongsToMany).toHaveBeenCalledWith(
       User,
       expect.objectContaining({
@@ -128,7 +124,6 @@ describe("models.js", () => {
       }),
     );
 
-    // User.hasMany(PasswordToken, { as: "passwordTokens" })
     expect(User.hasMany).toHaveBeenCalledWith(
       PasswordToken,
       expect.objectContaining({
@@ -137,11 +132,58 @@ describe("models.js", () => {
       }),
     );
 
-    // PasswordToken.belongsTo(User, ...)
     expect(PasswordToken.belongsTo).toHaveBeenCalledWith(
       User,
       expect.objectContaining({
         foreignKey: "user_id",
+      }),
+    );
+
+    expect(CocktailRecipeStep.belongsTo).toHaveBeenCalledWith(
+      Ingredient,
+      expect.objectContaining({
+        foreignKey: "ingredient_id",
+        as: "mainIngredient",
+      }),
+    );
+
+    expect(CocktailRecipeStep.hasMany).toHaveBeenCalledWith(
+      CocktailIngredient,
+      expect.objectContaining({
+        foreignKey: "recipe_step_id",
+        as: "stepIngredients",
+      }),
+    );
+
+    expect(CocktailIngredient.belongsTo).toHaveBeenCalledWith(
+      CocktailRecipeStep,
+      expect.objectContaining({
+        foreignKey: "recipe_step_id",
+        as: "step",
+      }),
+    );
+
+    expect(Ingredient.hasMany).toHaveBeenCalledWith(
+      CocktailRecipeStep,
+      expect.objectContaining({
+        foreignKey: "ingredient_id",
+        as: "stepsAsMainIngredient",
+      }),
+    );
+
+    expect(User.belongsTo).toHaveBeenCalledWith(
+      Bar,
+      expect.objectContaining({
+        foreignKey: "bar_id",
+        as: "workplace",
+      }),
+    );
+
+    expect(Bar.hasMany).toHaveBeenCalledWith(
+      User,
+      expect.objectContaining({
+        foreignKey: "bar_id",
+        as: "employees",
       }),
     );
   });
@@ -149,10 +191,10 @@ describe("models.js", () => {
   it("валидатор User.roleConstraints — staff/bar_admin требуют bar_id (пароль НЕ обязателен)", async () => {
     const { User } = await import("../src/models.js");
 
-    const defineSymbol = Object.getOwnPropertySymbols(User).find(
-      (s) => User[s] && User[s].validate,
-    );
-    const validate = User[defineSymbol].validate;
+    const options = User[OPTS];
+    expect(options).toBeDefined();
+    expect(options.validate).toBeDefined();
+    const validate = options.validate;
 
     const make = (roles, extras = {}) => ({
       roles,
@@ -160,22 +202,16 @@ describe("models.js", () => {
       bar_id: extras.bar_id ?? null,
     });
 
-    // staff без bar_id — ошибка
-    expect(() => validate.roleConstraints.call(make(["staff"]))).toThrow(
-      /ID бара/i,
-    );
+    expect(() => validate.roleConstraints.call(make(["staff"]))).toThrow(/ID бара/i);
 
-    // bar_admin без bar_id — ошибка (даже если пароль есть)
     expect(() =>
       validate.roleConstraints.call(make(["bar_admin"], { password: "x" })),
     ).toThrow(/ID бара/i);
 
-    // staff с bar_id — ок (пароль не требуется в оригинале)
     expect(() =>
       validate.roleConstraints.call(make(["staff"], { bar_id: 1 })),
     ).not.toThrow();
 
-    // bar_admin с bar_id — ок
     expect(() =>
       validate.roleConstraints.call(make(["bar_admin"], { bar_id: 2 })),
     ).not.toThrow();
@@ -184,12 +220,8 @@ describe("models.js", () => {
   it("валидатор User.roleConstraints — user требует пароль и запрещает bar_id", async () => {
     const { User } = await import("../src/models.js");
 
-    const defineSymbol = Object.getOwnPropertySymbols(User).find(
-      (s) => User[s] && User[s].validate,
-    );
-    const validate = User[defineSymbol].validate;
+    const validate = User[OPTS].validate;
 
-    // user без пароля — ошибка
     expect(() =>
       validate.roleConstraints.call({
         roles: ["user"],
@@ -198,7 +230,6 @@ describe("models.js", () => {
       }),
     ).toThrow(/парол/i);
 
-    // user с bar_id — ошибка
     expect(() =>
       validate.roleConstraints.call({
         roles: ["user"],
@@ -207,7 +238,6 @@ describe("models.js", () => {
       }),
     ).toThrow(/ID бара/i);
 
-    // корректный вариант
     expect(() =>
       validate.roleConstraints.call({
         roles: ["user"],
@@ -220,10 +250,7 @@ describe("models.js", () => {
   it("валидатор User.roleConstraints — super_admin запрещает bar_id", async () => {
     const { User } = await import("../src/models.js");
 
-    const defineSymbol = Object.getOwnPropertySymbols(User).find(
-      (s) => User[s] && User[s].validate,
-    );
-    const validate = User[defineSymbol].validate;
+    const validate = User[OPTS].validate;
 
     expect(() =>
       validate.roleConstraints.call({

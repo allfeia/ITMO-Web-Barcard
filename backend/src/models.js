@@ -73,6 +73,7 @@ Bar.init(
     description: { type: DataTypes.TEXT },
     pass_key: { type: DataTypes.STRING, allowNull: false },
     "web-site": { type: DataTypes.STRING, field: "web_site" },
+    telegram_chat_id: { type: DataTypes.BIGINT, allowNull: true },
   },
   { sequelize, modelName: "Bar", tableName: "bars", underscored: true },
 );

@@ -38,7 +38,7 @@
 .title {
     font-size: clamp(64px, 8vw, 72px);
     font-weight: 700;
-    margin: 0px auto 50px;
+    margin: 0 auto 50px;
     max-width: 377px;
     text-align: left;
     pointer-events: none;

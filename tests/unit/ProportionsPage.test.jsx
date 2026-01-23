@@ -66,7 +66,6 @@ vi.mock("../../src/game-pages/HardModeFailModal.jsx", () => ({
 import { proportionsErrors } from "../../src/game-pages/proportions-page/proportions_error.js";
 import {
     addStageMistake,
-    setStageScore,
     setStageStepsCount,
     setIngredientAmount,
 } from "../../src/game/gameSlice.js";

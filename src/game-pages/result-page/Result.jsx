@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
@@ -7,6 +7,7 @@ import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
 import './Result.css';
 import { useAuth } from "../../authContext/useAuth.js";
+import OrderModal from "../OderCard.jsx";
 
 function Result() {
     const navigate = useNavigate();
@@ -21,9 +22,15 @@ function Result() {
         );
     });
 
+    const cocktailId = useSelector((state) => {state.game.cocktailId})
+
     const handleReplay = () => navigate('/levelPage');
     const handleBar = () => navigate('/menu');
-    const handleOrder = () => navigate('/order');
+
+    const [orderOpen, setOrderOpen] = useState(false);
+
+    const handleOrderOpen = () => setOrderOpen(true);
+    const handleOrderClose = () => setOrderOpen(false);
 
     useEffect(() => {
         if (!isBarman || !currentUser?.login || totalScore <= 0) return;
@@ -115,15 +122,22 @@ function Result() {
             </Stack>
 
             {!isBarman && (
-                <Button
-                    variant="contained"
-                    disableElevation
-                    disableRipple
-                    className="order-button"
-                    onClick={handleOrder}
-                >
-                    Заказать
-                </Button>
+                <>
+                    <Button
+                        variant="contained"
+                        disableElevation
+                        disableRipple
+                        className="order-button"
+                        onClick={handleOrderOpen}
+                    >
+                        Заказать
+                    </Button>
+                    <OrderModal
+                        open={orderOpen}
+                        onClose={handleOrderClose}
+                        cocktailId={cocktailId}
+                    />
+                </>
             )}
         </Box>
     );

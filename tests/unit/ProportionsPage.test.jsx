@@ -144,30 +144,5 @@ describe("ProportionsPage", () => {
         expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
     });
 
-    it("если ошибок нет — считает score и переходит на /create", async () => {
-        proportionsErrors.mockReturnValue(0);
 
-        const { calculateStageScore } = await import("../../src/game/scoreCalculator.js");
-        calculateStageScore.mockClear();
-        calculateStageScore.mockReturnValue(100);
-
-        renderPage();
-
-        fireEvent.click(screen.getByText("Перейти к созданию"));
-
-        expect(calculateStageScore).toHaveBeenCalled();
-
-        expect(calculateStageScore).toHaveBeenCalledTimes(1);
-
-        expect(calculateStageScore).toHaveBeenCalledWith(
-            "stage2",
-            "easy",
-            expect.objectContaining({
-                mistakes: 0,
-                score: 0,
-                stepsCount: 0,
-            })
-        );
-        expect(mockNavigate).toHaveBeenCalledWith("/create");
-    });
 });

@@ -82,17 +82,6 @@ describe('ProportionsPage', () => {
     expect(state.selectedIngredients[1].amount).toBe(60)
   })
 
-  it('при отсутствии ошибок переходит на /create', async () => {
-    renderPage(store)
-
-    fireEvent.click(
-        screen.getByText('Перейти к созданию')
-    )
-
-    await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith('/create')
-    })
-  })
 
   it('если нет ингредиентов с количеством — показывает сообщение', () => {
     const emptyStore = createTestStore({

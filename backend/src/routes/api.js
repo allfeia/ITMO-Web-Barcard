@@ -244,13 +244,17 @@ router.get("/cocktail/:id/recipe", async (req, res) => {
     const steps = recipeSteps
       .slice()
       .sort((a, b) => (a.step_number ?? 0) - (b.step_number ?? 0))
-      .map((s) => ({
-        id: s.id,
-        step_number: s.step_number,
-        action: s.action,
-        ingredient_id: s.ingredient_id,
-        ingredient_case: s.ingredient_case,
-      }));
+      .map((s) => {
+          const ingredient =
+              s.stepIngredients?.[0]?.Ingredient || null;
+          return {
+              id: s.id,
+              step_number: s.step_number,
+              action: s.action,
+              ingredient_id: s.ingredient_id,
+              ingredient_name: ingredient ? ingredient.name : null,
+          }
+      });
 
     return res.json({
       id: cocktail.id,

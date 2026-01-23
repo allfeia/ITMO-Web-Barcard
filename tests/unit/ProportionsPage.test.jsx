@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
 import ProportionsPage from '../../src/game-pages/proportions-page/ProportionsPage.jsx';
 import gameReducer from '../../src/game/gameSlice';
+import {proportionsErrors} from "../../src/game-pages/proportions-page/proportions_error.js";
 
 // ──────────────────────────────────────────────
 // ВСЕ МОКИ — САМЫЙ ВЕРХ ФАЙЛА

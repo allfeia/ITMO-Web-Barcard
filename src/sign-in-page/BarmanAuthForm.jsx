@@ -75,11 +75,8 @@ export default function BarmanAuthForm() {
             }
 
             if (response.ok) {
-                // Сохраняем данные пользователя и бара в localStorage
                 localStorage.setItem('currentUser', JSON.stringify(data.user));
                 localStorage.setItem('currentBar', JSON.stringify({ id: barId, name: data.barName }));
-
-                // Обновляем контекст
                 setRoles(data.user.roles);
                 setBarName(data.barName);
                 setBarSite(data.barSite);

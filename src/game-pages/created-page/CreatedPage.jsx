@@ -58,7 +58,6 @@ function CreatedPage() {
                 count: totalErrors
             }));
 
-            // Проверка на превышение в hard-режиме
             const currentMistakes = stage3Data.mistakes + totalErrors;
             const steps = stage3Data.stepsCount || (cocktailIngredients.length + recipeSteps.length);
             const maxAllowed = Math.max(steps - 2, 1);

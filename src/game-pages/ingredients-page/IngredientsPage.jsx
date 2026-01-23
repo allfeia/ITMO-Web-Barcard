@@ -63,8 +63,6 @@ function IngredientsPage() {
                 stage: 'stage1',
                 count: totalErrors
             }));
-
-            // Проверка на превышение в hard-режиме
             const currentMistakes = stage1Data.mistakes + totalErrors;
             const steps = stage1Data.stepsCount || cocktailIngredients.length;
             const maxAllowed = Math.max(steps - 2, 1);

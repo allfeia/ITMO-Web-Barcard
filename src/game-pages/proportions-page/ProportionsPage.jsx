@@ -54,7 +54,6 @@ function ProportionsPage() {
                 count: errors
             }));
 
-            // Проверка на превышение в hard-режиме
             const currentMistakes = stage2Data.mistakes + errors;
             const steps = stage2Data.stepsCount || ingredientsWithQuantity.length;
             const maxAllowed = Math.max(steps - 2, 1);

@@ -5,7 +5,7 @@ const initialState = {
     cocktailData: null,
     mode: 'easy',
     hintsEnabled: true,
-    selectedIngredients: {},      // ингредиенты с пропорциями [{ id, name, quantity }]
+    selectedIngredients: {},
 
 
     stages: {
@@ -104,9 +104,9 @@ const gameSlice = createSlice({
         resetForNewLevel: (state) => {
             return {
                 ...initialState,
-                cocktailId: state.cocktailId,       // сохраняем
-                cocktailData: state.cocktailData,   // сохраняем
-                mode: state.mode,                   // можно сохранить текущий режим
+                cocktailId: state.cocktailId,
+                cocktailData: state.cocktailData,
+                mode: state.mode,
             };
         },
 

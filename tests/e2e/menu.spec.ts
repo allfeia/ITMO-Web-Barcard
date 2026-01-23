@@ -10,7 +10,6 @@ test.beforeEach(async ({ page }) => {
         sessionStorage.setItem("roles", "[]");
         sessionStorage.setItem("barName", "Olive Bar");
         sessionStorage.setItem("savedCocktailsId", "[2]");
-        sessionStorage.setItem("token", "aXZhbi0xMjMtMTc");
     });
 });
 

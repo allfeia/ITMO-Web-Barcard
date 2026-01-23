@@ -46,8 +46,8 @@ function StartPage() {
         } else if (isBarmanChecker === false) {
             goTo("/menu");
         } else {
-        console.log("неизвестный пользователь");
-    }
+            console.log("неизвестный пользователь");
+        }
     };
 
     const tracks = [

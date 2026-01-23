@@ -5,7 +5,7 @@ import drawOlive from "./Olive.js";
 import "./LevelPage.css";
 import WestIcon from '@mui/icons-material/West';
 import {useDispatch, useSelector} from "react-redux";
-import {resetGame, setMode} from "../../game/gameSlice.js";
+import {resetForNewLevel, resetGame, setMode} from "../../game/gameSlice.js";
 
 export default function LevelPage() {
     const goTo = useNavigate();
@@ -24,6 +24,7 @@ export default function LevelPage() {
 
     const selectLevel = (mode) => {
         window.ym(106396717,'reachGoal','chosen_level', {level: mode});
+        dispatch(resetForNewLevel());
         dispatch(setMode(mode));
         goTo("/ingredients");
     }

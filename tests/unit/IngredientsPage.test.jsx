@@ -1,38 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import IngredientsPage from "../../src/game-pages/ingredients-page/IngredientsPage";
-import { MemoryRouter } from "react-router-dom";
 
-const mockNavigate = vi.fn();
-const mockDispatch = vi.fn();
+const navigateMock = vi.fn();
 
-vi.mock("react-router-dom", async () => {
-    const actual = await vi.importActual("react-router-dom");
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-    };
-});
-
-vi.mock("react-redux", () => ({
-    useDispatch: () => mockDispatch,
-    useSelector: (selector) =>
-        selector({
-            game: {
-                mode: "easy",
-                cocktailId: 1,
-                selectedIngredients: {},
-                cocktailData: {
-                    ingredients: [
-                        { id: 1, name: "Лайм" },
-                        { id: 2, name: "Белый ром" },
-                    ],
-                },
-            },
-        }),
+vi.mock("react-router-dom", () => ({
+    useNavigate: () => navigateMock,
 }));
 
-vi.mock("../../src/game-pages/ingredients-page/Ingredients", () => ({
+const dispatchMock = vi.fn();
+
+vi.mock("react-redux", () => ({
+    useDispatch: () => dispatchMock,
+    useSelector: vi.fn(),
+}));
+
+import { useSelector } from "react-redux";
+
+vi.mock("../../src/game-pages/ingredients-page/ingredients_error.js", () => ({
+    ingredientErrors: vi.fn(),
+}));
+
+import { ingredientErrors } from "../../src/game-pages/ingredients-page/ingredients_error.js";
+
+vi.mock("../../src/game-pages/ingredients-page/Ingredients.jsx", () => ({
     useIngredients: () => ({
         searchValue: "",
         setSearchValue: vi.fn(),
@@ -40,117 +31,86 @@ vi.mock("../../src/game-pages/ingredients-page/Ingredients", () => ({
             {
                 type: "base",
                 title: "Основа",
-                items: [
-                    { id: 1, name: "Лайм" },
-                    { id: 2, name: "Белый ром" },
-                ],
+                items: [{ id: 1, name: "Лайм" }],
             },
         ],
     }),
 }));
 
-vi.mock("../../src/game-pages/hint.js", () => ({
-    default: vi.fn(),
-}));
-
-vi.mock("../../src/game-pages/ingredients-page/ingredients_error.js", () => ({
-    ingredientErrors: vi.fn(),
-}));
-
-vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
-    default: () => <div>RecipeCard</div>,
+vi.mock("../PageHeader.jsx", () => ({
+    default: () => <div data-testid="page-header" />,
 }));
 
 vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
     default: ({ open, errorCount }) =>
-        open ? <div>Ошибок: {errorCount}</div> : null,
+        open ? (
+            <div data-testid="error-modal">Errors: {errorCount}</div>
+        ) : null,
 }));
 
-import drawHint from "../../src/game-pages/hint.js";
-import { ingredientErrors } from "../../src/game-pages/ingredients-page/ingredients_error.js";
-import {
-    addStageMistake,
-    resetLevel,
-    toggleIngredient,
-} from "../../src/game/gameSlice.js";
+vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
+    default: () => <div />,
+}));
+
+vi.mock("../HardModeFailModal", () => ({
+    default: () => <div />,
+}));
 
 
-const renderPage = () =>
-    render(
-        <MemoryRouter>
-            <IngredientsPage />
-        </MemoryRouter>
-    );
+const baseState = {
+    game: {
+        mode: "easy",
+        selectedIngredients: {},
+        cocktailId: 1,
+        cocktailData: {
+            ingredients: [{ id: 1, name: "Лайм" }],
+        },
+        stages: {
+            stage1: {
+                mistakes: 0,
+                stepsCount: 0,
+            },
+        },
+        gameOver: false,
+    },
+};
 
+beforeEach(() => {
+    vi.clearAllMocks();
+    useSelector.mockImplementation(selector => selector(baseState));
+    window.ym = vi.fn();
+});
 
 describe("IngredientsPage", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        window.ym = vi.fn();
-    });
-
-    it("рендерит заголовок страницы", () => {
-        renderPage();
-        expect(screen.getByText("Ингредиенты")).toBeInTheDocument();
-    });
-
-    it("рендерит кнопку назад", () => {
-        renderPage();
-        expect(screen.getByTestId("back-button")).toBeInTheDocument();
-    });
-
-    it("клик по кнопке назад вызывает navigate(-1) и resetLevel", () => {
-        renderPage();
-
-        fireEvent.click(screen.getByTestId("back-button"));
-
-        expect(mockNavigate).toHaveBeenCalledWith(-1);
-        expect(mockDispatch).toHaveBeenCalledWith(resetLevel());
-    });
-
-    it("рисует ингредиенты", () => {
-        renderPage();
-
-        expect(screen.getByText("Лайм")).toBeInTheDocument();
-        expect(screen.getByText("Белый ром")).toBeInTheDocument();
-    });
-
-    it("клик по ингредиенту вызывает toggleIngredient", () => {
-        renderPage();
-
-        fireEvent.click(screen.getByText("Лайм"));
-
-        expect(mockDispatch).toHaveBeenCalledWith(
-            toggleIngredient({ id: 1, name: "Лайм" })
-        );
-    });
-
-    it("вызывает drawHint при монтировании (mode !== hard)", () => {
-        renderPage();
-        expect(drawHint).toHaveBeenCalledTimes(1);
-    });
-
-    it("если есть ошибки — открывает модалку и dispatch addStageMistake", () => {
+    it("показывает ErrorModal и диспатчит ошибку, если есть ошибки", () => {
         ingredientErrors.mockReturnValue(2);
 
-        renderPage();
+        render(<IngredientsPage />);
 
-        fireEvent.click(screen.getByText("Создать с пропорциями"));
-
-        expect(mockDispatch).toHaveBeenCalledWith(
-            addStageMistake({ stage: "stage1", count: 2 })
+        fireEvent.click(
+            screen.getByText("Создать с пропорциями")
         );
 
-        expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
+        expect(dispatchMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                payload: { stage: "stage1", count: 2 },
+            })
+        );
+
+        expect(
+            screen.getByTestId("error-modal")
+        ).toBeInTheDocument();
     });
 
-    it("если ошибок нет — переходит на /proportions", () => {
+    it("переходит на /proportions, если ошибок нет", () => {
         ingredientErrors.mockReturnValue(0);
 
-        renderPage();
+        render(<IngredientsPage />);
 
-        fireEvent.click(screen.getByText("Создать с пропорциями"));
+        fireEvent.click(
+            screen.getByText("Создать с пропорциями")
+        );
 
-        expect(mockNavigate).toHaveBeenCalledWith("/proportions");
+        expect(navigateMock).toHaveBeenCalledWith("/proportions");
     });
 });

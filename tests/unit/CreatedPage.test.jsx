@@ -1,45 +1,71 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import CreatedPage from "../../src/game-pages/created-page/CreatedPage";
 
-const navigateMock = vi.fn();
+const mockNavigate = vi.fn();
+const mockDispatch = vi.fn();
 
-vi.mock("react-router-dom", () => ({
-    useNavigate: () => navigateMock,
-}));
-
-const dispatchMock = vi.fn();
+vi.mock("react-router-dom", async () => {
+    const actual = await vi.importActual("react-router-dom");
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+    };
+});
 
 vi.mock("react-redux", () => ({
-    useDispatch: () => dispatchMock,
-    useSelector: vi.fn(),
+    useDispatch: () => mockDispatch,
+    useSelector: (selector) =>
+        selector({
+            game: {
+                mode: "easy",
+                cocktailId: 1,
+                selectedIngredients: {},
+                cocktailData: {
+                    ingredients: [{ id: 1, name: "Лайм" }],
+                    steps: [
+                        { step_number: 1, text: "Шаг 1" },
+                        { step_number: 2, text: "Шаг 2" },
+                    ],
+                },
+                stages: {
+                    stage3: {
+                        mistakes: 0,
+                        stepsCount: 0,
+                    },
+                },
+                gameOver: false,
+            },
+        }),
 }));
-
-import { useSelector } from "react-redux";
 
 vi.mock("../../src/game-pages/created-page/created_error.js", () => ({
     createdErrors: vi.fn(),
 }));
 
-import { createdErrors } from "../../src/game-pages/created-page/created_error.js";
+vi.mock("../../src/game/scoreCalculator.js", () => ({
+    calculateStageScore: vi.fn(() => 10),
+}));
 
-vi.mock("../PageHeader.jsx", () => ({
-    default: () => <div data-testid="page-header" />,
+vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
+    default: () => <div>RecipeCard</div>,
 }));
 
 vi.mock("../../src/game-pages/ErrorModal.jsx", () => ({
     default: ({ open, errorCount }) =>
-        open ? <div data-testid="error-modal">Errors: {errorCount}</div> : null,
+        open ? <div>Ошибок: {errorCount}</div> : null,
+}));
+
+vi.mock("../../src/game-pages/HardModeFailModal.jsx", () => ({
+    default: ({ open }) => (open ? <div>HardModeFail</div> : null),
 }));
 
 vi.mock("../../src/game-pages/created-page/RecipeStepCard.jsx", () => ({
-    default: () => <div />,
+    default: ({ step }) => <div>{step.text}</div>,
 }));
 
-vi.mock("../../src/menu-page/RecipeCard.jsx", () => ({
-    default: () => <div />,
-}));
-
+// DnD мокаем максимально просто
 vi.mock("@hello-pangea/dnd", () => ({
     DragDropContext: ({ children }) => <div>{children}</div>,
     Droppable: ({ children }) =>
@@ -49,70 +75,90 @@ vi.mock("@hello-pangea/dnd", () => ({
             placeholder: null,
         }),
     Draggable: ({ children }) =>
-        children(
-            {
-                draggableProps: { style: {} },
-                dragHandleProps: {},
-                innerRef: vi.fn(),
-            },
-            {
-                isDragging: false,
-            }
-        ),
+        children({
+            draggableProps: { style: {} },
+            dragHandleProps: {},
+            innerRef: vi.fn(),
+        }, { isDragging: false }),
 }));
 
+import { createdErrors } from "../../src/game-pages/created-page/created_error.js";
+import {
+    addStageMistake,
+    setStageScore,
+    setStageStepsCount,
+} from "../../src/game/gameSlice.js";
 
-const baseState = {
-    game: {
-        mode: "easy",
-        selectedIngredients: [],
-        cocktailId: 1,
-        cocktailData: {
-            ingredients: [],
-            steps: [
-                { step_number: 1 },
-                { step_number: 2 },
-            ],
-        },
-    },
-};
-
-beforeEach(() => {
-    vi.clearAllMocks();
-    useSelector.mockImplementation(selector => selector(baseState));
-    window.ym = vi.fn();
-});
+const renderPage = () =>
+    render(
+        <MemoryRouter>
+            <CreatedPage />
+        </MemoryRouter>
+    );
 
 describe("CreatedPage", () => {
-    it("показывает ErrorModal и диспатчит ошибку, если есть ошибки", () => {
-        createdErrors.mockReturnValue(3);
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
-        render(<CreatedPage />);
+    it("рендерит заголовок страницы", () => {
+        renderPage();
+        expect(screen.getByText("Коктейль")).toBeInTheDocument();
+    });
 
-        fireEvent.click(
-            screen.getByText("Создать коктейль")
-        );
+    it("рендерит шаги рецепта", () => {
+        renderPage();
 
-        expect(dispatchMock).toHaveBeenCalledWith(
-            expect.objectContaining({
-                payload: { stage: "stage3", count: 3 },
+        expect(screen.getByText("Шаг 1")).toBeInTheDocument();
+        expect(screen.getByText("Шаг 2")).toBeInTheDocument();
+    });
+
+    it("кнопка назад вызывает navigate(-1)", () => {
+        renderPage();
+
+        fireEvent.click(screen.getByTestId("back-button"));
+
+        expect(mockNavigate).toHaveBeenCalledWith(-1);
+    });
+
+    it("если есть ошибки — диспатчит addStageMistake и показывает модалку", () => {
+        createdErrors.mockReturnValue(2);
+
+        renderPage();
+
+        fireEvent.click(screen.getByText("Создать коктейль"));
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            setStageStepsCount({
+                stage: "stage3",
+                stepsCount: 3,
             })
         );
 
-        expect(
-            screen.getByTestId("error-modal")
-        ).toBeInTheDocument();
-    });
-
-    it("переходит на /result, если ошибок нет", () => {
-        createdErrors.mockReturnValue(0);
-
-        render(<CreatedPage />);
-
-        fireEvent.click(
-            screen.getByText("Создать коктейль")
+        expect(mockDispatch).toHaveBeenCalledWith(
+            addStageMistake({
+                stage: "stage3",
+                count: 2,
+            })
         );
 
-        expect(navigateMock).toHaveBeenCalledWith("/result");
+        expect(screen.getByText("Ошибок: 2")).toBeInTheDocument();
+    });
+
+    it("если ошибок нет — считает скор и переходит на /result", () => {
+        createdErrors.mockReturnValue(0);
+
+        renderPage();
+
+        fireEvent.click(screen.getByText("Создать коктейль"));
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            setStageScore({
+                stage: "stage3",
+                score: 10,
+            })
+        );
+
+        expect(mockNavigate).toHaveBeenCalledWith("/result");
     });
 });

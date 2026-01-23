@@ -17,7 +17,6 @@ function SignInPage() {
         });
     }, []);
 
-    //style={{border: "1px solid #999"}}
     return (
         <div className="sign-in-page">
             <div className="sign-in-container">

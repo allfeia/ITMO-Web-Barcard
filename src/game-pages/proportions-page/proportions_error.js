@@ -1,18 +1,21 @@
-export const proportionsErrors = (ingredientsWithQuantity, cocktailIngredients) => {
-    if (!ingredientsWithQuantity || !cocktailIngredients.length) return 0;
+export const proportionsErrors = (
+  ingredientsWithQuantity,
+  cocktailIngredients,
+) => {
+  if (!ingredientsWithQuantity || !cocktailIngredients.length) return 0;
 
-    let errors = 0;
+  let errors = 0;
 
-    ingredientsWithQuantity.forEach((ing) => {
-        const recipeIng = cocktailIngredients.find(ci => ci.id === ing.id);
+  ingredientsWithQuantity.forEach((ing) => {
+    const recipeIng = cocktailIngredients.find((ci) => ci.id === ing.id);
 
-        const correctAmount = recipeIng?.amount;
-        const userAmount = ing.amount;
+    const correctAmount = recipeIng?.amount;
+    const userAmount = ing.amount;
 
-        if (correctAmount !== userAmount) {
-            errors += 1;
-        }
-    });
+    if (correctAmount !== userAmount) {
+      errors += 1;
+    }
+  });
 
-    return errors;
+  return errors;
 };

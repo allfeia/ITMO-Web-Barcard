@@ -100,7 +100,7 @@
 .glass-icon {
     width: 75px;
     height: 75px;
-    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 0 6px rgb(0 0 0 / 15%));
     display: block;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
@@ -114,14 +114,14 @@
     width: 334px;
     height: 80px;
     background: #333 !important;
-    color: #ffffff;
+    color: #fff;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     font-size: clamp(36px, 5vw, 40px) !important;
     font-weight: 400 !important;
     text-transform: none !important;
     border-radius: 4px;
     border: 2px solid #333;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
     transition: all 0.2s ease;
     z-index: 20;
     cursor: pointer;
@@ -130,7 +130,7 @@
 .start-button:hover {
     background: #111;
     transform: translate(-50%, -2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 25%);
 }
 
 .start-button:active {

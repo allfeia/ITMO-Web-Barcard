@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import {act, renderHook, waitFor} from "@testing-library/react";
 import { useIngredients } from "../../src/game-pages/ingredients-page/Ingredients";
 
 const mockIngredients = [
@@ -65,9 +65,9 @@ describe("useIngredients", () => {
         await waitFor(() => {
             expect(result.current.groupedIngredients.length).toBeGreaterThan(0);
         });
-
-        result.current.setSearchValue("несуществующий");
-
+        await act(async () => {
+            result.current.setSearchValue("несуществующий");
+        });
         await waitFor(() => {
             const totalItems = result.current.groupedIngredients.reduce(
                 (sum, g) => sum + g.items.length,
@@ -77,4 +77,5 @@ describe("useIngredients", () => {
             expect(totalItems).toBe(0);
         });
     });
+
 });

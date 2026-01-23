@@ -7,13 +7,15 @@ import { MemoryRouter } from 'react-router-dom';
 import Result from '../../src/game-pages/result-page/Result.jsx';
 import gameReducer from '../../src/game/gameSlice';
 
-// Мок CocktailCanvas — теперь как canvas, чтобы соответствовать реальному DOM
+// Мок CocktailCanvas — возвращаем canvas, чтобы соответствовать реальному DOM
 vi.mock('../../src/game-pages/result-page/CocktailCanvas', () => ({
     default: () => (
         <canvas
             data-testid="cocktail-canvas"
             className="cocktail-canvas"
-            aria-label="Нарисованный коктейль"
+            aria-label="Нарисованный коктейль с оливкой"
+            width="200"
+            height="260"
         />
     ),
 }));
@@ -28,7 +30,7 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
-describe('Result', () => {
+describe('Result component', () => {
     let store;
 
     beforeEach(() => {
@@ -114,8 +116,8 @@ describe('Result', () => {
             </Provider>
         );
 
-        // Более надёжный селектор: по доступному имени (title + aria-label или текст рядом)
-        const replayBtn = screen.getByRole('button', { name: /переиграть/i });
+        // Более надёжный поиск: по title атрибуту (tooltip)
+        const replayBtn = screen.getByTitle('переиграть');
         fireEvent.click(replayBtn);
 
         expect(mockNavigate).toHaveBeenCalledWith('/levelPage');
@@ -130,7 +132,7 @@ describe('Result', () => {
             </Provider>
         );
 
-        const barBtn = screen.getByRole('button', { name: /бар/i });
+        const barBtn = screen.getByTitle('бар');
         fireEvent.click(barBtn);
 
         expect(mockNavigate).toHaveBeenCalledWith('/menu');
@@ -145,6 +147,7 @@ describe('Result', () => {
             </Provider>
         );
 
+        // Кнопка "Заказать" — это полноценный Button, ищем по тексту
         const orderBtn = screen.getByRole('button', { name: /заказать/i });
         fireEvent.click(orderBtn);
 

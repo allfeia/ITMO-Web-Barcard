@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import OrderModal from "./OderCard.jsx";
 import { useAuth } from "../authContext/useAuth.js";
 
@@ -6,6 +7,7 @@ function Result() {
   const { roles } = useAuth();
 
   const [orderOpen, setOrderOpen] = useState(false);
+  const cocktailId = useSelector((state) => state.game.cocktailId);
 
   const rolesArr = Array.isArray(roles) ? roles : roles ? [roles] : [];
   const isAdminOrStaff =
@@ -26,7 +28,7 @@ function Result() {
       <OrderModal
         open={orderOpen}
         onClose={() => setOrderOpen(false)}
-        cocktailId={2}
+        cocktailId={cocktailId}
       />
     </>
   );

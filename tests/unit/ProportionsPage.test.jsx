@@ -145,14 +145,40 @@ describe("ProportionsPage", () => {
     });
 
     it("если ошибок нет — считает score и переходит на /create", async () => {
+
         proportionsErrors.mockReturnValue(0);
+
+        const { calculateStageScore } = await import("../../src/game/scoreCalculator.js");
+        calculateStageScore.mockReturnValue(100);
 
         renderPage();
 
-        fireEvent.click(screen.getByText("Перейти к созданию"));
+        const createButton = screen.getByText("Перейти к созданию");
+        expect(createButton).toBeInTheDocument();
 
-        await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith("/create");
+        fireEvent.click(createButton);
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            setStageStepsCount({
+                stage: "stage2",
+                stepsCount: 1,
+            })
+        );
+
+        expect(calculateStageScore).toHaveBeenCalledWith(
+            "easy",
+            "stage2",
+            expect.any(Object)
+        );
+
+        expect(mockDispatch).toHaveBeenCalledWith({
+            type: "game/setStageScore",
+            payload: {
+                stage: "stage2",
+                score: 100,
+            },
         });
+
+        expect(mockNavigate).toHaveBeenCalledWith("/create");
     });
 });

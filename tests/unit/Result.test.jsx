@@ -1,10 +1,13 @@
-// Result.test.jsx
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-
-import { useSelector } from "react-redux";
-import Result from "../../src/game-pages/result-page/Result.jsx";
 import {useAuth} from "../../src/authContext/useAuth.js";
+import Result from "../../src/game-pages/result-page/Result.jsx";
+import {useSelector} from "react-redux";
+
+vi.mock("../../authContext/useAuth.js", () => ({
+  useAuth: vi.fn(),
+}));
 
 const navigateMock = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -14,10 +17,6 @@ vi.mock("react-router-dom", async () => {
     useNavigate: () => navigateMock,
   };
 });
-
-vi.mock("../../authContext/useAuth.js", () => ({
-  useAuth: vi.fn(),
-}));
 
 vi.mock("react-redux", async () => {
   const actual = await vi.importActual("react-redux");
@@ -37,9 +36,8 @@ vi.mock("./CocktailCanvas", () => ({
 describe("Result", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear(); // очищаем флаг scoreSent
+    localStorage.clear();
 
-    // По умолчанию: не бармен, очков 0
     vi.mocked(useAuth).mockReturnValue({
       isBarman: false,
       currentUser: null,
@@ -106,7 +104,6 @@ describe("Result", () => {
           "/api/rating/update-score",
           expect.objectContaining({
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ login: "ivan", score: 200 }),
           })
       );

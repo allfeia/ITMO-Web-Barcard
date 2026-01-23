@@ -1,8 +1,13 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
-import TopList from "../../src/topList/TopList";
 
+import {useAuth} from "../../src/authContext/useAuth.js";
+import TopList from "../../src/topList/TopList.jsx";
+
+vi.mock("../authContext/useAuth.js", () => ({
+    useAuth: vi.fn(),
+}));
 
 const navigateMock = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -13,18 +18,8 @@ vi.mock("react-router-dom", async () => {
     };
 });
 
-vi.mock("../mocks/db", () => ({
-    db: {
-        bars: [
-            { id: 123, name: "Olive Bar" },
-            { id: 777, name: "Negroni Club" },
-        ],
-        users: [
-            { login: "ivan", bar_id: 123, score: 1422 },
-            { login: "alex", bar_id: 123, score: 2350 },
-        ],
-    },
-}));
+const windowOpenMock = vi.fn();
+vi.stubGlobal("open", windowOpenMock);
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -32,14 +27,18 @@ global.fetch = mockFetch;
 describe("TopList", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
-        localStorage.setItem("currentBar", JSON.stringify({ id: 123 }));
+
+        vi.mocked(useAuth).mockReturnValue({
+            barId: 123,
+            barName: "Olive Bar",
+            barSite: "https://olivebarandkitchen.com",
+        });
     });
 
     it("отображает 'Загрузка рейтинга...' во время загрузки", () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ bar: { name: "Test Bar" }, rating: [] }),
+            json: async () => ({ rating: [] }),
         });
 
         render(<TopList />);
@@ -51,7 +50,6 @@ describe("TopList", () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
-                bar: { name: "Olive Bar" },
                 rating: [
                     { login: "ivan", score: 1422 },
                     { login: "alex", score: 2350 },
@@ -70,17 +68,14 @@ describe("TopList", () => {
         });
     });
 
-    it("показывает fallback данные при ошибке сети", async () => {
+    it("показывает сообщение об ошибке при ошибке сети", async () => {
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
         render(<TopList />);
 
         await waitFor(() => {
-            expect(screen.getByText("Olive Bar")).toBeInTheDocument(); // fallback из db
-            expect(screen.getByText(/Ошибка/i)).toBeInTheDocument();
-            expect(screen.getByText("Показан резервный рейтинг")).toBeInTheDocument();
-            expect(screen.getByText("alex_ivanov")).toBeInTheDocument();
-            expect(screen.getByText("4 850 очков")).toBeInTheDocument();
+            expect(screen.getByText(/Не удалось загрузить рейтинг|Ошибка/i)).toBeInTheDocument();
+            expect(screen.queryByText("Olive Bar")).not.toBeInTheDocument(); // нет fallback из db
         });
     });
 
@@ -88,7 +83,6 @@ describe("TopList", () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
-                bar: { name: "Test" },
                 rating: [{ login: "test", score: 1234567 }],
             }),
         });
@@ -109,24 +103,48 @@ describe("TopList", () => {
         expect(navigateMock).toHaveBeenCalledWith(-1);
     });
 
-    it("ссылка на бар ведёт на /menu", async () => {
+    it("название бара является ссылкой на barSite и открывает в новой вкладке", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ bar: { name: "Olive Bar" }, rating: [] }),
+            json: async () => ({ rating: [] }),
         });
 
         render(<TopList />);
 
         await waitFor(() => {
             const barLink = screen.getByText("Olive Bar");
-            expect(barLink.closest("a")).toHaveAttribute("href", "/menu");
+            expect(barLink.tagName).toBe("A");
+            expect(barLink).toHaveAttribute("href", "https://olivebarandkitchen.com");
+            expect(barLink).toHaveAttribute("target", "_blank");
+            expect(barLink).toHaveAttribute("rel", "noopener noreferrer");
+        });
+    });
+
+    it("если barSite нет — название бара отображается как текст без ссылки", async () => {
+        vi.mocked(useAuth).mockReturnValue({
+            barId: 123,
+            barName: "Test Bar",
+            barSite: null, // нет сайта
+        });
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ rating: [] }),
+        });
+
+        render(<TopList />);
+
+        await waitFor(() => {
+            const barText = screen.getByText("Test Bar");
+            expect(barText.tagName).not.toBe("A"); // не ссылка
+            expect(barText).toBeInTheDocument();
         });
     });
 
     it("отображает 'Рейтинг пуст' когда пользователей нет", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ bar: { name: "Test" }, rating: [] }),
+            json: async () => ({ rating: [] }),
         });
 
         render(<TopList />);

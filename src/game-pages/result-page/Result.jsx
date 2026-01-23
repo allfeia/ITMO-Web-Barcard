@@ -1,142 +1,186 @@
-import React, {useEffect} from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import LiquorIcon from '@mui/icons-material/Liquor';
-import CocktailCanvas from './CocktailCanvas';
-import './Result.css';
+// Result.test.jsx
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import Result from "../../src/game-pages/result-page/Result";
+import { useAuth } from "../../authContext/useAuth.js";
+import { useSelector } from "react-redux";
+const navigateMock = vi.fn();
+vi.mock("react-router-dom", async () => {
+    const actual = await vi.importActual("react-router-dom");
+    return {
+        ...actual,
+        useNavigate: () => navigateMock,
+    };
+});
 
-function Result() {
-    const navigate = useNavigate();
-    const isBarman = sessionStorage.getItem("isBarman") === "true";
+vi.mock("../../authContext/useAuth.js", () => ({
+    useAuth: vi.fn(),
+}));
 
-    const totalScore = useSelector((state) => {
-        const stages = state.game.stages;
-        return (
-            (stages.stage1?.score || 0) +
-            (stages.stage2?.score || 0) +
-            (stages.stage3?.score || 0)
+vi.mock("react-redux", async () => {
+    const actual = await vi.importActual("react-redux");
+    return {
+        ...actual,
+        useSelector: vi.fn(),
+    };
+});
+
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
+vi.mock("./CocktailCanvas", () => ({
+    default: () => <div data-testid="cocktail-canvas" />,
+}));
+
+describe("Result", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        localStorage.clear();
+
+        vi.mocked(useAuth).mockReturnValue({
+            isBarman: false,
+            currentUser: null,
+        });
+
+        vi.mocked(useSelector).mockImplementation((selector) =>
+            selector({
+                game: {
+                    stages: {
+                        stage1: { score: 0 },
+                        stage2: { score: 0 },
+                        stage3: { score: 0 },
+                    },
+                },
+            })
         );
     });
 
-    const handleReplay = () => {
-        navigate('/levelPage');
-    };
-    const handleBar = () => {
-        navigate('/menu');
-    };
-    const handleOrder = () => {
-        navigate('/order');
-    };
+    it("отображает 'Ваш результат' и кнопку 'Заказать' для обычного пользователя", () => {
+        render(<Result />);
 
-    useEffect(() => {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+        expect(screen.getByText(/Ваш результат: 0 ★/)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Заказать/i })).toBeInTheDocument();
+        expect(screen.queryByText("Рейтинг")).not.toBeInTheDocument();
+    });
 
-        const sendScoreToServer = async () => {
-            const scoreSent = localStorage.getItem(`scoreSent_${currentUser.id}_${new Date().toLocaleDateString()}`);
-            if (totalScore > 0 && currentUser.login && !scoreSent) {
-                try {
-                    const response = await fetch('/api/rating/update-score', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            login: currentUser.login,
-                            score: totalScore
-                        })
-                    });
+    it("отображает ссылку 'Рейтинг' и скрывает 'Заказать' для бармена", () => {
+        vi.mocked(useAuth).mockReturnValue({
+            isBarman: true,
+            currentUser: { login: "ivan" },
+        });
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('Очки успешно обновлены:', data);
-                        localStorage.setItem(`scoreSent_${currentUser.id}_${new Date().toLocaleDateString()}`, 'true');
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                }
-            }
-        };
-        if (isBarman) {
-            sendScoreToServer();
-        }
-    }, [totalScore, isBarman]);
+        vi.mocked(useSelector).mockReturnValue(150);
 
-    return (
-        <Box className="result-screen">
-            <Typography variant="h4" component="h1" className="titleResult">
-                Готово!
-            </Typography>
+        render(<Result />);
 
-            <Typography variant="h5" className="subtitle">
-                {isBarman ? (
-                    <>
-                        <Link
-                            to="/top"
-                            style={{ color: 'inherit', textDecoration: 'underline' }}
-                        >
-                            Рейтинг
-                        </Link>
-                        : {totalScore} ★
-                    </>
-                ) : (
-                    <>
-                        Ваш результат: {totalScore} ★
-                    </>
-                )}
-            </Typography>
+        const ratingLink = screen.getByRole("link", { name: "Рейтинг" });
+        expect(ratingLink).toBeInTheDocument();
+        expect(ratingLink).toHaveAttribute("href", "/top");
 
-            <div className="cocktail-container">
-                <CocktailCanvas />
-            </div>
+        expect(screen.getByText(/Рейтинг: 150 ★/)).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Заказать/i })).not.toBeInTheDocument();
+    });
 
-            <Stack
-                direction="row"
-                spacing={4}
-                justifyContent="center"
-                className="button-stack"
-            >
-                <Box className="icon-button-container">
-                    <IconButton
-                        color="inherit"
-                        size="large"
-                        onClick={handleReplay}
-                        title="переиграть"
-                        className="control-icon-button"
-                    >
-                        <RefreshIcon fontSize="large" />
-                    </IconButton>
-                    <Typography className="icon-label">Переиграть</Typography>
-                </Box>
+    it("отправляет очки на сервер для бармена при totalScore > 0 и currentUser.login", async () => {
+        const today = new Date().toLocaleDateString();
 
-                <Box className="icon-button-container">
-                    <IconButton
-                        color="inherit"
-                        size="large"
-                        onClick={handleBar}
-                        title="бар"
-                        className="control-icon-button"
-                    >
-                        <LiquorIcon fontSize="large" />
-                    </IconButton>
-                    <Typography className="icon-label">Бар</Typography>
-                </Box>
-            </Stack>
+        vi.mocked(useAuth).mockReturnValue({
+            isBarman: true,
+            currentUser: { id: 42, login: "ivan" },
+        });
 
-            {!isBarman && (
-                <Button
-                    variant="contained"
-                    disableElevation
-                    disableRipple
-                    className="order-button"
-                    onClick={handleOrder}
-                >
-                    Заказать
-                </Button>
-            )}
-        </Box>
-    );
-}
+        vi.mocked(useSelector).mockReturnValue(200);
 
-export default Result;
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ success: true, newScore: 1622 }),
+        });
+
+        render(<Result />);
+
+        await waitFor(() => {
+            expect(mockFetch).toHaveBeenCalledWith(
+                "/api/rating/update-score",
+                expect.objectContaining({
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ login: "ivan", score: 200 }),
+                })
+            );
+        });
+
+        expect(localStorage.getItem(`scoreSent_42_${today}`)).toBe("true");
+    });
+
+    it("не отправляет очки, если не бармен", () => {
+        vi.mocked(useAuth).mockReturnValue({
+            isBarman: false,
+            currentUser: { login: "guest" },
+        });
+
+        vi.mocked(useSelector).mockReturnValue(300);
+
+        render(<Result />);
+
+        expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it("не отправляет очки, если totalScore = 0", () => {
+        vi.mocked(useAuth).mockReturnValue({
+            isBarman: true,
+            currentUser: { login: "ivan" },
+        });
+
+        vi.mocked(useSelector).mockReturnValue(0);
+
+        render(<Result />);
+
+        expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it("не отправляет очки повторно в один день", async () => {
+        const today = new Date().toLocaleDateString();
+        localStorage.setItem(`scoreSent_42_${today}`, "true");
+
+        vi.mocked(useAuth).mockReturnValue({
+            isBarman: true,
+            currentUser: { id: 42, login: "ivan" },
+        });
+
+        vi.mocked(useSelector).mockReturnValue(100);
+
+        render(<Result />);
+
+        await waitFor(() => {
+            expect(mockFetch).not.toHaveBeenCalled();
+        });
+    });
+
+    it("кнопка 'Переиграть' ведёт на /levelPage", () => {
+        render(<Result />);
+
+        fireEvent.click(screen.getByTitle("переиграть"));
+
+        expect(navigateMock).toHaveBeenCalledWith("/levelPage");
+    });
+
+    it("кнопка 'Бар' ведёт на /menu", () => {
+        render(<Result />);
+
+        fireEvent.click(screen.getByTitle("бар"));
+
+        expect(navigateMock).toHaveBeenCalledWith("/menu");
+    });
+
+    it("рендерит CocktailCanvas", () => {
+        render(<Result />);
+
+        expect(screen.getByTestId("cocktail-canvas")).toBeInTheDocument();
+    });
+
+    it("отображает 'Готово!' как заголовок", () => {
+        render(<Result />);
+
+        expect(screen.getByRole("heading", { name: "Готово!" })).toBeInTheDocument();
+    });
+});

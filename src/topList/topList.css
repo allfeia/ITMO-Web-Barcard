@@ -55,7 +55,7 @@
 
 .bar-name-link {
     font-size: 28px;
-    font-weight: 500;
+    font-weight: 200;
     color: #333;
     text-align: left;
     display: block;
@@ -71,11 +71,12 @@
 }
 
 .bar-divider {
-    width: 100%;
+    width: 100vw;
     height: 2px;
     background-color: #333;
     border: none;
     margin: 0 0 20px 0;
+    margin-left: -20px;
 }
 
 .users-rating-list {
@@ -101,7 +102,7 @@
 }
 
 .user-login {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 600;
     color: #333;
 }
@@ -131,12 +132,7 @@
     min-width: 40px;
 }
 
-.filled-star {
-    font-size: 48px !important;
-    color: #333;
-}
-
-.border-star {
+.star-icon {
     font-size: 48px !important;
     color: #333;
 }
@@ -155,5 +151,5 @@
 }
 
 .position-number.other {
-    color: #333;
+    color: #EFEEEC;
 }

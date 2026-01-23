@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import Result from "../../src/game-pages/Result.jsx";
+import Result from "../../src/game-pages/result-page/Result.jsx";
 
 vi.mock("../../src/authContext/useAuth.js", () => ({
   useAuth: vi.fn(),

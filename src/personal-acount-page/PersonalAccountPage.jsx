@@ -103,7 +103,7 @@ function PersonalAccountPage() {
         <canvas className="icon icon-inline" ref={canvasRefStar} />
       </div>
 
-      <Link to="" className="linkRow">
+      <Link to="/top" className="linkRow">
         Рейтинг бара
       </Link>
 

@@ -2,26 +2,30 @@ import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import WestIcon from '@mui/icons-material/West';
 import './topList.css';
-import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-
-import { db } from '../mocks/db';
+import { useAuth } from "../authContext/useAuth.js";
 
 export default function TopList() {
     const goTo = useNavigate();
+    const { barId, barName, barSite } = useAuth();
 
-    const barId = JSON.parse(localStorage.getItem('currentBar'))?.id || 123;
-
-    const [barName, setBarName] = useState("Загрузка...");
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const fetchBarAndRating = async () => {
+    const fetchRating = async () => {
+        if (!barId) {
+            setError("ID бара не найден");
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
+            setError(null);
+
             const response = await fetch(`/api/bar/${barId}/with-rating`);
 
             if (!response.ok) {
@@ -30,51 +34,35 @@ export default function TopList() {
 
             const data = await response.json();
 
-            setBarName(data.bar?.name || "Бар без названия");
             setUsers(data.rating || []);
-            setError(null);
         } catch (err) {
-            console.error('Ошибка загрузки данных бара и рейтинга:', err);
-            setError(err.message);
-
-            // fallback — берём напрямую из мока (db)
-            const fallbackBar = db.bars.find(b => b.id === barId) || { name: "Без названия" };
-            setBarName(fallbackBar.name);
-
-            const fallbackUsers = db.users
-                .filter(u => u.bar_id === barId)
-                .sort((a, b) => b.score - a.score)
-                .map(u => ({ login: u.login, score: u.score }));
-
-            setUsers(fallbackUsers.length > 0 ? fallbackUsers : [
-                { login: "alex_ivanov", score: 4850 },
-                { login: "maria_smirnova", score: 4720 },
-                { login: "dmitry_petrov", score: 4630 },
-                { login: "anna_kuznetsova", score: 4550 },
-                { login: "sergey_vasiliev", score: 4410 },
-            ]);
+            console.error('Ошибка загрузки рейтинга:', err);
+            setError(err.message || "Не удалось загрузить рейтинг");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchBarAndRating();
-        const interval = setInterval(fetchBarAndRating, 30000);
-        return () => clearInterval(interval);
+        fetchRating();
     }, [barId]);
 
     const formatScore = (score) =>
         score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+    const handleBarSiteClick = (e) => {
+        e.preventDefault();
+        if (barSite) {
+            window.open(barSite, '_blank', 'noopener,noreferrer');
+        }
+    };
 
     return (
         <div className="top-page">
             <Button
                 className="back-btn"
                 variant="text"
-                onClick={() => {
-                    goTo(-1);
-                }}
+                onClick={() => goTo(-1)}
                 data-testid="back-button"
             >
                 <WestIcon className="learn-arrow" sx={{ fontSize: "30px" }} />
@@ -86,9 +74,21 @@ export default function TopList() {
                 </h1>
 
                 <div className="bar-name-container">
-                    <Link to="/menu" className="bar-name-link">
-                        {barName}
-                    </Link>
+                    {barSite ? (
+                        <a
+                            href={barSite}
+                            onClick={handleBarSiteClick}
+                            className="bar-name-link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {barName || "Бар"}
+                        </a>
+                    ) : (
+                        <span className="bar-name-link">
+                            {barName || "Бар"}
+                        </span>
+                    )}
                 </div>
 
                 <div className="bar-divider"></div>
@@ -98,8 +98,7 @@ export default function TopList() {
                         <div className="loading">Загрузка рейтинга...</div>
                     ) : error ? (
                         <div className="error">
-                            {error} <br />
-                            Показан резервный рейтинг
+                            {error}
                         </div>
                     ) : users.length === 0 ? (
                         <div className="empty-rating">
@@ -119,14 +118,7 @@ export default function TopList() {
                                     </span>
                                 </div>
                                 <div className="star-position">
-                                    {index < 3 ? (
                                         <StarIcon className="star-icon filled-star" />
-                                    ) : (
-                                        <StarBorderIcon
-                                            className="star-icon border-star"
-                                            sx={{ strokeWidth: "0.5" }}
-                                        />
-                                    )}
                                     <span
                                         className={`position-number ${
                                             index < 3 ? 'top-three' : 'other'

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import AdminRegisterBarForm from "../../src/admin/super-admin/AdminRegisterBarForm.jsx";
 
 const goToMock = vi.fn();
@@ -114,9 +114,6 @@ describe("AdminRegisterBarForm", () => {
           }),
           body: JSON.stringify({
             name: "Бар 1",
-            address: undefined,
-            description: undefined,
-            website: undefined,
             barKey: "key123",
             chatId: 777,
           }),
@@ -140,6 +137,7 @@ describe("AdminRegisterBarForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Создать бар" }));
     expect(await screen.findByText("Не авторизовано")).toBeInTheDocument();
 
+    cleanup();
     // 403
     apiFetchMock.mockResolvedValueOnce({
       ok: false,
@@ -152,6 +150,7 @@ describe("AdminRegisterBarForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Создать бар" }));
     expect(await screen.findByText("Доступ запрещён")).toBeInTheDocument();
 
+    cleanup();
     // 400 с ключом (в компоненте при наличии слова "ключ" -> barKeyError)
     apiFetchMock.mockResolvedValueOnce({
       ok: false,

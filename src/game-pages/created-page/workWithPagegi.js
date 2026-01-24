@@ -35,5 +35,18 @@ export function findIngredientMatch(actionText, ingredientName) {
     }
   }
 
+    if (ingredientName.toLowerCase() === "кипяток") {
+        const hotWater = ["кипятком"];
+
+        for (let i = 0; i < actionWords.length; i++) {
+            if (hotWater.includes(actionWords[i])) {
+                return {
+                    start: i,
+                    end: i + 1,
+                };
+            }
+        }
+    }
+
   return null;
 }

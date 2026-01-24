@@ -3,7 +3,7 @@ import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ChatIdInfoModal from "../../src/admin/bar-admin/ChatIdInfoCard.jsx"
+import ChatIdInfoModal from "../../src/admin/super-admin/ChatIdInfoCard.jsx"
 
 describe("ChatIdInfoModal", () => {
   it("не рендерится, когда open=false", () => {

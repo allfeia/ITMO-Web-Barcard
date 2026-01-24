@@ -9,7 +9,7 @@ import {
   Link,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import "./chatIdInfoCard.css";
+import "./ChatIdInfoCard.css";
 import "../../commonStyles.css";
 
 export default function ChatIdInfoModal({ open, onClose }) {

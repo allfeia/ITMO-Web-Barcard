@@ -84,6 +84,7 @@ const adminBarSchema = z.object({
   description: z.string().optional(),
   website: z.string().url().optional(),
   barKey: z.string().min(1),
+  chatId: z.number().int(),
 });
 
 router.post(
@@ -92,7 +93,7 @@ router.post(
   requireRole("super_admin"),
   async (req, res) => {
     try {
-      const { name, address, description, website, barKey } =
+      const { name, address, description, website, barKey, chatId} =
         adminBarSchema.parse(req.body);
 
       const pass_key = await bcrypt.hash(barKey, 10);
@@ -103,6 +104,7 @@ router.post(
         description,
         pass_key,
         "web-site": website,
+        telegram_chat_id: chatId,
       });
 
       res.status(201).json({

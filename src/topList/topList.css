@@ -39,8 +39,7 @@
 .top-title {
     font-size: clamp(64px, 8vw, 72px);
     font-weight: 700;
-    margin: 0px auto 30px;
-    max-width: 377px;
+    margin: 0 auto 30px;
     text-align: left;
     pointer-events: none;
     color: #333;
@@ -75,8 +74,7 @@
     height: 2px;
     background-color: #333;
     border: none;
-    margin: 0 0 20px 0;
-    margin-left: -20px;
+    margin: 0 0 20px -20px;
 }
 
 .users-rating-list {
@@ -89,10 +87,11 @@
 
 .user-rating-item {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
     padding: 12px 0;
+    gap: 10px;
 }
 
 .user-details {
@@ -125,7 +124,8 @@
 }
 
 .star-position {
-    position: relative;
+    position: absolute;
+    right: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -152,4 +152,24 @@
 
 .position-number.other {
     color: #EFEEEC;
+}
+
+@media screen and (width >= 420px) {
+    .page-content {
+        max-width: 2000px;
+        margin: 0 auto;
+        padding: 60px 20px;
+    }
+
+    .bar-divider {
+        margin-left: -35px;
+    }
+
+    .user-rating-item {
+        padding: 12px 20px;
+    }
+
+    .star-position {
+        right: 35px;
+    }
 }

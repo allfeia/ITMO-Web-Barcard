@@ -1,0 +1,56 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #EFEEEC;
+}
+
+.chatid-modal__paper {
+  border-radius: 4px;
+  position: relative;
+}
+
+.chatid-modal__paperInner{
+  position: relative;
+}
+
+.chatid-modal__close.MuiIconButton-root{
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  left: auto;
+  z-index: 10;
+}
+
+.chatid-modal__title.MuiDilogTitle-root {
+  font-weight: 700;
+  padding: 16px 56px 8px 24px; 
+}
+
+.chatid-modal__content.MuiTypography-root {
+  padding: 8px 24px 22px;
+}
+
+.chatid-modal__text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chatid-modal__p {
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.chatid-modal__hint {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.chatid-modal__link.MuiLink-root{
+  color: red;
+  text-decoration: underline;
+}
+
+.chatid-modal__link:hover{
+  text-decoration: none;
+}

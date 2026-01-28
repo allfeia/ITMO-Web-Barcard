@@ -222,6 +222,7 @@ describe("api router", () => {
           description: "desc",
           website: "https://ex.com",
           barKey: "k",
+          chatId: 123,
         });
 
       expect(res.status).toBe(201);

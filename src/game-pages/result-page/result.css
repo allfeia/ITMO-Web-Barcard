@@ -20,7 +20,7 @@
     line-height: 1.1 !important;
     font-size: clamp(64px, 13vw, 72px) !important;
     margin-bottom: 1vh;
-    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif !important;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     letter-spacing: -0.02em !important;
 }
 
@@ -36,7 +36,7 @@
     width: 200px;
     height: 260px;
     margin: 2vh 0 4vh;
-    filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 15px 35px rgb(0 0 0 / 35%));
 }
 
 .cocktail-canvas {
@@ -68,7 +68,7 @@
 }
 
 .control-icon-button:hover {
-    background-color: rgba(51, 51, 51, 0.1) !important;
+    background-color: rgb(51 51 51 / 10%) !important;
 }
 
 .icon-label {
@@ -85,13 +85,13 @@
     color: #EFEEEC !important;
     width: 334px;
     height: 80px;
-    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: clamp(28px, 4vw, 32px) !important;
     font-weight: 200;
     text-transform: none;
     border-radius: 4px;
     border: 2px solid #333;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
     transition: all 0.2s ease;
     margin-top: 2vh;
 }
@@ -99,7 +99,7 @@
 .order-button:hover {
     background-color: #111 !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 25%);
 }
 
 .order-button:active {
@@ -107,7 +107,7 @@
     transform: translateY(0);
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .result-screen {
         padding: 30px 16px;
     }

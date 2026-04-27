@@ -6,6 +6,9 @@ import Typography from '@mui/material/Typography';
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from 'react-router-dom';
 import { useApiFetch } from "../../apiFetch.js";
+import ChatIdInfoModal from "./ChatIdInfoCard.jsx";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import IconButton from "@mui/material/IconButton";
 
 
 export default function AdminRegisterBarForm() {
@@ -18,6 +21,7 @@ export default function AdminRegisterBarForm() {
     description: '',
     website: '',
     barKey: '',
+    chatId:'',
   });
 
   const [loading, setLoading] = useState(false);
@@ -29,6 +33,9 @@ export default function AdminRegisterBarForm() {
   const [descriptionError, setDescriptionError] = useState('');
   const [websiteError, setWebsiteError] = useState('');
   const [barKeyError, setBarKeyError] = useState('');
+  const [chatIdError, setChatIdErrror] = useState('');
+
+  const [chatInfoOpen, setChatInfoOpen] = useState(false);
 
   function onChange(e) {
     const { name, value } = e.target;
@@ -39,6 +46,7 @@ export default function AdminRegisterBarForm() {
     if (name === 'description') setDescriptionError('');
     if (name === 'website') setWebsiteError('');
     if (name === 'barKey') setBarKeyError('');
+    if (name === "chatId") setChatIdErrror('');
     setCommonErr(null);
     setOkMsg(null);
   }
@@ -63,6 +71,7 @@ export default function AdminRegisterBarForm() {
     setDescriptionError('');
     setWebsiteError('');
     setBarKeyError('');
+    setChatIdErrror('');
 
     let hasError = false;
 
@@ -80,6 +89,13 @@ export default function AdminRegisterBarForm() {
       setBarKeyError('Введите ключ бара');
       hasError = true;
     }
+    if(!form.chatId.trim()){
+      setChatIdErrror('Введите ID чата в Telegram');
+      hasError = true;
+    }else if(!/^-?\d+$/.test(form.chatId.trim())){
+      setChatIdErrror('ID чата в Telegram должен быть числом');
+      hasError=true;
+    }
 
     if (hasError) return;
 
@@ -91,6 +107,7 @@ export default function AdminRegisterBarForm() {
         description: form.description.trim() || undefined,
         website: form.website.trim() || undefined,
         barKey: form.barKey.trim(),
+        chatId: Number(form.chatId.trim()),
       };
 
       const resp = await apiFetch('/api/admin/bars', {
@@ -149,8 +166,35 @@ export default function AdminRegisterBarForm() {
         <Typography variant="h1" className="form-title" sx={{ mt: 6 }}>Добавить бар</Typography>
         <TextField className="form-input" label="Название бара" variant="outlined" name="name" value={form.name} onChange={onChange} error={Boolean(nameError)} helperText={nameError} />
         <TextField className="form-input" label="Адрес" variant="outlined" name="address" value={form.address} onChange={onChange} error={Boolean(addressError)} helperText={addressError} />
-        <TextField className="orm-input" label="Описание" variant="outlined" name="description" value={form.description} onChange={onChange} multiline minRows={3} error={Boolean(descriptionError)} helperText={descriptionError} />
+        <TextField className="form-textaria" label="Описание" variant="outlined" name="description" value={form.description} onChange={onChange} multiline minRows={3} error={Boolean(descriptionError)} helperText={descriptionError} />
         <TextField className="form-input" label="Web‑site (URL)" variant="outlined" name="website" value={form.website} onChange={onChange} error={Boolean(websiteError)} helperText={websiteError} />
+        <div className="chatid-field-wrap">
+  <div className="chatid-field-wrap__icon">
+    <IconButton
+      size="small"
+      onClick={() => setChatInfoOpen(true)}
+      aria-label="Инструкция по ID чата"
+    >
+      <InfoOutlinedIcon fontSize="small" />
+    </IconButton>
+  </div>
+
+  <TextField
+    className="form-input"
+    label="ID чата в Telegram"
+    variant="outlined"
+    name="chatId"
+    value={form.chatId}
+    onChange={onChange}
+    error={Boolean(chatIdError)}
+    helperText={chatIdError}
+  />
+</div>
+
+<ChatIdInfoModal
+  open={chatInfoOpen}
+  onClose={() => setChatInfoOpen(false)}
+/>
         <TextField className="form-input" label="Ключ бара" variant="outlined" name="barKey" value={form.barKey} onChange={onChange} error={Boolean(barKeyError)} helperText={barKeyError} type="password" />
         {commonErr && <Typography color="error" sx={{ mt: 1 }}>{commonErr}</Typography>}
         {okMsg && <Typography color="success.main" sx={{ mt: 1 }}>{okMsg}</Typography>}

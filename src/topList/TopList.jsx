@@ -4,8 +4,8 @@ import WestIcon from '@mui/icons-material/West';
 import './topList.css';
 import { useState, useEffect } from "react";
 import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useAuth } from "../authContext/useAuth.js";
+import '../commonStyles.css'
 
 export default function TopList() {
     const goTo = useNavigate();
@@ -70,7 +70,7 @@ export default function TopList() {
 
             <div className="page-content">
                 <h1 className="top-title">
-                    Рейтинг<br />бара
+                    Рейтинг бара
                 </h1>
 
                 <div className="bar-name-container">
@@ -93,43 +93,45 @@ export default function TopList() {
 
                 <div className="bar-divider"></div>
 
-                <div className="users-rating-list">
-                    {loading ? (
-                        <div className="loading">Загрузка рейтинга...</div>
-                    ) : error ? (
-                        <div className="error">
-                            {error}
-                        </div>
-                    ) : users.length === 0 ? (
-                        <div className="empty-rating">
-                            <p>Рейтинг пуст</p>
-                            <p>Станьте первым участником!</p>
-                        </div>
-                    ) : (
-                        users.map((user, index) => (
-                            <div
-                                key={user.login || index}
-                                className="user-rating-item"
-                            >
-                                <div className="user-details">
-                                    <span className="user-login">{user.login}</span>
-                                    <span className="user-score">
+                <div className="page-content-inner">
+                    <div className="users-rating-list">
+                        {loading ? (
+                            <div className="loading">Загрузка рейтинга...</div>
+                        ) : error ? (
+                            <div className="error">
+                                {error}
+                            </div>
+                        ) : users.length === 0 ? (
+                            <div className="empty-rating">
+                                <p>Рейтинг пуст</p>
+                                <p>Станьте первым участником!</p>
+                            </div>
+                        ) : (
+                            users.map((user, index) => (
+                                <div
+                                    key={user.login || index}
+                                    className="user-rating-item"
+                                >
+                                    <div className="user-details">
+                                        <span className="user-login">{user.login}</span>
+                                        <span className="user-score">
                                         {formatScore(user.score)} очков
                                     </span>
-                                </div>
-                                <div className="star-position">
+                                    </div>
+                                    <div className="star-position">
                                         <StarIcon className="star-icon filled-star" />
-                                    <span
-                                        className={`position-number ${
-                                            index < 3 ? 'top-three' : 'other'
-                                        }`}
-                                    >
+                                        <span
+                                            className={`position-number ${
+                                                index < 3 ? 'top-three' : 'other'
+                                            }`}
+                                        >
                                         {index + 1}
                                     </span>
+                                    </div>
                                 </div>
-                            </div>
-                        ))
-                    )}
+                            ))
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

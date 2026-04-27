@@ -5,7 +5,7 @@ import { Box, Typography, Button, IconButton, Stack } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LiquorIcon from '@mui/icons-material/Liquor';
 import CocktailCanvas from './CocktailCanvas';
-import './Result.css';
+import './result.css';
 import { useAuth } from "../../authContext/useAuth.js";
 import OrderModal from "../OderCard.jsx";
 import {useApiFetch} from '../../apiFetch.js';

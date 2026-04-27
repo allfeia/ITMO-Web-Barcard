@@ -1,0 +1,26 @@
+.opportunity-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+
+}
+
+.opportunity-panel p {
+    margin: 0;
+    text-align: center;
+}
+
+@media (width <= 640px) {
+    .san-card {
+        padding: 24px 16px;
+    }
+
+    .san-h1 {
+        font-size: 20px;
+    }
+
+    .san-body {
+        font-size: 14px;
+    }
+}

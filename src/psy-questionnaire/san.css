@@ -1,0 +1,275 @@
+.san-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.san-card {
+    padding: 40px 48px;
+    max-width: 680px;
+    width: 100%;
+}
+
+.san-fade-in {
+    animation: fadeUp 0.3s ease;
+}
+
+.san-divider {
+    height: 1px;
+    margin: 28px 0;
+}
+
+
+.san-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.san-h1 {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 12px;
+}
+
+.san-body {
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+}
+
+.san-answer-hint {
+    font-size: 12px;
+    align-self: center;
+}
+
+
+.san-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.san-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 20px;
+}
+
+.san-btns {
+    display: flex;
+    align-items: center;
+    gap: 16px;}
+
+.san-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: #333 !important;
+    color: #EFEEEC !important;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-transform: none;
+    border-radius: 4px;
+    border: 2px solid #333;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+    transition: all 0.2s ease;
+}
+
+
+.san-btn-primary:hover {
+    opacity: 0.88;
+}
+
+.san-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+    padding: 0;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.san-info-box {
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.san-info-box ol {
+    padding-left: 18px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.san-code {
+    display: block;
+    padding: 12px;
+    margin-top: 12px;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.san-progress-wrap {
+    margin-bottom: 36px;
+}
+
+.san-progress-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.san-progress-track {
+    height: 2px;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.san-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+.san-q-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.san-pole {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.san-pole-right {
+    text-align: right;
+}
+
+.san-scale {
+    display: flex;
+    gap: 6px;
+}
+
+.san-scale-labels {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.san-scale-label {
+    width: 38px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.san-rb {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+
+.san-rb.zero {
+    border-style: dashed;
+}
+
+.san-result-item {
+    margin-bottom: 24px;
+}
+
+.san-result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.san-result-name {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.san-result-right {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.san-result-score {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.san-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 99px;
+}
+
+.san-bar-track {
+    height: 4px;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.san-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s ease;
+}
+
+.san-neutral-note {
+    font-size: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+}
+
+.san-alert {
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 16px;
+    border: 0.5px solid;
+}
+
+@media (width <= 640px) {
+    .san-q-row {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,10 +1,11 @@
 import TextField from "@mui/material/TextField";
 import {InputAdornment} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import FilterListAltIcon from "@mui/icons-material/FilterListAlt";
 import {useEffect, useState} from "react";
 import CardsGrid from "./menu-page/CardsGrid.jsx";
 import drawUserIcon from "./icons/userIcon.js";
+import HelpIcon from '@mui/icons-material/Help';
+import {useNavigate} from "react-router-dom";
 
 function CocktailListPage({
                                              cocktails,
@@ -16,6 +17,7 @@ function CocktailListPage({
                                              onAccountClick = null
                                          }) {
     const [searchValue, setSearchValue] = useState("");
+    const goTo = useNavigate();
 
     const filtered = cocktails.filter(c =>
         c.name.toLowerCase().includes(searchValue.toLowerCase())
@@ -32,12 +34,24 @@ function CocktailListPage({
 
     return (
         <div className="menu-template-container">
-            {showAccountIcon && (
+            {showAccountIcon ? (
                 <canvas
                     className="account-icon"
                     data-testid="account-canvas"
                     ref={accountIconRef}
                     onClick={onAccountClick}
+                />
+            ) : (
+                <HelpIcon
+                    className="help-icon"
+                    sx={{
+                        position: "absolute",
+                        right: "15px",
+                        top: "8px",
+                        size: "30px",
+                        color: "#333"
+                    }}
+                    onClick={() => {goTo("/psyQuest")}}
                 />
             )}
 
@@ -60,11 +74,6 @@ function CocktailListPage({
                                 <SearchIcon />
                             </InputAdornment>
                         ),
-                        // endAdornment: (
-                        //     <InputAdornment position="end">
-                        //         <FilterListAltIcon />
-                        //     </InputAdornment>
-                        // )
                     }}
                 />
             </div>

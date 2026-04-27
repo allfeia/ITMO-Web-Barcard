@@ -60,9 +60,9 @@ export default function QuestionScreen({
                     ← Назад
                 </button>
                 <span className="san-answer-hint">
-          {selectedValue !== undefined
-              ? `Выбрано: ${selectedValue > 0 ? "+" : ""}${selectedValue}. Переход…`
-              : ""}
+          {/*{selectedValue !== undefined*/}
+          {/*    ? `Выбрано: ${selectedValue > 0 ? "+" : ""}${selectedValue}. Переход…`*/}
+          {/*    : ""}*/}
         </span>
             </div>
         </div>

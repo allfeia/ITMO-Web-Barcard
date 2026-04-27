@@ -4,8 +4,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import {useEffect, useState} from "react";
 import CardsGrid from "./menu-page/CardsGrid.jsx";
 import drawUserIcon from "./icons/userIcon.js";
-import HelpIcon from '@mui/icons-material/Help';
 import {useNavigate} from "react-router-dom";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import Button from "@mui/material/Button";
 
 function CocktailListPage({
                                              cocktails,
@@ -42,17 +43,20 @@ function CocktailListPage({
                     onClick={onAccountClick}
                 />
             ) : (
-                <HelpIcon
-                    className="help-icon"
+                <Button
+                    variant="text"
+                    onClick={() => {goTo("/psyQuest")}}
                     sx={{
                         position: "absolute",
                         right: "15px",
                         top: "8px",
-                        size: "30px",
-                        color: "#333"
+                        textTransform: "none",
+                        color: "#333",
                     }}
-                    onClick={() => {goTo("/psyQuest")}}
-                />
+                    endIcon={<HelpOutlineIcon />}
+                >
+                    Не знаете, что заказать?
+                </Button>
             )}
 
             <h1 className="menu-template-title">{title}</h1>

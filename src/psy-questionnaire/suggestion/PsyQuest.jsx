@@ -17,8 +17,8 @@ function PsyQuest() {
             </Button>
             <div className="san-card san-fade-in opportunity-panel">
                 <div className="opportunity-panel">
-                    <p className="san-h1">Не знаете, что заказать?</p>
-                    <p className="san-body">Мы подберём вам коктейли по вашему самочувствию!</p>
+                    <p className="san-h1">Мы подберём вам коктейли по вашему самочувствию!</p>
+                    {/*<p className="san-body">Мы подберём вам коктейли по вашему самочувствию!</p>*/}
                     <Button
                         variant="contained"
                         className="san-btn"

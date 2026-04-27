@@ -6,6 +6,10 @@
     height: 30px;
 }
 
+.menu-template-container {
+    padding-top: 30px;
+}
+
 .menu-template-title {
     font-size: 64px;
     margin-bottom: 30px;

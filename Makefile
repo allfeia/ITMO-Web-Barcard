@@ -5,3 +5,4 @@
 #запуск в фоне для ci
 run:
 	docker compose up -d --build
+

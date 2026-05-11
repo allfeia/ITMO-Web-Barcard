@@ -1,5 +1,23 @@
 import {SCALE} from "../data/questions.js";
 
+const getButtonStyle = (v, maxAbs) => {
+    if (v === 0) {
+        return {};
+    }
+
+    const intensity = Math.abs(v) / maxAbs; 
+
+    if (v < 0) {
+        return {
+            backgroundColor: `rgba(240, 148, 57, ${0.25 + intensity * 0.75})`,
+        };
+    }
+
+    return {
+        backgroundColor: `rgba(159, 163, 236, ${0.25 + intensity * 0.75})`,
+    };
+};
+
 export default function QuestionScreen({
                                            question,
                                            idx,
@@ -27,25 +45,19 @@ export default function QuestionScreen({
                 <div className="san-pole">{question.left}</div>
 
                 <div>
-                    <div className="san-scale-labels">
-                        {SCALE.map((v) => (
-                            <div className="san-scale-label" key={v}>{v}</div>
-                        ))}
-                    </div>
                     <div className="san-scale">
                         {SCALE.map((v) => (
                             <button
                                 key={v}
                                 className={[
-                                    "san-rb",
-                                    v === 0 ? "zero" : "",
-                                    selectedValue === v ? "sel" : "",
+                                    `san-rb ${v === 0 ? "san-rb-0" : ""} ${selectedValue === v ? "sel" : ""}`
                                 ]
                                     .filter(Boolean)
                                     .join(" ")}
+                                style={getButtonStyle(v, Math.max(...SCALE.map(Math.abs)))}    
                                 onClick={() => onAnswer(v)}
                             >
-                                {v === 0 ? "·" : ""}
+                                {Math.abs(v)}
                             </button>
                         ))}
                     </div>

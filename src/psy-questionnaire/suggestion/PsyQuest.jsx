@@ -24,7 +24,7 @@ function PsyQuest() {
                         className="san-btn"
                         onClick={() => goTo("/san")}
                     >
-                        Пройти опросник
+                        Пройти опрос
                     </Button>
                 </div>
             </div>

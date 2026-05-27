@@ -528,4 +528,109 @@ router.get("/bar/:barId/with-rating", async (req, res) => {
   }
 });
 
+router.get("/bar/:barId/with-rating", async (req, res) => {
+  try {
+    const barId = Number(req.params.barId);
+    if (!Number.isFinite(barId) || barId <= 0) {
+      return res.status(400).json({ error: "Invalid bar id" });
+    }
+
+    const bar = await Bar.findByPk(barId, { attributes: ["id"] });
+    if (!bar) return res.status(404).json({ error: "Бар не найден" });
+
+    const rows = await User.findAll({
+      where: { bar_id: barId },
+      attributes: [
+        "id",
+        "login",
+        [fn("COALESCE", fn("SUM", col("userPoints.points")), 0), "score"],
+      ],
+      include: [
+        {
+          model: Point,
+          as: "userPoints",
+          attributes: [],
+          required: false,
+        },
+      ],
+      group: ["User.id"],
+      order: [[fn("COALESCE", fn("SUM", col("userPoints.points")), 0), "DESC"]],
+    });
+
+    const rating = rows.map((u) => ({
+      id: u.id,
+      login: u.login,
+      score: Number(u.get("score") ?? 0),
+    }));
+
+    return res.json({ rating });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/bar/:barId/recommend", async (req, res) => {
+  try {
+    const barId = Number(req.params.barId); 
+
+    if (!Number.isFinite(barId) || barId <= 0) {
+      return res.status(400).json({ error: "Invalid bar id" });
+    }
+
+    const {
+      wellbeing,
+      activity,
+      mood,
+      preferences = {},
+    } = req.body;
+
+    const cocktails = await Cocktail.findAll({
+      where: { bar_id: barId },
+      attributes: [
+        "id",
+        "name",
+        "taste_sweet",
+        "taste_sour",
+        "taste_bitter",
+        "taste_salty",
+        "taste_umami",
+      ],
+      include: [
+        {
+          model: Ingredient,
+          as: "ingredients",
+          attributes: ["id", "name", "type"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    const filtered = filterCocktails(cocktails, preferences);
+
+    const ml = await axios.post(
+  `${process.env.ML_SERVICE_URL}/predict`,
+  {
+    wellbeing,
+    activity,
+    mood
+  }
+);
+
+    const recommendations = rankCocktails(
+      filtered,
+      ml.data.tastes || []
+    );
+
+    return res.json({
+      ml: ml.data,
+      recommendations,
+    });
+
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "failed" });
+  }
+});
+
 export default router;

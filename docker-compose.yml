@@ -39,8 +39,8 @@ services:
 
   ml:
     build:
-      context: ./ml
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/ml.Dockerfile
     expose:
       - "8000"
     command: uvicorn app:app --host 0.0.0.0 --port 8000

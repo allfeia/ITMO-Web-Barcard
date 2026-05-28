@@ -23,7 +23,6 @@ export default function PreferencesScreen({ results }) {
     const [ingredientsError, setIngredientsError] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [recommendError, setRecommendError] = useState("");
-    const [recommendations, setRecommendations] = useState(null);
 
     useEffect(() => {
         const loadIngredients = async () => {
@@ -155,7 +154,6 @@ export default function PreferencesScreen({ results }) {
         try {
             setSubmitting(true);
             setRecommendError("");
-            setRecommendations(null);
 
             const response = await fetch(`/api/bar/${barId}/recommend`, {
                 method: "POST",
@@ -170,8 +168,6 @@ export default function PreferencesScreen({ results }) {
             }
 
             const data = await response.json();
-
-            setRecommendations(data);
 
             console.log("Рекомендации:", data);
         } catch (error) {

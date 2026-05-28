@@ -8,6 +8,7 @@ import {computeResults} from "./data/utils/scoring.js";
 import InstructionScreen from "./components/InstructionScreen.jsx";
 import QuestionScreen from "./components/QuestionScreen.jsx";
 import ResultsScreen from "./components/ResultsScreen.jsx";
+import PreferencesScreen from "../preferences/PreferencesScreen.jsx";
 
 export default function SAN() {
     const [phase,      setPhase]      = useState("instruction");

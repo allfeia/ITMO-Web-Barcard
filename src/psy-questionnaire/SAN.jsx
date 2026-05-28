@@ -14,8 +14,8 @@ export default function SAN() {
     const [answers,    setAnswers]    = useState({});
     const [qIdx,       setQIdx]       = useState(0);
     const [results,    setResults]    = useState(null);
-    const [saving,     setSaving]     = useState(false);
-    const [saveStatus, setSaveStatus] = useState(null); // null | "success" | "error"
+    // const [saving,     setSaving]     = useState(false);
+    // const [saveStatus, setSaveStatus] = useState(null); // null | "success" | "error"
 
     useEffect(() => {
         const data = {
@@ -70,59 +70,59 @@ export default function SAN() {
         else setPhase("instruction");
     }
 
-    async function handleSave() {
-        setSaving(true);
-        setSaveStatus(null);
+    // async function handleSave() {
+    //     setSaving(true);
+    //     setSaveStatus(null);
 
-        const saved = sessionStorage.getItem("san_data");
-        if (!saved) {
-            setSaveStatus("error");
-            setSaving(false);
-            return;
-        }
-        const parsed = JSON.parse(saved);
+    //     const saved = sessionStorage.getItem("san_data");
+    //     if (!saved) {
+    //         setSaveStatus("error");
+    //         setSaving(false);
+    //         return;
+    //     }
+    //     const parsed = JSON.parse(saved);
 
-        const { answers, results } = parsed;
+    //     const { answers, results } = parsed;
 
-        const questionIds = Questions.map((question) => question.id);
+    //     const questionIds = Questions.map((question) => question.id);
 
-        const row = {
-            timestamp: new Date().toISOString(),
+    //     const row = {
+    //         timestamp: new Date().toISOString(),
 
-            answers: questionIds.map((id) => answers?.[id] ?? ""),
+    //         answers: questionIds.map((id) => answers?.[id] ?? ""),
 
-            samochuvstvie: results?.samochuvstvie.toFixed(2) ?? "",
-            aktivnost: results?.aktivnost.toFixed(2) ?? "",
-            nastroenie: results?.nastroenie.toFixed(2) ?? "",
-        };
+    //         samochuvstvie: results?.samochuvstvie.toFixed(2) ?? "",
+    //         aktivnost: results?.aktivnost.toFixed(2) ?? "",
+    //         nastroenie: results?.nastroenie.toFixed(2) ?? "",
+    //     };
 
-        try {
-            await fetch("https://script.google.com/macros/s/AKfycbzFiB4K9vzRxhX3JcdbfZ6HXghxm_X3_zmY31JvCmgdq29pKoG15J4MDx-1LbCuIiuZ/exec", {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(row),
-            });
+    //     try {
+    //         await fetch("https://script.google.com/macros/s/AKfycbzFiB4K9vzRxhX3JcdbfZ6HXghxm_X3_zmY31JvCmgdq29pKoG15J4MDx-1LbCuIiuZ/exec", {
+    //             method: "POST",
+    //             mode: "no-cors",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify(row),
+    //         });
 
-            setSaveStatus("success");
-        } catch {
-            setSaveStatus("error");
-        }
+    //         setSaveStatus("success");
+    //     } catch {
+    //         setSaveStatus("error");
+    //     }
 
-        setSaving(false);
-    }
+    //     setSaving(false);
+    // }
 
-    function handleRestart() {
-        setAnswers({});
-        setQIdx(0);
-        setResults(null);
-        setSaveStatus(null);
-        setPhase("instruction");
+    // function handleRestart() {
+    //     setAnswers({});
+    //     setQIdx(0);
+    //     setResults(null);
+    //     setSaveStatus(null);
+    //     setPhase("instruction");
 
-        sessionStorage.removeItem("san_data");
-    }
+    //     sessionStorage.removeItem("san_data");
+    // }
 
 
     const currentQuestion = Questions[qIdx];
@@ -147,8 +147,7 @@ export default function SAN() {
                     onBack={handleBack}
                 />
             )}
-
-            {phase === "results" && results && (
+            {/* {phase === "results" && results && (
                 <ResultsScreen
                     results={results}
                     saving={saving}
@@ -156,6 +155,11 @@ export default function SAN() {
                     onSave={handleSave}
                     onRestart={handleRestart}
                 />
+            )} */}
+            {phase === "results" && results && (
+            <PreferencesScreen
+                results={results}
+            />
             )}
         </div>
     );

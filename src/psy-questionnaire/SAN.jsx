@@ -147,8 +147,7 @@ export default function SAN() {
                     onBack={handleBack}
                 />
             )}
-
-            {phase === "results" && results && (
+            {/* {phase === "results" && results && (
                 <ResultsScreen
                     results={results}
                     saving={saving}
@@ -156,6 +155,11 @@ export default function SAN() {
                     onSave={handleSave}
                     onRestart={handleRestart}
                 />
+            )} */}
+            {phase === "results" && results && (
+            <PreferencesScreen
+                results={results}
+            />
             )}
         </div>
     );

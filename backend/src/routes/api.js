@@ -636,4 +636,57 @@ router.post("/bar/:barId/recommend", async (req, res) => {
   }
 });
 
+router.get("/bar/:barId/ingredients", async (req, res) => {
+  try {
+    const barId = Number(req.params.barId);
+
+    if (!Number.isFinite(barId) || barId <= 0) {
+      return res.status(400).json({ error: "Invalid bar id" });
+    }
+
+    const bar = await Bar.findByPk(barId, { attributes: ["id"] });
+    if (!bar) {
+      return res.status(404).json({ error: "Бар не найден" });
+    }
+
+    const cocktails = await Cocktail.findAll({
+      where: { bar_id: barId },
+      attributes: ["id"],
+      include: [
+        {
+          model: Ingredient,
+          as: "ingredients",
+          attributes: ["id", "name"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    const ingredientMap = new Map();
+
+    for (const cocktail of cocktails) {
+      for (const ingredient of cocktail.ingredients || []) {
+        if (!ingredientMap.has(ingredient.id)) {
+          ingredientMap.set(ingredient.id, {
+            id: ingredient.id,
+            name: ingredient.name,
+          });
+        }
+      }
+    }
+
+    const ingredients = Array.from(ingredientMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, "ru")
+    );
+
+    return res.json({
+      barId,
+      ingredients,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default router;

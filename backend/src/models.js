@@ -277,11 +277,13 @@ Cocktail.belongsToMany(Ingredient, {
   through: CocktailIngredient,
   foreignKey: "cocktail_id",
   otherKey: "ingredient_id",
+  as: "ingredients",
 });
 Ingredient.belongsToMany(Cocktail, {
   through: CocktailIngredient,
   foreignKey: "ingredient_id",
   otherKey: "cocktail_id",
+  as: "cocktails",
 });
 
 Cocktail.hasMany(CocktailRecipeStep, { foreignKey: "cocktail_id" });

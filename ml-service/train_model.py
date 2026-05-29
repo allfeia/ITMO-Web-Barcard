@@ -65,7 +65,7 @@ state_to_tastes = {
     "negative": ["sweet", "umami"],
     "fatigue": ["salty", "umami"],
     "anxiety": ["sour", "sweet", "bitter"],
-    "mixed": ["sweet", "sweet"]
+    "mixed": ["sweet", "sour", "bitter"]
 }
 
 X_train, X_test, y_train, y_test = train_test_split(

@@ -89,6 +89,11 @@ Cocktail.init(
     },
     name: { type: DataTypes.STRING, allowNull: false },
     draw_file: { type: DataTypes.STRING },
+    taste_sweet: { type: DataTypes.FLOAT, defaultValue: 0 },
+    taste_salty: { type: DataTypes.FLOAT, defaultValue: 0 },
+    taste_bitter: { type: DataTypes.FLOAT, defaultValue: 0 },
+    taste_sour: { type: DataTypes.FLOAT, defaultValue: 0 },
+    taste_umami: { type: DataTypes.FLOAT, defaultValue: 0 },
   },
   {
     sequelize,

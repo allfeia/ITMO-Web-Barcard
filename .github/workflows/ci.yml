@@ -100,7 +100,7 @@ jobs:
           TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_POLLING=${{ secrets.TG_BOT_POLLING }}
           DEFAULT_TELEGRAM_CHAT_ID=${{ secrets.DEFAULT_TELEGRAM_CHAT_ID }}
-          ML_S=${{ secrets.ML_SERVICE_URL }}
+          ML_SERVICE_URL=${{ secrets.ML_SERVICE_URL }}
           EOT
           )
           

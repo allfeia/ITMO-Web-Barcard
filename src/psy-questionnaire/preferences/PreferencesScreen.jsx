@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../authContext/useAuth.js";
 
 import "./PreferencesScreen.css";
-import RecommendationsPage from "../RecommendationsPage.jsx";
 
 function normalizeText(value) {
     return String(value || "").trim().toLowerCase();
@@ -24,8 +23,6 @@ export default function PreferencesScreen({ results, onRecommendations }) {
     const [ingredientsError, setIngredientsError] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [recommendError, setRecommendError] = useState("");
-    const [recommendations, setRecommendations] = useState(null);
-
 
     useEffect(() => {
         const loadIngredients = async () => {

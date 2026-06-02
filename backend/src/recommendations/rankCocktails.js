@@ -13,6 +13,7 @@ export function rankCocktails(cocktails, tastes = []) {
     return {
       id: c.id,
       name: c.name,
+      draw_file: c.draw_file,
       score,
     };
   });
@@ -21,5 +22,5 @@ export function rankCocktails(cocktails, tastes = []) {
     .filter((c) => c.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 10)
-    .map(({ id, name }) => ({ id, name }));
+    .map(({ id, name, draw_file }) => ({ id, name, draw_file }));
 }

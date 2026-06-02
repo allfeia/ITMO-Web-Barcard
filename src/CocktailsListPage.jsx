@@ -5,7 +5,6 @@ import {useEffect, useState} from "react";
 import CardsGrid from "./menu-page/CardsGrid.jsx";
 import drawUserIcon from "./icons/userIcon.js";
 import {useNavigate} from "react-router-dom";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import Button from "@mui/material/Button";
 
 function CocktailListPage({
@@ -15,7 +14,8 @@ function CocktailListPage({
                                              barSite = "",
                                              showAccountIcon = false,
                                              accountIconRef = null,
-                                             onAccountClick = null
+                                             onAccountClick = null,
+                                             showHelper = false,
                                          }) {
     const [searchValue, setSearchValue] = useState("");
     const goTo = useNavigate();
@@ -42,7 +42,7 @@ function CocktailListPage({
                     ref={accountIconRef}
                     onClick={onAccountClick}
                 />
-            ) : (
+            ) : showHelper ? (
                 <Button
                     variant="text"
                     onClick={() => {goTo("/psyQuest")}}
@@ -53,11 +53,10 @@ function CocktailListPage({
                         textTransform: "none",
                         color: "#333",
                     }}
-                    endIcon={<HelpOutlineIcon />}
                 >
                     Не знаете, что заказать?
                 </Button>
-            )}
+            ) : null}
 
             <h1 className="menu-template-title">{title}</h1>
 

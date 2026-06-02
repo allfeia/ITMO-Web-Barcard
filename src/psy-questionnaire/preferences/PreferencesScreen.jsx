@@ -2,15 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../authContext/useAuth.js";
+import { useAuth } from "../../authContext/useAuth.js";
 
 import "./PreferencesScreen.css";
+import RecommendationsPage from "../RecommendationsPage.jsx";
 
 function normalizeText(value) {
     return String(value || "").trim().toLowerCase();
 }
 
-export default function PreferencesScreen({ results }) {
+export default function PreferencesScreen({ results, onRecommendations }) {
     const { barId } = useAuth();
     const goTo = useNavigate();
 
@@ -23,6 +24,8 @@ export default function PreferencesScreen({ results }) {
     const [ingredientsError, setIngredientsError] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [recommendError, setRecommendError] = useState("");
+    const [recommendations, setRecommendations] = useState(null);
+
 
     useEffect(() => {
         const loadIngredients = async () => {
@@ -170,6 +173,8 @@ export default function PreferencesScreen({ results }) {
             const data = await response.json();
 
             console.log("Рекомендации:", data);
+            onRecommendations(data.recommendations);
+
         } catch (error) {
             console.error(error);
             setRecommendError("Ошибка при получении рекомендаций");

@@ -57,6 +57,7 @@ function FavouritesPage() {
                     showBarLink={true}
                     barName={barName}
                     barSite={barSite}
+                    showHelper={false}
                 />
             )}
 

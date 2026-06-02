@@ -5,7 +5,7 @@ WORKDIR /app
 COPY ml-service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY ml-service/ .
 
 EXPOSE 8000
 

@@ -593,6 +593,7 @@ router.post("/bar/:barId/recommend", async (req, res) => {
       attributes: [
         "id",
         "name",
+        "draw_file",
         "taste_sweet",
         "taste_sour",
         "taste_bitter",

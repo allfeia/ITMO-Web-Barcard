@@ -34,6 +34,7 @@ function MenuPage() {
             showAccountIcon={isBarman}
             accountIconRef={canvasRefUser}
             onAccountClick={() => goTo("/account")}
+            showHelper={true}
         />
     )
 }

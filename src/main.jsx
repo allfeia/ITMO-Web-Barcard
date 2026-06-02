@@ -28,6 +28,7 @@ import Result from "./game-pages/result-page/Result.jsx";
 import TopList from "./topList/TopList.jsx";
 import PsyQuest from "./psy-questionnaire/suggestion/PsyQuest.jsx";
 import SAN from "./psy-questionnaire/SAN.jsx";
+import RecommendationsPage from "./psy-questionnaire/RecommendationsPage.jsx";
 
 Sentry.init({
     dsn: "https://ff863d9ec402606b1c0666c164a5ba2f@o4510535321255936.ingest.us.sentry.io/4510535479132160",
@@ -41,12 +42,12 @@ Sentry.init({
     environment: import.meta.env.MODE || "development",
 });
 
-if (import.meta.env.MODE === 'development') {
-    const { worker } = await import('./mocks/browser.js');
-    await worker.start({
-        onUnhandledRequest: "bypass",
-    });
-}
+// if (import.meta.env.MODE === 'development') {
+//     const { worker } = await import('./mocks/browser.js');
+//     await worker.start({
+//         onUnhandledRequest: "bypass",
+//     });
+// }
 
 createRoot(document.getElementById('root')).render(
     <Provider store={store}>
@@ -68,6 +69,7 @@ createRoot(document.getElementById('root')).render(
                         <Route path="/top" element={<TopList />} />
                         <Route path="/psyQuest" element={<PsyQuest />} />
                         <Route path="san" element={<SAN/>} />
+                        <Route path="rec" element={<RecommendationsPage />} />
 
 
 

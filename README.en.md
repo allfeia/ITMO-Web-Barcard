@@ -121,6 +121,8 @@ uvicorn app:app --reload --port 8000
 
 The training command creates `rf_model.pkl`, `scaler.pkl`, `kmeans.pkl`, `cluster_profiles.pkl`, and `state_to_tastes.pkl`.
 
+Build all components for one command:
+
 ```bash
 make run
 ```

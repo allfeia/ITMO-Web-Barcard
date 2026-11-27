@@ -56,59 +56,59 @@ jobs:
       - name: Run e2e Tests
         run: npx playwright test
 
-  deploy:
-    needs: check
-    runs-on: ubuntu-24.04
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup SSH key
-        uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Deploy via SSH
-        run: |
-          ssh -o StrictHostKeyChecking=no root@85.117.234.255 << 'EOF'
-          set -euo pipefail
-          cd ITMO-Web-Barcard
-          
-          ENV_CONTENT=$(cat << 'EOT'
-          PORT=${{ secrets.PORT }}
-
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
-          SUPER_ADMIN_PASSWORD=${{ secrets.SUPER_ADMIN_PASSWORD }}
-          JWT_EXPIRES=${{ secrets.JWT_EXPIRES }}
-          BCRYPT_ROUNDS=${{ secrets.BCRYPT_ROUNDS }}
-          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
-
-          SMTP_HOST=${{ secrets.SMTP_HOST }}
-          SMTP_PORT=${{ secrets.SMTP_PORT }}
-          SMTP_USER=${{ secrets.SMTP_USER }}
-          SMTP_PASS=${{ secrets.SMTP_PASS }}
-          SMTP_FROM=${{ secrets.SMTP_FROM }}
-          APP_PUBLIC_URL=${{ secrets.APP_PUBLIC_URL }}
-          INVITE_SECRET=${{ secrets.INVITE_SECRET }}
-          
-          TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}
-          TG_BOT_POLLING=${{ secrets.TG_BOT_POLLING }}
-          DEFAULT_TELEGRAM_CHAT_ID=${{ secrets.DEFAULT_TELEGRAM_CHAT_ID }}
-          ML_SERVICE_URL=${{ secrets.ML_SERVICE_URL }}
-          EOT
-          )
-          
-          rm -f .env backend/.env
-          printf '%s\n' "$ENV_CONTENT" | tee .env backend/.env > /dev/null
-
-          chmod 600 .env backend/.env
-
-          git pull
-          make run
-          EOF
+#  deploy:
+#    needs: check
+#    runs-on: ubuntu-24.04
+#    if: github.ref == 'refs/heads/main'
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup SSH key
+#        uses: webfactory/ssh-agent@v0.9.1
+#        with:
+#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+#      - name: Deploy via SSH
+#        run: |
+#          ssh -o StrictHostKeyChecking=no root@85.117.234.255 << 'EOF'
+#          set -euo pipefail
+#          cd ITMO-Web-Barcard
+#
+#          ENV_CONTENT=$(cat << 'EOT'
+#          PORT=${{ secrets.PORT }}
+#
+#          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+#          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+#          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+#
+#          DATABASE_URL=${{ secrets.DATABASE_URL }}
+#
+#          JWT_SECRET=${{ secrets.JWT_SECRET }}
+#          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+#          SUPER_ADMIN_PASSWORD=${{ secrets.SUPER_ADMIN_PASSWORD }}
+#          JWT_EXPIRES=${{ secrets.JWT_EXPIRES }}
+#          BCRYPT_ROUNDS=${{ secrets.BCRYPT_ROUNDS }}
+#          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+#
+#          SMTP_HOST=${{ secrets.SMTP_HOST }}
+#          SMTP_PORT=${{ secrets.SMTP_PORT }}
+#          SMTP_USER=${{ secrets.SMTP_USER }}
+#          SMTP_PASS=${{ secrets.SMTP_PASS }}
+#          SMTP_FROM=${{ secrets.SMTP_FROM }}
+#          APP_PUBLIC_URL=${{ secrets.APP_PUBLIC_URL }}
+#          INVITE_SECRET=${{ secrets.INVITE_SECRET }}
+#
+#          TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}
+#          TG_BOT_POLLING=${{ secrets.TG_BOT_POLLING }}
+#          DEFAULT_TELEGRAM_CHAT_ID=${{ secrets.DEFAULT_TELEGRAM_CHAT_ID }}
+#          ML_SERVICE_URL=${{ secrets.ML_SERVICE_URL }}
+#          EOT
+#          )
+#
+#          rm -f .env backend/.env
+#          printf '%s\n' "$ENV_CONTENT" | tee .env backend/.env > /dev/null
+#
+#          chmod 600 .env backend/.env
+#
+#          git pull
+#          make run
+#          EOF
